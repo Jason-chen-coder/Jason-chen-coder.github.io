@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en" data-locale="en" data-webgl="pending" data-chapter="top">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Jason Chen is a senior frontend engineer building cross-platform interfaces for laboratories, connected devices, and AI workflows."
+      data-i18n-content="meta.description"
+    />
+    <meta name="theme-color" content="#07090c" />
+    <title data-i18n="meta.title">Jason Chen / Senior Frontend Engineer</title>
+    <link rel="icon" href="./assets/images/favicon.png" type="image/png" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./assets/vendor/three/three.module.min.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content" data-i18n="a11y.skip">Skip to content</a>
+
+    <div class="environment" aria-hidden="true">
+      <div id="scene-fallback" class="scene-fallback"></div>
+      <canvas id="scene-canvas" aria-hidden="true"></canvas>
+      <div class="scene-haze"></div>
+    </div>
+
+    <header class="masthead">
+      <a class="wordmark" href="#top" aria-label="Jason Chen, home" data-i18n-aria-label="a11y.wordmark">
+        <span class="wordmark-mark" aria-hidden="true">陈</span>
+        <span class="wordmark-name" lang="en">Jason Chen</span>
+      </a>
+      <p class="edition-label" data-i18n="header.edition">Jason Chen / Portfolio 2026</p>
+      <div class="masthead-actions">
+        <nav id="site-nav" class="site-nav" aria-label="Primary navigation" data-i18n-aria-label="a11y.primaryNav">
+          <a href="#about" data-i18n="nav.about">About</a>
+          <a href="#work" data-i18n="nav.work">Work</a>
+          <a href="#craft" data-i18n="nav.capabilities">Capabilities</a>
+          <a href="#experience" data-i18n="nav.experience">Experience</a>
+          <a href="#contact" data-i18n="nav.contact">Contact</a>
+        </nav>
+        <div class="locale-switch" role="group" aria-label="Language" data-i18n-aria-label="locale.group">
+          <button class="locale-option" type="button" data-locale="zh-CN" aria-pressed="false" aria-label="Switch to Chinese" data-i18n-aria-label="locale.zhAria" title="Chinese" data-i18n-title="locale.zhTitle"><span lang="zh-CN">中</span></button>
+          <button class="locale-option" type="button" data-locale="en" aria-pressed="true" aria-label="Switch to English" data-i18n-aria-label="locale.enAria" title="English" data-i18n-title="locale.enTitle"><span lang="en">EN</span></button>
+        </div>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation" data-i18n-aria-label="nav.open">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <nav class="chapter-rail" aria-label="Chapter navigation" data-i18n-aria-label="a11y.chapterNav">
+      <a href="#top" data-rail="top"><span>00</span><span data-i18n="nav.home">Home</span></a>
+      <a href="#about" data-rail="about"><span>01</span><span data-i18n="nav.about">About</span></a>
+      <a href="#work" data-rail="work"><span>02</span><span data-i18n="nav.work">Work</span></a>
+      <a href="#craft" data-rail="craft"><span>03</span><span data-i18n="nav.capabilities">Capabilities</span></a>
+      <a href="#experience" data-rail="experience"><span>04</span><span data-i18n="nav.experience">Experience</span></a>
+      <a href="#contact" data-rail="contact"><span>05</span><span data-i18n="nav.contact">Contact</span></a>
+    </nav>
+
+    <main id="main-content">
+      <section id="top" class="chapter hero" data-chapter-section="top" aria-labelledby="hero-title">
+        <div class="chapter-wash"></div>
+        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.home">Home</div>
+        <div class="chapter-inner hero-inner">
+          <div class="hero-meta reveal">
+            <span data-i18n="hero.role">Senior Frontend Engineer</span>
+            <span data-i18n="hero.location">Shenzhen, China</span>
+          </div>
+          <div class="hero-copy">
+            <p class="chapter-label reveal" data-i18n="hero.chapter">Introduction / Portfolio</p>
+            <h1 id="hero-title" class="reveal" data-split data-i18n="hero.name">Jason Chen</h1>
+            <p class="hero-statement reveal" data-split data-i18n="hero.statement">I build the interface layer for complex systems.</p>
+            <p class="hero-support reveal" data-i18n="hero.support">Cross-platform products, real-time device control, and AI workflows for teams working where software meets the physical world.</p>
+            <div class="hero-actions reveal">
+              <a class="command-link" href="#work"><span data-i18n="hero.explore">Explore selected work</span> <span aria-hidden="true">↓</span></a>
+            </div>
+          </div>
+          <div class="hero-note reveal">
+            <span class="fine-rule"></span>
+            <p data-i18n="hero.note">Interfaces for laboratory systems, connected hardware, and intelligent workflows.</p>
+          </div>
+          <a class="scroll-cue" href="#about" aria-label="Continue to About" data-i18n-aria-label="a11y.continueAbout">
+            <span data-i18n="hero.scroll">About me</span>
+            <i aria-hidden="true"></i>
+          </a>
+        </div>
+      </section>
+
+      <section id="about" class="chapter about" data-chapter-section="about" aria-labelledby="about-title">
+        <div class="chapter-wash"></div>
+        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.about">About</div>
+        <div class="chapter-inner editorial-grid">
+          <header class="chapter-heading">
+            <p class="chapter-label reveal" data-i18n="about.chapter">Chapter 01 / About</p>
+            <h2 id="about-title" class="reveal" data-split data-i18n="about.title">At the edge of software and the physical world.</h2>
+          </header>
+          <div class="about-statement reveal">
+            <p data-i18n="about.body">My work sits where product interfaces meet devices, protocols, and live operational state. I turn that complexity into software people can read, trust, and act through.</p>
+          </div>
+          <dl class="system-index reveal" aria-label="Areas of practice" data-i18n-aria-label="a11y.areas">
+            <div><dt>01</dt><dd data-i18n="about.areaProduct">Product interfaces</dd></div>
+            <div><dt>02</dt><dd data-i18n="about.areaCrossPlatform">Cross-platform applications</dd></div>
+            <div><dt>03</dt><dd data-i18n="about.areaLaboratory">Laboratory and connected devices</dd></div>
+            <div><dt>04</dt><dd data-i18n="about.areaRealtime">Real-time state and communication</dd></div>
+            <div><dt>05</dt><dd data-i18n="about.areaAi">AI and agent workflows</dd></div>
+          </dl>
+          <p class="margin-note reveal" data-i18n="about.note">Clear interfaces connect user intent, system state, and device behavior.</p>
+        </div>
+      </section>
+
+      <section id="work" class="chapter work" data-chapter-section="work" aria-labelledby="work-title">
+        <div class="chapter-wash"></div>
+        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.work">Work</div>
+        <div class="chapter-inner work-inner">
+          <header class="chapter-heading work-heading">
+            <p class="chapter-label reveal" data-i18n="work.chapter">Chapter 02 / Selected work</p>
+            <h2 id="work-title" class="reveal" data-split data-i18n="work.title">Selected work, composed as systems.</h2>
+            <p class="section-intro reveal" data-i18n="work.intro">Four surfaces for complex work. Each one makes hidden state more legible.</p>
+          </header>
+
+          <article class="project-spread project-alab" aria-labelledby="alab-title">
+            <figure class="project-media reveal">
+              <img src="./assets/images/plate-alab.webp" alt="Cinematic interpretation of a laboratory automation workspace" data-i18n-alt="work.alab.alt" loading="lazy" />
+              <figcaption><span data-i18n="work.alab.type">01 / Laboratory platform</span><span data-i18n="work.alab.process">Design · Execute · Observe</span></figcaption>
+            </figure>
+            <div class="project-copy">
+              <p class="technical-label reveal" lang="en">αLab Studio / MGI</p>
+              <h3 id="alab-title" class="reveal" data-split data-i18n="work.alab.title">One surface for laboratory work.</h3>
+              <p class="project-summary reveal" data-i18n="work.alab.summary">A platform for designing protocols, operating connected equipment, and following experiments through execution.</p>
+              <dl class="evidence-grid reveal">
+                <div><dt data-i18n="work.contribution">Contribution</dt><dd data-i18n="work.alab.contribution">Frontend architecture, protocol tooling, device execution interfaces, and integration surfaces.</dd></div>
+                <div><dt data-i18n="work.system">System</dt><dd lang="en">Flutter, Vue, Node.js, Socket.IO, SQLite, monorepo delivery.</dd></div>
+              </dl>
+              <a class="command-link project-link reveal" href="https://www.mgi-tech.com/lab-management-system/209.html" target="_blank" rel="noreferrer"><span data-i18n="work.alab.link">View αLab Studio</span> <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+
+          <article class="project-spread project-primegen" aria-labelledby="primegen-title">
+            <figure class="project-media reveal">
+              <img src="./assets/images/plate-primegen.webp" alt="Cinematic interpretation of an intelligent experimental workflow" data-i18n-alt="work.primegen.alt" loading="lazy" />
+              <figcaption><span data-i18n="work.primegen.type">02 / Intelligent workflow</span><span data-i18n="work.primegen.process">Intent · Tools · State</span></figcaption>
+            </figure>
+            <div class="project-copy">
+              <p class="technical-label reveal" lang="en">PrimeGen / MGI</p>
+              <h3 id="primegen-title" class="reveal" data-split data-i18n="work.primegen.title">Language becomes an operable plan.</h3>
+              <p class="project-summary reveal" data-i18n="work.primegen.summary">An AI-assisted experimental workflow connecting search, design, script generation, execution, and quality control.</p>
+              <dl class="evidence-grid reveal">
+                <div><dt data-i18n="work.contribution">Contribution</dt><dd data-i18n="work.primegen.contribution">Agent-facing interaction design, context and workflow state, visual experiment editing, and live monitoring.</dd></div>
+                <div><dt data-i18n="work.system">System</dt><dd lang="en">Vue, TypeScript, NestJS, LLM applications, Redis, WebSocket.</dd></div>
+              </dl>
+              <a class="command-link project-link reveal" href="https://mp.weixin.qq.com/s/jXKv9ZQzOUUefsgutNwPng" target="_blank" rel="noreferrer"><span data-i18n="work.primegen.link">View PrimeGen</span> <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+
+          <article class="project-spread project-oxygen" aria-labelledby="oxygen-title">
+            <figure class="project-media reveal">
+              <img src="./assets/images/plate-oxygen.webp" alt="Cinematic interpretation of a connected oxygen chamber interface" data-i18n-alt="work.oxygen.alt" loading="lazy" />
+              <figcaption><span data-i18n="work.oxygen.type">03 / Connected device</span><span data-i18n="work.oxygen.process">Sense · Control · Sync</span></figcaption>
+            </figure>
+            <div class="project-copy">
+              <p class="technical-label reveal" lang="en">Oxygen Future / MGI</p>
+              <h3 id="oxygen-title" class="reveal" data-split data-i18n="work.oxygen.title">One device state across many surfaces.</h3>
+              <p class="project-summary reveal" data-i18n="work.oxygen.summary">A connected product system spanning an app, embedded screen, operations console, and mini program.</p>
+              <dl class="evidence-grid reveal">
+                <div><dt data-i18n="work.contribution">Contribution</dt><dd data-i18n="work.oxygen.contribution">Device state modeling, BLE control, OTA flows, cloud synchronization, visualization, and release work.</dd></div>
+                <div><dt data-i18n="work.system">System</dt><dd lang="en">Flutter, Vue, BLE, SQLite, UniApp, connected-device operations.</dd></div>
+              </dl>
+              <a class="command-link project-link reveal" href="https://www.mgi-tech.com/827/258.html" target="_blank" rel="noreferrer"><span data-i18n="work.oxygen.link">View Oxygen Future</span> <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+
+          <article class="project-spread project-imaging" aria-labelledby="imaging-title">
+            <figure class="project-media reveal">
+              <img src="./assets/images/plate-imaging.webp" alt="Cinematic interpretation of a remote medical imaging consultation" data-i18n-alt="work.imaging.alt" loading="lazy" />
+              <figcaption><span data-i18n="work.imaging.type">04 / Remote imaging</span><span data-i18n="work.imaging.process">Connect · Render · Operate</span></figcaption>
+            </figure>
+            <div class="project-copy">
+              <p class="technical-label reveal" lang="en">Cloud Imaging / MGI</p>
+              <h3 id="imaging-title" class="reveal" data-split data-i18n="work.imaging.title">Distance becomes a shared workspace.</h3>
+              <p class="project-summary reveal" data-i18n="work.imaging.summary">A remote consultation system across desktop, web, and mobile, with live media and hardware communication.</p>
+              <dl class="evidence-grid reveal">
+                <div><dt data-i18n="work.contribution">Contribution</dt><dd data-i18n="work.imaging.contribution">Shared UI systems, multi-window desktop architecture, serial communication, and media integration.</dd></div>
+                <div><dt data-i18n="work.system">System</dt><dd lang="en">React, Electron, Flutter, WebRTC, Mediasoup, serial communication.</dd></div>
+              </dl>
+              <a class="command-link project-link reveal" href="https://www.mgi-tech.com/671/157.html" target="_blank" rel="noreferrer"><span data-i18n="work.imaging.link">View Cloud Imaging</span> <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="craft" class="chapter craft" data-chapter-section="craft" aria-labelledby="craft-title">
+        <div class="chapter-wash"></div>
+        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.craft">Craft</div>
+        <div class="chapter-inner editorial-grid">
+          <header class="chapter-heading">
+            <p class="chapter-label reveal" data-i18n="craft.chapter">Chapter 03 / Capabilities</p>
+            <h2 id="craft-title" class="reveal" data-split data-i18n="craft.title">Make the invisible easy to operate.</h2>
+          </header>
+          <ol class="principles">
+            <li class="reveal"><span>01</span><h3 data-i18n="craft.principleModelTitle">Model the system</h3><p data-i18n="craft.principleModelBody">Turn devices, protocols, agents, and permissions into explicit states a team can reason about.</p></li>
+            <li class="reveal"><span>02</span><h3 data-i18n="craft.principleDistanceTitle">Reduce the distance</h3><p data-i18n="craft.principleDistanceBody">Give design, software, hardware, and operations a shared language for the work.</p></li>
+            <li class="reveal"><span>03</span><h3 data-i18n="craft.principleEvidenceTitle">Ship the evidence</h3><p data-i18n="craft.principleEvidenceBody">Use tests, quality gates, release discipline, and useful documentation to support each decision.</p></li>
+          </ol>
+          <div class="capability-index" aria-label="Technical capabilities" data-i18n-aria-label="a11y.capabilities">
+            <div class="reveal"><span data-i18n="craft.frontend">Frontend</span><p lang="en">Vue · TypeScript · React · Flutter · Electron</p></div>
+            <div class="reveal"><span data-i18n="craft.systems">Systems</span><p lang="en">Node.js · NestJS · Monorepos · Micro-frontends · CI/CD</p></div>
+            <div class="reveal"><span data-i18n="craft.connected">Connected</span><p lang="en">BLE · Serial · WebSocket · Socket.IO · WebRTC</p></div>
+            <div class="reveal"><span data-i18n="craft.intelligent">Intelligent</span><p lang="en">LLM applications · Function calling · Agent interfaces</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="experience" class="chapter experience" data-chapter-section="experience" aria-labelledby="experience-title">
+        <div class="chapter-wash"></div>
+        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.experience">Experience</div>
+        <div class="chapter-inner editorial-grid">
+          <header class="chapter-heading">
+            <p class="chapter-label reveal" data-i18n="experience.chapter">Chapter 04 / Experience</p>
+            <h2 id="experience-title" class="reveal" data-split data-i18n="experience.title">Responsibility grows with the system.</h2>
+          </header>
+          <ol class="timeline">
+            <li class="reveal">
+              <div class="timeline-marker"><span data-i18n="experience.currentPeriod">2021—Present</span><i aria-hidden="true"></i></div>
+              <div><p class="technical-label" lang="en">MGI</p><h3 data-i18n="experience.leadRole">Frontend Development Lead</h3><p data-i18n="experience.leadBody">Frontend delivery for laboratory, medical imaging, and connected-device products, with work across architecture, implementation, integration, and engineering practice.</p></div>
+            </li>
+            <li class="reveal">
+              <div class="timeline-marker"><span>2020—2021</span><i aria-hidden="true"></i></div>
+              <div><p class="technical-label" data-i18n="experience.changliang">Changliang Technology</p><h3 data-i18n="experience.frontendRole">Frontend Engineer</h3><p data-i18n="experience.frontendBody">Enterprise product work spanning shared components, micro-frontend foundations, and release workflows.</p></div>
+            </li>
+            <li class="reveal">
+              <div class="timeline-marker"><span>2018—2020</span><i aria-hidden="true"></i></div>
+              <div><p class="technical-label" data-i18n="experience.shenzhen">Shenzhen</p><h3 data-i18n="experience.webRole">Web Engineering</h3><p data-i18n="experience.webBody">Responsive business systems and customer-facing products across web, mobile, and operational interfaces.</p></div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="contact" class="chapter contact" data-chapter-section="contact" aria-labelledby="contact-title">
+        <div class="chapter-wash"></div>
+        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.contact">Contact</div>
+        <div class="chapter-inner contact-inner">
+          <p class="chapter-label reveal" data-i18n="contact.chapter">Chapter 05 / Contact</p>
+          <h2 id="contact-title" class="reveal" data-split data-i18n="contact.title">Have a difficult surface to build?</h2>
+          <p class="contact-copy reveal" data-i18n="contact.body">Bring the system, the constraints, and the people who need to operate it.</p>
+          <div class="contact-actions reveal">
+            <a class="contact-primary" href="mailto:hongxin.jasonchen@gmail.com"><span lang="en">hongxin.jasonchen@gmail.com</span> <span aria-hidden="true">↗</span></a>
+            <a href="https://github.com/Jason-chen-coder" target="_blank" rel="noreferrer"><span lang="en">GitHub</span> <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="manifesto-footer">
+      <p data-i18n="footer.tagline">Built for complex work.</p>
+      <div><span lang="en">© 2026 Jason Chen</span><a href="#top"><span data-i18n="footer.back">Back to top</span> <span aria-hidden="true">↑</span></a></div>
+    </footer>
+
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
+
+    <script defer src="./i18n.js"></script>
+    <script defer src="./script.js"></script>
+    <script type="module" src="./scene.js"></script>
+  </body>
+</html>
