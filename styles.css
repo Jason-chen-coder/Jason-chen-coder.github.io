@@ -202,9 +202,12 @@ html[lang="zh-CN"] .eyebrow {
   gap: 11px;
   flex-shrink: 0;
 }
-.brand > svg {
+.brand > .brand-avatar {
   width: 39px;
   height: 39px;
+  display: block;
+  object-fit: cover;
+  flex-shrink: 0;
   border-radius: 50%;
   background: linear-gradient(145deg, #fffef9, #e2dfd6);
   border: 1px solid #fffdf6;
@@ -213,7 +216,7 @@ html[lang="zh-CN"] .eyebrow {
     0 2px 3px #51482c26;
   transition: transform 0.4s var(--ease);
 }
-.brand:hover > svg {
+.brand:hover > .brand-avatar {
   transform: rotate(-8deg);
 }
 .brand-copy {
@@ -1359,7 +1362,7 @@ html[lang="zh-CN"] .eyebrow {
 .footer-brand .brand {
   gap: 11px;
 }
-.footer-brand .brand > svg {
+.footer-brand .brand > .brand-avatar {
   width: 31px;
   height: 31px;
 }
@@ -1595,7 +1598,7 @@ html[lang="en"] .contact h2 {
   .brand-name {
     font-size: 21px;
   }
-  .brand > svg {
+  .brand > .brand-avatar {
     width: 33px;
     height: 33px;
   }
@@ -1767,7 +1770,7 @@ html[lang="en"] .contact h2 {
   .brand-sub {
     font-size: 8px;
   }
-  .brand > svg {
+  .brand > .brand-avatar {
     width: 32px;
     height: 32px;
   }
