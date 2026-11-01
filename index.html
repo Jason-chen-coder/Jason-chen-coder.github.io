@@ -21,6 +21,7 @@
     <script defer src="./i18n.js"></script>
     <script defer src="./script.js"></script>
     <script defer src="./promo-media.js"></script>
+    <script defer src="./illustration-motion.js"></script>
   </head>
   <body>
     <a data-i18n="a11y.skip" class="skip-link" href="#main-content"
@@ -352,9 +353,10 @@
             <div
               class="loop-illustration"
               data-method-state="0"
-              aria-hidden="true"
+              data-illustration-motion
+              data-motion-running="false"
             >
-              <div class="loop-art">
+              <div class="loop-art" id="engineering-loop-art" aria-hidden="true">
                 <img
                   src="./assets/illustrations/engineering-loop-ceramic.webp"
                   alt=""
@@ -363,14 +365,62 @@
                   width="1200"
                   height="800"
                 />
+                <svg class="illustration-overlay" viewBox="0 0 1200 800" fill="none" aria-hidden="true" focusable="false">
+                  <defs>
+                    <path id="engineering-motion-route" pathLength="1000" d="M522 207 1017 292C1052 309 1070 342 1066 370L1044 465Q1038 503 1016 524L807 524Q783 556 759 557Q739 561 700 552L221 465Q144 453 155 413Q158 392 166 380L214 300Q225 280 248 271Z" />
+                    <mask id="engineering-motion-rail-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="800">
+                      <rect width="1200" height="800" fill="white" />
+                      <path d="M181 116 492 82 535 258 223 326 181 246Z M653 93 1000 144 1035 312 912 337 650 273Z M165 374 351 336 403 515 231 555 163 482Z M829 351 1030 385 1056 575 1003 601 776 563Z" fill="black" />
+                    </mask>
+                    <filter id="engineering-motion-soft" filterUnits="userSpaceOnUse" x="120" y="180" width="990" height="410" color-interpolation-filters="sRGB">
+                      <feGaussianBlur stdDeviation="3" />
+                    </filter>
+                  </defs>
+                  <g mask="url(#engineering-motion-rail-mask)">
+                    <use href="#engineering-motion-route" class="motion-track motion-track-halo" />
+                    <use href="#engineering-motion-route" class="motion-track motion-track-tail" />
+                    <use href="#engineering-motion-route" class="motion-track motion-track-near" />
+                    <use href="#engineering-motion-route" class="motion-track motion-track-bead" />
+                    <use href="#engineering-motion-route" class="motion-track motion-track-head" />
+                  </g>
+                  <g class="motion-station motion-station-intent" style="--station-delay: 6.9s">
+                    <path class="motion-station-light" d="M229 139 387 111 410 228 256 258Z" fill="#c5e1df" />
+                    <path class="motion-station-line" d="M264 224 290 188 324 209 349 160 383 194" />
+                  </g>
+                  <g class="motion-station motion-station-model" style="--station-delay: .5s">
+                    <ellipse class="motion-station-halo" cx="704" cy="237" rx="29" ry="14" />
+                    <g class="motion-station-light" fill="#fff1ac">
+                      <circle cx="690" cy="234" r="3.2" /><circle cx="704" cy="238" r="3.2" /><circle cx="720" cy="241" r="3.2" />
+                    </g>
+                    <path class="motion-station-line" d="M792 213 842 223M791 235 840 245" />
+                  </g>
+                  <g class="motion-station motion-station-build" style="--station-delay: 2.5s">
+                    <path class="motion-station-light" d="M860 405 1008 430 987 497 842 475Z" fill="#d4e3df" />
+                    <path class="motion-station-line motion-code-scan" d="M861 422 959 440M857 438 937 453M852 454 966 476" />
+                  </g>
+                  <g class="motion-station motion-station-verify" style="--station-delay: 4.7s">
+                    <ellipse class="motion-station-halo" cx="292" cy="443" rx="53" ry="57" transform="rotate(10 292 443)" />
+                    <ellipse class="motion-station-light" cx="292" cy="443" rx="44" ry="49" transform="rotate(10 292 443)" fill="#fff3bf" />
+                  </g>
+                  <g class="motion-selections">
+                    <path class="motion-selection motion-selection-intent" d="M229 139 387 111 410 228 256 258Z" />
+                    <ellipse class="motion-selection motion-selection-model" cx="704" cy="237" rx="29" ry="14" />
+                    <path class="motion-selection motion-selection-build" d="M860 405 1008 430 987 497 842 475Z" />
+                    <ellipse class="motion-selection motion-selection-verify" cx="292" cy="443" rx="53" ry="57" transform="rotate(10 292 443)" />
+                  </g>
+                </svg>
                 <span class="loop-node loop-node-intent is-current" data-loop-node="0">01</span>
                 <span class="loop-node loop-node-model" data-loop-node="1">02</span>
                 <span class="loop-node loop-node-build" data-loop-node="2">03</span>
                 <span class="loop-node loop-node-verify" data-loop-node="3">04</span>
               </div>
-              <p class="diagram-footnote" lang="en">
-                INTENT / MODEL / INTERFACE / EVIDENCE
-              </p>
+              <div class="diagram-caption">
+                <p class="diagram-footnote" lang="en">INTENT / MODEL / INTERFACE / EVIDENCE</p>
+                <button class="illustration-motion-toggle" type="button" data-illustration-toggle aria-controls="engineering-loop-art" aria-pressed="true" hidden>
+                  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path class="motion-pause-icon" d="M5.5 4v8M10.5 4v8" /><path class="motion-play-icon" d="m6 4 6 4-6 4Z" /></svg>
+                  <span data-i18n="illustration.pause">暂停动效</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
