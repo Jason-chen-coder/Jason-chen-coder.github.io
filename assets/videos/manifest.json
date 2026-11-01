@@ -1,42 +1,102 @@
 {
   "created": "2026-11-01",
   "video_format": "H.264/AAC, 1920x1080, 30fps",
-  "variants": "Original music versions, byte-identical to delivered videos; no re-encoding.",
+  "variants": "Web-optimized visually high-quality lossy re-encodes at original 1920x1080 / 30fps; full durations and frame timings preserved. Original AAC audio packets copied without re-encoding. Not mathematically lossless.",
   "files": {
     "mxgraph": {
       "filename": "mxgraph.mp4",
-      "sha256": "4a79dc7f02ae290382ae0c67306fd528d9f93c933574c425099f3bea7750cb9f",
-      "bytes": 11333696,
+      "sha256": "d3e440cb481f485b459bfd4adda4c8a0136cae2b9ae47cf54ee00549bef9c830",
+      "bytes": 7507620,
       "poster": "mxgraph-poster.webp",
-      "poster_sha256": "580b4bb7246ebef5497acd138055713d80a799a2f690aa74c500c6d15bc7f861"
+      "poster_sha256": "580b4bb7246ebef5497acd138055713d80a799a2f690aa74c500c6d15bc7f861",
+      "source_sha256": "4a79dc7f02ae290382ae0c67306fd528d9f93c933574c425099f3bea7750cb9f",
+      "source_bytes": 11333696,
+      "encoding": {
+        "encoder": "libx264",
+        "preset": "slow",
+        "crf": 22
+      },
+      "quality": {
+        "vmaf_mean": 96.380884,
+        "vmaf_min": 91.85547,
+        "ssim_mean": 0.999474
+      }
     },
     "d3": {
       "filename": "d3.mp4",
-      "sha256": "6690f76add852e063b8d66b95e9169af1cf145d58926ce1ff6af430cc720461f",
-      "bytes": 4915969,
+      "sha256": "d2bf1fcefa68d2d1678aafd48dbdcaedf4ba03bc219c6c092a07b6139d3b6a12",
+      "bytes": 3824713,
       "poster": "d3-poster.webp",
-      "poster_sha256": "e3c92a15efb8a496a8c53e74f6cf66bf2bddc09cd511b2a0a9008d574a66cd61"
+      "poster_sha256": "e3c92a15efb8a496a8c53e74f6cf66bf2bddc09cd511b2a0a9008d574a66cd61",
+      "source_sha256": "6690f76add852e063b8d66b95e9169af1cf145d58926ce1ff6af430cc720461f",
+      "source_bytes": 4915969,
+      "encoding": {
+        "encoder": "libx264",
+        "preset": "slow",
+        "crf": 22
+      },
+      "quality": {
+        "vmaf_mean": 96.160847,
+        "vmaf_min": 93.682564,
+        "ssim_mean": 0.99994
+      }
     },
     "speech": {
       "filename": "speech.mp4",
-      "sha256": "cc054002d554460d362465b2ef6d384f487354d263ffbc1c837e3a2a32fd68e0",
-      "bytes": 3126062,
+      "sha256": "c54556a8c9e86ec000268f05c02bea513fa9aa8b81173b129031efae16e1b258",
+      "bytes": 2963819,
       "poster": "speech-poster.webp",
-      "poster_sha256": "6c7455df028a0696d88473dc38890e094643d73d09a56b25b1030455d91a4b1b"
+      "poster_sha256": "6c7455df028a0696d88473dc38890e094643d73d09a56b25b1030455d91a4b1b",
+      "source_sha256": "cc054002d554460d362465b2ef6d384f487354d263ffbc1c837e3a2a32fd68e0",
+      "source_bytes": 3126062,
+      "encoding": {
+        "encoder": "libx264",
+        "preset": "slow",
+        "crf": 20
+      },
+      "quality": {
+        "vmaf_mean": 96.709368,
+        "vmaf_min": 91.770856,
+        "ssim_mean": 0.999959
+      }
     },
     "monaco": {
       "filename": "monaco.mp4",
-      "sha256": "30052e8d48e6b87cae2ca255f2eee77fe7b2bd068bc493cd5e962b494a3687a2",
-      "bytes": 5734873,
+      "sha256": "55925eaee3cbbd13bdef81c205e2c3d11276a15fd00be31e6d9bcdf32ee65e53",
+      "bytes": 4270953,
       "poster": "monaco-poster.webp",
-      "poster_sha256": "8f98d016d5e888bdb448e412591985bd3b5b57b02ed2772f7005a62296931cac"
+      "poster_sha256": "8f98d016d5e888bdb448e412591985bd3b5b57b02ed2772f7005a62296931cac",
+      "source_sha256": "30052e8d48e6b87cae2ca255f2eee77fe7b2bd068bc493cd5e962b494a3687a2",
+      "source_bytes": 5734873,
+      "encoding": {
+        "encoder": "libx264",
+        "preset": "slow",
+        "crf": 22
+      },
+      "quality": {
+        "vmaf_mean": 96.92254,
+        "vmaf_min": 92.481707,
+        "ssim_mean": 0.999881
+      }
     },
     "yourdream": {
       "filename": "yourdream.mp4",
-      "sha256": "66382569e1e07132c19652635ee9e0a7aed7713b3c01bf85092a2e35ef1d51b4",
-      "bytes": 17548070,
+      "sha256": "967ad9c45e715aa47f6b1620f93b47a44b4ccec3d75e3346f36f90382374a85b",
+      "bytes": 13338903,
       "poster": "yourdream-poster.webp",
-      "poster_sha256": "e37ceb2ce08e85703fe417eb680c91b4e1458cd8d36e1f2eb4c7f248779717f5"
+      "poster_sha256": "e37ceb2ce08e85703fe417eb680c91b4e1458cd8d36e1f2eb4c7f248779717f5",
+      "source_sha256": "66382569e1e07132c19652635ee9e0a7aed7713b3c01bf85092a2e35ef1d51b4",
+      "source_bytes": 17548070,
+      "encoding": {
+        "encoder": "libx264",
+        "preset": "slow",
+        "crf": 20
+      },
+      "quality": {
+        "vmaf_mean": 97.262027,
+        "vmaf_min": 92.548498,
+        "ssim_mean": 0.999742
+      }
     }
   }
 }
