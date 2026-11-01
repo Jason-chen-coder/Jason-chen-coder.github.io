@@ -124,7 +124,6 @@
     "about.title2": "更喜欢造东西",
     "about.body":
       "我是一名高级前端工程师，工作与生活在深圳。关注可视化编辑、跨平台应用、设备交互和 AI 工具，也喜欢把项目中的真实问题，沉淀成可以分享的代码与方法。",
-    "about.resume": "查看我的简历",
     "about.toolbox": "常用的工具箱",
     "experience.label": "走过的路",
     "experience.0.company": "MGI",
@@ -152,7 +151,6 @@
     "footer.about": "关于我",
     "footer.elsewhere": "在别处",
     "footer.github": "GitHub",
-    "footer.resume": "个人简历",
     "footer.email": "电子邮件",
     "footer.locationLabel": "此时此地",
     "footer.location": "中国 · 深圳",
@@ -282,7 +280,6 @@
     "about.title2": "A builder.",
     "about.body":
       "I’m a senior frontend engineer based in Shenzhen. My work spans visual editors, cross-platform applications, device interfaces, and AI tools. I like turning practical problems into code and methods others can build on.",
-    "about.resume": "Read my résumé",
     "about.toolbox": "MY TOOLBOX",
     "experience.label": "EXPERIENCE",
     "experience.0.company": "MGI",
@@ -313,7 +310,6 @@
     "footer.about": "About",
     "footer.elsewhere": "ELSEWHERE",
     "footer.github": "GitHub",
-    "footer.resume": "Résumé",
     "footer.email": "Email",
     "footer.locationLabel": "BASED IN",
     "footer.location": "Shenzhen, China",

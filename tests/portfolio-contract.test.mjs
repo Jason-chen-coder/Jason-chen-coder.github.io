@@ -90,15 +90,14 @@ test('all page and stylesheet resources are local, present, and safe under a Git
   assert.doesNotMatch(html, /<canvas\b/);
 });
 
-test('external links, résumé and contact actions remain usable and safe', async () => {
+test('external links and contact actions remain usable and safe without a public résumé', async () => {
   const html = await read('index.html');
   for (const tag of html.match(/<a\b[^>]*>/g) ?? []) {
     if (!/\btarget="_blank"/.test(tag)) continue;
     const rel = tag.match(/\brel="([^"]+)"/)?.[1]?.split(/\s+/) ?? [];
     assert.ok(rel.includes('noreferrer'), `external destination must not expose an opener: ${tag}`);
   }
-  assert.match(html, /href="\.\/resume\.pdf"/);
-  await access(new URL('resume.pdf', root));
+  assert.doesNotMatch(html, /resume\.pdf|about\.resume|footer\.resume/);
   assert.match(html, /href="mailto:hongxin\.jasonchen@gmail\.com"/);
   assert.match(html, /<button\b[^>]*data-copy-email/);
   assert.match(html, /aria-live="polite"[^>]*role="status"|role="status"[^>]*aria-live="polite"/);
