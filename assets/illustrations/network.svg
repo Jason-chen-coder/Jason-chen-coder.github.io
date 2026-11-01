@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 380" fill="none">
+  <defs>
+    <linearGradient id="porcelain" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fffefa" />
+      <stop offset="1" stop-color="#e4e0d6" />
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#e6dfce" />
+      <stop offset=".42" stop-color="#aa8a52" />
+      <stop offset=".58" stop-color="#e5cf9d" />
+      <stop offset="1" stop-color="#80663b" />
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fefdf8" />
+      <stop offset="1" stop-color="#f3f1e9" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="230%">
+      <feDropShadow
+        dx="0"
+        dy="11"
+        stdDeviation="10"
+        flood-color="#544529"
+        flood-opacity=".15"
+      />
+    </filter>
+    <filter id="small-shadow" x="-50%" y="-50%" width="200%" height="230%">
+      <feDropShadow
+        dx="0"
+        dy="4"
+        stdDeviation="3"
+        flood-color="#544529"
+        flood-opacity=".13"
+      />
+    </filter>
+    <radialGradient id="orb">
+      <stop offset="0" stop-color="#fffef9" />
+      <stop offset=".55" stop-color="#edeae1" />
+      <stop offset="1" stop-color="#c6c2b4" />
+    </radialGradient>
+  </defs>
+  <ellipse cx="277" cy="303" rx="199" ry="21" fill="#a99b7c" opacity=".08" />
+  <g transform="translate(55 47) rotate(3 220 130)" filter="url(#shadow)">
+    <rect
+      x="0"
+      y="7"
+      width="450"
+      height="255"
+      rx="20"
+      fill="#dfdbd0"
+      stroke="#cbc3b3"
+    />
+    <rect
+      width="450"
+      height="255"
+      rx="20"
+      fill="url(#porcelain)"
+      stroke="#fffefa"
+      stroke-width="2"
+    />
+    <rect
+      x="12"
+      y="12"
+      width="426"
+      height="230"
+      rx="12"
+      fill="url(#screen)"
+      stroke="#e6dfd0"
+    />
+    <text
+      x="31"
+      y="36"
+      font-family="sans-serif"
+      font-size="8"
+      fill="#8f8470"
+      letter-spacing="1.6"
+    >
+      DATA · RELATIONSHIPS · MEANING
+    </text>
+    <g stroke="#d6d0c4" stroke-width=".6">
+      <path d="M30 220h390M30 62h390M49 47v181M397 47v181" />
+      <path d="M224 62v157M30 142h390" stroke-dasharray="2 5" />
+    </g>
+    <g stroke="#9d854f" stroke-width="1.4" opacity=".7">
+      <path
+        d="M226 140C192 76 121 67 105 99M226 140C275 60 334 71 352 101M226 140C282 172 333 163 366 192M226 140C195 206 133 198 102 196M226 140 177 105M226 140l47 64M226 140 333 151M105 99l72 6M352 101l-19 50M102 196l75-91M273 204l93-12"
+      />
+    </g>
+    <g stroke="#faf8ee" stroke-width="2" filter="url(#small-shadow)">
+      <circle cx="226" cy="140" r="31" fill="#64728c" />
+      <circle cx="105" cy="99" r="22" fill="url(#orb)" />
+      <circle cx="352" cy="101" r="22" fill="url(#orb)" />
+      <circle cx="366" cy="192" r="18" fill="url(#orb)" />
+      <circle cx="102" cy="196" r="20" fill="url(#orb)" />
+      <circle cx="177" cy="105" r="12" fill="#c9b17d" />
+      <circle cx="273" cy="204" r="13" fill="#91aaa2" />
+      <circle cx="333" cy="151" r="9" fill="#bbc0cc" />
+    </g>
+    <g
+      fill="#60716f"
+      font-family="Georgia,serif"
+      font-size="19"
+      text-anchor="middle"
+    >
+      <text x="105" y="105">A</text>
+      <text x="352" y="107">B</text>
+      <text x="366" y="198">C</text>
+      <text x="102" y="202">D</text>
+    </g>
+    <path
+      d="m215 140 7-12 7 12-7 12Z M229 140l8-12 8 12-8 12Z"
+      stroke="#ede5d1"
+      stroke-width="1"
+    />
+    <circle
+      cx="226"
+      cy="140"
+      r="39"
+      stroke="#a18b5b"
+      stroke-width=".8"
+      stroke-dasharray="3 5"
+    />
+    <g fill="#b2a58b">
+      <circle cx="31" cy="219" r="2" />
+      <circle cx="419" cy="219" r="2" />
+    </g>
+  </g>
+  <g transform="translate(53 287)" filter="url(#small-shadow)">
+    <rect
+      width="145"
+      height="27"
+      rx="13.5"
+      fill="url(#porcelain)"
+      stroke="#fffef8"
+    />
+    <circle cx="17" cy="13.5" r="3" fill="#5e718b" />
+    <text
+      x="31"
+      y="17"
+      fill="#6e6658"
+      font-family="sans-serif"
+      font-size="8"
+      letter-spacing=".7"
+    >
+      D3 · INTERACTIVE GRAPH
+    </text>
+  </g>
+</svg>

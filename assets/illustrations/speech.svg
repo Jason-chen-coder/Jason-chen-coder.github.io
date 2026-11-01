@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 380" fill="none">
+  <defs>
+    <linearGradient id="porcelain" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fffefa" />
+      <stop offset="1" stop-color="#e4e0d6" />
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#e6dfce" />
+      <stop offset=".42" stop-color="#aa8a52" />
+      <stop offset=".58" stop-color="#e5cf9d" />
+      <stop offset="1" stop-color="#80663b" />
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fefdf8" />
+      <stop offset="1" stop-color="#f3f1e9" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="230%">
+      <feDropShadow
+        dx="0"
+        dy="11"
+        stdDeviation="10"
+        flood-color="#544529"
+        flood-opacity=".15"
+      />
+    </filter>
+    <filter id="small-shadow" x="-50%" y="-50%" width="200%" height="230%">
+      <feDropShadow
+        dx="0"
+        dy="4"
+        stdDeviation="3"
+        flood-color="#544529"
+        flood-opacity=".13"
+      />
+    </filter>
+    <radialGradient id="orb">
+      <stop offset="0" stop-color="#fffef9" />
+      <stop offset=".55" stop-color="#edeae1" />
+      <stop offset="1" stop-color="#c6c2b4" />
+    </radialGradient>
+  </defs>
+  <ellipse cx="282" cy="306" rx="172" ry="24" fill="#a99b7c" opacity=".09" />
+  <g transform="translate(117 25) rotate(-7 86 143)" filter="url(#shadow)">
+    <rect
+      x="-4"
+      y="1"
+      width="164"
+      height="294"
+      rx="25"
+      fill="#b2b3ac"
+      stroke="#ecebe4"
+      stroke-width="1.5"
+    />
+    <rect
+      x="0"
+      width="156"
+      height="290"
+      rx="23"
+      fill="#e8e7df"
+      stroke="#fffef9"
+      stroke-width="2"
+    />
+    <rect
+      x="7"
+      y="8"
+      width="142"
+      height="274"
+      rx="18"
+      fill="#f9f8f3"
+      stroke="#cecec4"
+    />
+    <rect x="55" y="14" width="47" height="9" rx="4.5" fill="#6f756e" />
+    <text
+      x="24"
+      y="48"
+      fill="#837b69"
+      font-family="sans-serif"
+      font-size="7"
+      letter-spacing=".8"
+    >
+      VOICE WORKSPACE
+    </text>
+    <text
+      x="78"
+      y="76"
+      text-anchor="middle"
+      font-family="Georgia,serif"
+      font-size="19"
+      fill="#645944"
+    >
+      Listening...
+    </text>
+    <circle
+      cx="78"
+      cy="126"
+      r="32"
+      fill="#efe8d5"
+      stroke="#fffdf7"
+      stroke-width="2"
+    />
+    <circle cx="78" cy="126" r="25" stroke="#c8ad70" stroke-width=".7" />
+    <g stroke="#9e7b3f" stroke-width="1.6" stroke-linecap="round">
+      <rect x="73" y="112" width="10" height="19" rx="5" />
+      <path d="M68 124c0 15 20 15 20 0m-10 11v6m-5 0h10" />
+    </g>
+    <g stroke="#9d7d41" stroke-linecap="round" stroke-width="2">
+      <path d="M25 188.5v7" />
+      <path d="M31 184.5v15" />
+      <path d="M37 187.5v9" />
+      <path d="M43 180.5v23" />
+      <path d="M49 175.5v33" />
+      <path d="M55 184.0v16" />
+      <path d="M61 178.5v27" />
+      <path d="M67 171.0v42" />
+      <path d="M73 181.0v22" />
+      <path d="M79 176.0v32" />
+      <path d="M85 167.5v49" />
+      <path d="M91 178.5v27" />
+      <path d="M97 182.5v19" />
+      <path d="M103 174.0v36" />
+      <path d="M109 181.0v22" />
+      <path d="M115 186.0v12" />
+      <path d="M121 179.5v25" />
+      <path d="M127 184.0v16" />
+      <path d="M133 187.5v9" />
+    </g>
+    <rect
+      x="22"
+      y="234"
+      width="112"
+      height="24"
+      rx="12"
+      fill="#f0ede4"
+      stroke="#e2d9c6"
+    />
+    <circle cx="37" cy="246" r="2.5" fill="#5a8b72" />
+    <text x="48" y="249" fill="#7e725b" font-family="sans-serif" font-size="7">
+      ON-DEVICE MODEL
+    </text>
+    <path
+      d="M58 271h40"
+      stroke="#bdb8ac"
+      stroke-width="2"
+      stroke-linecap="round"
+    />
+  </g>
+  <g transform="translate(317 105)" filter="url(#small-shadow)">
+    <rect
+      x="0"
+      y="22"
+      width="130"
+      height="130"
+      rx="17"
+      fill="#d5d0c3"
+      stroke="#f9f7ef"
+    />
+    <rect
+      x="0"
+      y="13"
+      width="130"
+      height="130"
+      rx="17"
+      fill="#e4dfd3"
+      stroke="#fffdf6"
+    />
+    <rect
+      width="130"
+      height="130"
+      rx="17"
+      fill="url(#porcelain)"
+      stroke="#fffdf7"
+      stroke-width="2"
+    />
+    <rect
+      x="26"
+      y="22"
+      width="78"
+      height="64"
+      rx="8"
+      fill="#e6e6dc"
+      stroke="#c4bca9"
+    />
+    <rect
+      x="37"
+      y="33"
+      width="56"
+      height="42"
+      rx="5"
+      fill="#617c78"
+      stroke="#89998b"
+    />
+    <g stroke="#c6ba9c" stroke-width="2">
+      <path
+        d="M43 17v-8m14 8v-8m14 8v-8m14 8v-8M43 89v8m14-8v8m14-8v8m14-8v8M21 36h-8m8 13h-8m8 13h-8m8 13h-8m96-39h8m-8 13h8m-8 13h8m-8 13h8"
+      />
+    </g>
+    <path
+      d="m54 54 8 8 13-15"
+      stroke="#e2dcc9"
+      stroke-width="1.5"
+      stroke-linecap="round"
+    />
+    <text
+      x="65"
+      y="113"
+      text-anchor="middle"
+      fill="#6f6654"
+      font-family="sans-serif"
+      font-size="7"
+      letter-spacing="1"
+    >
+      SHERPA-ONNX
+    </text>
+  </g>
+  <path
+    d="M291 175c10-10 19-13 26-13m-27 18c10-8 19-10 27-10"
+    stroke="#b69b60"
+    stroke-width="1"
+    stroke-dasharray="3 4"
+  />
+  <circle cx="303" cy="158" r="3" fill="#ba9d60" />
+</svg>

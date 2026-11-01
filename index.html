@@ -1,271 +1,1137 @@
 <!doctype html>
-<html lang="en" data-locale="en" data-webgl="pending" data-chapter="top">
+<html lang="zh-CN" data-locale="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f4ef" />
     <meta
       name="description"
-      content="Jason Chen is a senior frontend engineer building cross-platform interfaces for laboratories, connected devices, and AI workflows."
+      content="Jason Chen，高级前端工程师。构建可视化编辑器、跨平台应用、互联设备与 AI 工作流，把复杂系统做成好用的产品。"
       data-i18n-content="meta.description"
     />
-    <meta name="theme-color" content="#07090c" />
-    <title data-i18n="meta.title">Jason Chen / Senior Frontend Engineer</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Jason Chen · 把复杂系统做成好用的产品" />
+    <meta
+      property="og:description"
+      content="可视化编辑器、跨平台应用、互联设备与 AI 工作流。"
+    />
+    <title data-i18n="meta.title">Jason Chen · 把复杂系统做成好用的产品</title>
     <link rel="icon" href="./assets/images/favicon.png" type="image/png" />
     <link rel="stylesheet" href="./styles.css" />
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "./assets/vendor/three/three.module.min.js"
-        }
-      }
-    </script>
+    <script defer src="./i18n.js"></script>
+    <script defer src="./script.js"></script>
+    <script defer src="./promo-media.js"></script>
   </head>
   <body>
-    <a class="skip-link" href="#main-content" data-i18n="a11y.skip">Skip to content</a>
-
-    <div class="environment" aria-hidden="true">
-      <div id="scene-fallback" class="scene-fallback"></div>
-      <canvas id="scene-canvas" aria-hidden="true"></canvas>
-      <div class="scene-haze"></div>
-    </div>
-
-    <header class="masthead">
-      <a class="wordmark" href="#top" aria-label="Jason Chen, home" data-i18n-aria-label="a11y.wordmark">
-        <span class="wordmark-mark" aria-hidden="true">陈</span>
-        <span class="wordmark-name" lang="en">Jason Chen</span>
-      </a>
-      <p class="edition-label" data-i18n="header.edition">Jason Chen / Portfolio 2026</p>
-      <div class="masthead-actions">
-        <nav id="site-nav" class="site-nav" aria-label="Primary navigation" data-i18n-aria-label="a11y.primaryNav">
-          <a href="#about" data-i18n="nav.about">About</a>
-          <a href="#work" data-i18n="nav.work">Work</a>
-          <a href="#craft" data-i18n="nav.capabilities">Capabilities</a>
-          <a href="#experience" data-i18n="nav.experience">Experience</a>
-          <a href="#contact" data-i18n="nav.contact">Contact</a>
-        </nav>
-        <div class="locale-switch" role="group" aria-label="Language" data-i18n-aria-label="locale.group">
-          <button class="locale-option" type="button" data-locale="zh-CN" aria-pressed="false" aria-label="Switch to Chinese" data-i18n-aria-label="locale.zhAria" title="Chinese" data-i18n-title="locale.zhTitle"><span lang="zh-CN">中</span></button>
-          <button class="locale-option" type="button" data-locale="en" aria-pressed="true" aria-label="Switch to English" data-i18n-aria-label="locale.enAria" title="English" data-i18n-title="locale.enTitle"><span lang="en">EN</span></button>
+    <a data-i18n="a11y.skip" class="skip-link" href="#main-content"
+      >跳到主要内容</a
+    >
+    <header class="masthead" id="masthead">
+      <a class="brand" href="#top" aria-label="Jason Chen"
+        ><svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <path
+            d="M27 10v13c0 8-13 10-14 1"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+          <path
+            d="M15 12c-9 4-7 17 1 19 7 2 15-3 16-10"
+            stroke="currentColor"
+            stroke-width="1.1"
+          />
+          <circle cx="27" cy="10" r="2.2" fill="#aa8143" />
+          <circle cx="13" cy="24" r="1.7" fill="#00696e" />
+          <path
+            d="M11 9h8M7 15h6M26 30h7"
+            stroke="#a39b8d"
+            stroke-width=".7"
+          /></svg
+        ><span class="brand-copy"
+          ><span class="brand-name" lang="en">Jason Chen</span
+          ><span data-i18n="brand.sub" class="brand-sub"
+            >前端工程 · 深圳</span
+          ></span
+        ></a
+      >
+      <nav
+        class="site-nav"
+        id="site-nav"
+        aria-label="主导航"
+        data-i18n-aria-label="a11y.nav"
+      >
+        <a href="#top" data-nav="top"><span data-i18n="nav.top">首页</span></a>
+        <a href="#opensource" data-nav="opensource"
+          ><span data-i18n="nav.opensource">开源项目</span></a
+        >
+        <a href="#work" data-nav="work"
+          ><span data-i18n="nav.work">产品实践</span></a
+        >
+        <a href="#about" data-nav="about"
+          ><span data-i18n="nav.about">关于我</span></a
+        >
+      </nav>
+      <div class="nav-actions">
+        <div class="locale-switch" role="group" aria-label="语言 / Language">
+          <button
+            type="button"
+            data-locale="zh-CN"
+            aria-pressed="true"
+            lang="zh-CN"
+          >
+            中</button
+          ><button
+            type="button"
+            data-locale="en"
+            aria-pressed="false"
+            lang="en"
+          >
+            EN
+          </button>
         </div>
-        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation" data-i18n-aria-label="nav.open">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
+        <a class="contact-nav" href="#contact" data-nav="contact"
+          ><span data-i18n="nav.contact">聊一聊</span
+          ><span aria-hidden="true">↗</span></a
+        ><button
+          type="button"
+          class="menu-toggle"
+          aria-expanded="false"
+          aria-controls="site-nav"
+          aria-label="打开导航"
+          data-i18n-aria-label="nav.open"
+        >
+          <span></span><span></span>
         </button>
       </div>
     </header>
-
-    <nav class="chapter-rail" aria-label="Chapter navigation" data-i18n-aria-label="a11y.chapterNav">
-      <a href="#top" data-rail="top"><span>00</span><span data-i18n="nav.home">Home</span></a>
-      <a href="#about" data-rail="about"><span>01</span><span data-i18n="nav.about">About</span></a>
-      <a href="#work" data-rail="work"><span>02</span><span data-i18n="nav.work">Work</span></a>
-      <a href="#craft" data-rail="craft"><span>03</span><span data-i18n="nav.capabilities">Capabilities</span></a>
-      <a href="#experience" data-rail="experience"><span>04</span><span data-i18n="nav.experience">Experience</span></a>
-      <a href="#contact" data-rail="contact"><span>05</span><span data-i18n="nav.contact">Contact</span></a>
-    </nav>
-
     <main id="main-content">
-      <section id="top" class="chapter hero" data-chapter-section="top" aria-labelledby="hero-title">
-        <div class="chapter-wash"></div>
-        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.home">Home</div>
-        <div class="chapter-inner hero-inner">
-          <div class="hero-meta reveal">
-            <span data-i18n="hero.role">Senior Frontend Engineer</span>
-            <span data-i18n="hero.location">Shenzhen, China</span>
+      <section id="top" class="hero" aria-labelledby="hero-title">
+        <div class="hero-field" aria-hidden="true">
+          <div class="field-band"></div>
+          <div class="field-line field-line-one"><i></i></div>
+          <div class="field-line field-line-two"><i></i></div>
+          <div class="field-ruler">
+            <span>01</span><span>02</span><span>03</span>
           </div>
-          <div class="hero-copy">
-            <p class="chapter-label reveal" data-i18n="hero.chapter">Introduction / Portfolio</p>
-            <h1 id="hero-title" class="reveal" data-split data-i18n="hero.name">Jason Chen</h1>
-            <p class="hero-statement reveal" data-split data-i18n="hero.statement">I build the interface layer for complex systems.</p>
-            <p class="hero-support reveal" data-i18n="hero.support">Cross-platform products, real-time device control, and AI workflows for teams working where software meets the physical world.</p>
-            <div class="hero-actions reveal">
-              <a class="command-link" href="#work"><span data-i18n="hero.explore">Explore selected work</span> <span aria-hidden="true">↓</span></a>
+          <div class="field-caption">INTENT → INTERFACE → IMPACT</div>
+          <div class="field-circuit"><span></span><i></i><span></span></div>
+        </div>
+        <div class="hero-inner">
+          <div class="hero-identity">
+            <svg
+              class="crest"
+              viewBox="0 0 160 160"
+              fill="none"
+              aria-hidden="true"
+            >
+              <defs>
+                <path id="crest-top" d="M25 80a55 55 0 1 1 110 0" />
+                <path id="crest-bottom" d="M23 80a57 57 0 0 0 114 0" />
+                <linearGradient
+                  id="crest-metal"
+                  x1="10"
+                  y1="0"
+                  x2="150"
+                  y2="160"
+                >
+                  <stop stop-color="#fffdf5" />
+                  <stop offset=".48" stop-color="#dfdbd0" />
+                  <stop offset=".52" stop-color="#fffef8" />
+                  <stop offset="1" stop-color="#b6afa0" />
+                </linearGradient>
+              </defs>
+              <circle cx="80" cy="80" r="76" stroke="#a9a291" />
+              <circle
+                cx="80"
+                cy="80"
+                r="72"
+                stroke="url(#crest-metal)"
+                stroke-width="3"
+              />
+              <circle
+                cx="80"
+                cy="80"
+                r="49"
+                stroke="#c4b89f"
+                stroke-width=".8"
+              />
+              <text
+                fill="#7b643e"
+                font-family="Georgia,serif"
+                font-size="10.5"
+                letter-spacing="3.1"
+              >
+                <textPath
+                  href="#crest-top"
+                  startOffset="50%"
+                  text-anchor="middle"
+                >
+                  JASON CHEN · BUILDER
+                </textPath>
+              </text>
+              <text
+                fill="#4d5d68"
+                font-family="sans-serif"
+                font-size="8.6"
+                letter-spacing="1"
+              >
+                <textPath
+                  href="#crest-bottom"
+                  startOffset="50%"
+                  text-anchor="middle"
+                >
+                  INTERFACES · SYSTEMS · AI
+                </textPath>
+              </text>
+              <path
+                d="M90 50v42c0 19-31 20-34 1"
+                stroke="#5d594d"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              <path
+                d="M65 51c-27 12-25 47 0 55 23 7 43-7 48-27"
+                stroke="#5d594d"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+              <circle cx="90" cy="50" r="3.5" fill="#aa8143" />
+              <circle cx="56" cy="93" r="2.7" fill="#00696e" />
+              <circle cx="16" cy="80" r="2.2" fill="#a1804d" />
+              <circle cx="144" cy="80" r="2.2" fill="#00696e" />
+              <path
+                d="M71 118h18M75 122h10"
+                stroke="#b5a78f"
+                stroke-width=".8"
+              />
+            </svg>
+            <div>
+              <p class="identity-name" lang="en">Jason Chen</p>
+              <p data-i18n="hero.identity" class="identity-note">
+                工程师，也是构建者。
+              </p>
             </div>
           </div>
-          <div class="hero-note reveal">
-            <span class="fine-rule"></span>
-            <p data-i18n="hero.note">Interfaces for laboratory systems, connected hardware, and intelligent workflows.</p>
+          <p data-i18n="hero.eyebrow" class="eyebrow hero-eyebrow" lang="en">
+            FRONTEND ENGINEERING · AI &amp; AUTOMATION
+          </p>
+          <h1 id="hero-title">
+            <span data-i18n="hero.line1">把复杂系统</span><br /><span
+              data-i18n="hero.line2"
+              >做成好用的</span
+            ><em data-i18n="hero.accent">产品</em>
+          </h1>
+          <p data-i18n="hero.body" class="hero-copy">
+            你好，我是
+            Jason，一名在深圳工作的高级前端工程师。从可视化编辑器到实验室自动化，从跨平台设备到
+            AI 工作流，我关注的不只是界面，更是界面背后真实运转的系统。
+          </p>
+          <div class="hero-actions">
+            <a class="button button-rim" href="#opensource"
+              ><span data-i18n="hero.explore">看看我的开源项目</span
+              ><span aria-hidden="true">↗</span></a
+            ><a class="button button-soft" href="#about"
+              ><span data-i18n="hero.about">认识一下</span
+              ><span aria-hidden="true">↗</span></a
+            >
           </div>
-          <a class="scroll-cue" href="#about" aria-label="Continue to About" data-i18n-aria-label="a11y.continueAbout">
-            <span data-i18n="hero.scroll">About me</span>
-            <i aria-hidden="true"></i>
-          </a>
+          <nav
+            class="practice-pills"
+            aria-label="实践领域"
+            data-i18n-aria-label="hero.areas"
+          >
+            <a href="#opensource"
+              ><span class="pill-icon" aria-hidden="true">⌘</span
+              ><span data-i18n="hero.pillopensource">可视化与 Web</span></a
+            >
+            <a href="#work"
+              ><span class="pill-icon" aria-hidden="true">◈</span
+              ><span data-i18n="hero.pillwork">跨平台与设备</span></a
+            >
+            <a href="#ai-workflows"
+              ><span class="pill-icon" aria-hidden="true">✳</span
+              ><span data-i18n="hero.pillai-workflows">AI 工作流</span></a
+            >
+          </nav>
         </div>
+        <a class="hero-scroll" href="#craft"
+          ><span aria-hidden="true">↓</span
+          ><span data-i18n="hero.scroll">向下探索</span></a
+        >
       </section>
-
-      <section id="about" class="chapter about" data-chapter-section="about" aria-labelledby="about-title">
-        <div class="chapter-wash"></div>
-        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.about">About</div>
-        <div class="chapter-inner editorial-grid">
-          <header class="chapter-heading">
-            <p class="chapter-label reveal" data-i18n="about.chapter">Chapter 01 / About</p>
-            <h2 id="about-title" class="reveal" data-split data-i18n="about.title">At the edge of software and the physical world.</h2>
+      <section
+        id="craft"
+        class="section approach"
+        aria-labelledby="approach-title"
+      >
+        <div class="shell">
+          <header class="section-heading reveal">
+            <div>
+              <p data-i18n="approach.label" class="eyebrow">思考与构建</p>
+              <h2 id="approach-title">
+                <span data-i18n="approach.title1">从真实问题</span><br /><span
+                  data-i18n="approach.title2"
+                  >到可用系统</span
+                >
+              </h2>
+            </div>
+            <p data-i18n="approach.intro" class="section-intro">
+              好的工程，不止于实现一个界面。我习惯把需求、状态、协议和执行连起来，让每一次设计选择都有来处，每一个交付结果都能被验证。
+            </p>
           </header>
-          <div class="about-statement reveal">
-            <p data-i18n="about.body">My work sits where product interfaces meet devices, protocols, and live operational state. I turn that complexity into software people can read, trust, and act through.</p>
+          <div class="approach-layout reveal">
+            <div class="method-summary">
+              <p class="method-overline" lang="en">THE ENGINEERING LOOP</p>
+              <div
+                class="method-tabs"
+                role="tablist"
+                aria-label="工程工作方式"
+                data-i18n-aria-label="approach.tabs"
+              >
+                <button
+                  id="method-tab-0"
+                  role="tab"
+                  type="button"
+                  aria-controls="method-panel"
+                  aria-selected="true"
+                  tabindex="0"
+                  data-method="0"
+                >
+                  <span class="method-number">01</span
+                  ><span data-i18n="method.0.name">需求</span>
+                </button>
+                <button
+                  id="method-tab-1"
+                  role="tab"
+                  type="button"
+                  aria-controls="method-panel"
+                  aria-selected="false"
+                  tabindex="-1"
+                  data-method="1"
+                >
+                  <span class="method-number">02</span
+                  ><span data-i18n="method.1.name">建模</span>
+                </button>
+                <button
+                  id="method-tab-2"
+                  role="tab"
+                  type="button"
+                  aria-controls="method-panel"
+                  aria-selected="false"
+                  tabindex="-1"
+                  data-method="2"
+                >
+                  <span class="method-number">03</span
+                  ><span data-i18n="method.2.name">实现</span>
+                </button>
+                <button
+                  id="method-tab-3"
+                  role="tab"
+                  type="button"
+                  aria-controls="method-panel"
+                  aria-selected="false"
+                  tabindex="-1"
+                  data-method="3"
+                >
+                  <span class="method-number">04</span
+                  ><span data-i18n="method.3.name">验证</span>
+                </button>
+              </div>
+              <div
+                class="method-panel"
+                id="method-panel"
+                role="tabpanel"
+                aria-labelledby="method-tab-0"
+                tabindex="0"
+              >
+                <h3 data-i18n="method.0.title" id="method-title">
+                  先理解问题，再确定边界。
+                </h3>
+                <p data-i18n="method.0.body" id="method-body">
+                  从用户要完成的任务出发，理清场景、约束与验收标准。让需求成为可以讨论、可以验证的共同语言。
+                </p>
+              </div>
+              <noscript>
+                <ol class="method-static">
+                  <li>
+                    <h3>01 · 需求</h3>
+                    <p>从用户要完成的任务出发，理清场景、约束与验收标准。</p>
+                  </li>
+                  <li>
+                    <h3>02 · 建模</h3>
+                    <p>
+                      梳理设备、协议、权限和运行状态，在界面与真实执行之间建立一致的模型。
+                    </p>
+                  </li>
+                  <li>
+                    <h3>03 · 实现</h3>
+                    <p>
+                      用合适的技术把模型变成清晰的交互，连接
+                      Web、桌面、移动端和设备。
+                    </p>
+                  </li>
+                  <li>
+                    <h3>04 · 验证</h3>
+                    <p>
+                      沿着用户路径验证交互、数据和执行结果，保留测试和集成证据。
+                    </p>
+                  </li>
+                </ol>
+              </noscript>
+            </div>
+            <div
+              class="loop-illustration"
+              data-method-state="0"
+              aria-hidden="true"
+            >
+              <div class="loop-art">
+                <img
+                  src="./assets/illustrations/engineering-loop-ceramic.webp"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  width="1200"
+                  height="800"
+                />
+                <span class="loop-node loop-node-intent is-current" data-loop-node="0">01</span>
+                <span class="loop-node loop-node-model" data-loop-node="1">02</span>
+                <span class="loop-node loop-node-build" data-loop-node="2">03</span>
+                <span class="loop-node loop-node-verify" data-loop-node="3">04</span>
+              </div>
+              <p class="diagram-footnote" lang="en">
+                INTENT / MODEL / INTERFACE / EVIDENCE
+              </p>
+            </div>
           </div>
-          <dl class="system-index reveal" aria-label="Areas of practice" data-i18n-aria-label="a11y.areas">
-            <div><dt>01</dt><dd data-i18n="about.areaProduct">Product interfaces</dd></div>
-            <div><dt>02</dt><dd data-i18n="about.areaCrossPlatform">Cross-platform applications</dd></div>
-            <div><dt>03</dt><dd data-i18n="about.areaLaboratory">Laboratory and connected devices</dd></div>
-            <div><dt>04</dt><dd data-i18n="about.areaRealtime">Real-time state and communication</dd></div>
-            <div><dt>05</dt><dd data-i18n="about.areaAi">AI and agent workflows</dd></div>
-          </dl>
-          <p class="margin-note reveal" data-i18n="about.note">Clear interfaces connect user intent, system state, and device behavior.</p>
         </div>
       </section>
-
-      <section id="work" class="chapter work" data-chapter-section="work" aria-labelledby="work-title">
-        <div class="chapter-wash"></div>
-        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.work">Work</div>
-        <div class="chapter-inner work-inner">
-          <header class="chapter-heading work-heading">
-            <p class="chapter-label reveal" data-i18n="work.chapter">Chapter 02 / Selected work</p>
-            <h2 id="work-title" class="reveal" data-split data-i18n="work.title">Selected work, composed as systems.</h2>
-            <p class="section-intro reveal" data-i18n="work.intro">Four surfaces for complex work. Each one makes hidden state more legible.</p>
+      <section
+        id="opensource"
+        class="section open-source band"
+        aria-labelledby="opensource-title"
+      >
+        <div class="shell">
+          <header class="section-heading reveal">
+            <div>
+              <p data-i18n="opensource.label" class="eyebrow">开源作品</p>
+              <h2 id="opensource-title">
+                <span data-i18n="opensource.title1">写在代码里的</span
+                ><br /><span data-i18n="opensource.title2">长期主义</span>
+              </h2>
+            </div>
+            <div>
+              <p data-i18n="opensource.intro" class="section-intro">
+                把重复遇到的问题，做成可以复用的工具。这里是我持续探索可视化、开发体验与跨平台交互的几个开源项目。
+              </p>
+              <p data-i18n="opensource.snapshot" class="snapshot">
+                GitHub 公开数据 · 2026.10.31 快照
+              </p>
+            </div>
           </header>
-
-          <article class="project-spread project-alab" aria-labelledby="alab-title">
-            <figure class="project-media reveal">
-              <img src="./assets/images/plate-alab.webp" alt="Cinematic interpretation of a laboratory automation workspace" data-i18n-alt="work.alab.alt" loading="lazy" />
-              <figcaption><span data-i18n="work.alab.type">01 / Laboratory platform</span><span data-i18n="work.alab.process">Design · Execute · Observe</span></figcaption>
-            </figure>
-            <div class="project-copy">
-              <p class="technical-label reveal" lang="en">αLab Studio / MGI</p>
-              <h3 id="alab-title" class="reveal" data-split data-i18n="work.alab.title">One surface for laboratory work.</h3>
-              <p class="project-summary reveal" data-i18n="work.alab.summary">A platform for designing protocols, operating connected equipment, and following experiments through execution.</p>
-              <dl class="evidence-grid reveal">
-                <div><dt data-i18n="work.contribution">Contribution</dt><dd data-i18n="work.alab.contribution">Frontend architecture, protocol tooling, device execution interfaces, and integration surfaces.</dd></div>
-                <div><dt data-i18n="work.system">System</dt><dd lang="en">Flutter, Vue, Node.js, Socket.IO, SQLite, monorepo delivery.</dd></div>
-              </dl>
-              <a class="command-link project-link reveal" href="https://www.mgi-tech.com/lab-management-system/209.html" target="_blank" rel="noreferrer"><span data-i18n="work.alab.link">View αLab Studio</span> <span aria-hidden="true">↗</span></a>
+          <div class="project-ledger">
+            <article
+              class="project-row reveal teal"
+              aria-labelledby="project-0"
+            >
+              <div class="project-index">
+                <i>01</i><span data-i18n="project.index">开源</span>
+              </div>
+              <div class="project-copy">
+                <p class="project-repo" lang="en">Mxgraph-EasyFlowEditor</p>
+                <h3 id="project-0">
+                  <a
+                    href="https://github.com/Jason-chen-coder/Mxgraph-EasyFlowEditor"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><span data-i18n="project.0.title">可视化流程编辑器</span
+                    ><span aria-hidden="true">↗</span></a
+                  >
+                </h3>
+                <div class="project-tags">
+                  <span lang="en">Vue</span><span lang="en">mxGraph</span
+                  ><span lang="en">Visual editor</span>
+                </div>
+                <p data-i18n="project.0.body" class="project-description">
+                  基于 Vue 与 mxGraph
+                  的流程编辑器，探索从节点、连线到业务流程的可视化编排。让复杂逻辑拥有可以直接操作的形状。
+                </p>
+                <div class="project-bottom">
+                  <span class="project-stars" aria-label="213 GitHub stars"
+                    ><svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path
+                        d="m10 2 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8Z"
+                        stroke="currentColor"
+                        stroke-width="1.1"
+                      /></svg
+                    ><b>213</b><span>stars</span></span
+                  ><span class="fork-count">48 forks</span
+                  ><a
+                    class="text-link"
+                    href="https://github.com/Jason-chen-coder/Mxgraph-EasyFlowEditor"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><span data-i18n="project.0.link">查看项目</span
+                    ><span aria-hidden="true">↗</span></a
+                  >
+                </div>
+              </div>
+              <figure class="film-player project-film-player">
+                <video
+                  controls playsinline preload="none" data-promo-video
+                  src="./assets/videos/mxgraph.mp4"
+                  poster="./assets/videos/mxgraph-poster.webp"
+                  aria-label="Mxgraph-EasyFlowEditor 宣传短片"
+                  data-i18n-aria-label="film.mxgraph.label"
+                ><a href="./assets/videos/mxgraph.mp4" data-i18n="film.fallback">直接打开视频</a></video>
+                <figcaption>
+                  <span data-i18n="film.mxgraph.caption">从拖拽节点到流程编排。</span>
+                  <a class="film-download" href="./assets/videos/mxgraph.mp4" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
+                </figcaption>
+                <div class="film-error" data-film-error hidden role="status"><span data-i18n="film.error">暂时无法播放，可以直接打开或下载短片。</span></div>
+              </figure>
+            </article>
+            <article
+              class="project-row reveal indigo"
+              aria-labelledby="project-1"
+            >
+              <div class="project-index">
+                <i>02</i><span data-i18n="project.index">开源</span>
+              </div>
+              <div class="project-copy">
+                <p class="project-repo" lang="en">D3-EasyFlowRender</p>
+                <h3 id="project-1">
+                  <a
+                    href="https://github.com/Jason-chen-coder/D3-EasyFlowRender"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><span data-i18n="project.1.title">数据驱动的流程渲染</span
+                    ><span aria-hidden="true">↗</span></a
+                  >
+                </h3>
+                <div class="project-tags">
+                  <span lang="en">D3.js</span><span lang="en">SVG</span
+                  ><span lang="en">Data visualization</span>
+                </div>
+                <p data-i18n="project.1.body" class="project-description">
+                  用 D3.js
+                  将流程数据变成可阅读的图形，在结构与呈现之间建立连接，探索更灵活的可视化表达。
+                </p>
+                <div class="project-bottom">
+                  <span class="project-stars" aria-label="43 GitHub stars"
+                    ><svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path
+                        d="m10 2 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8Z"
+                        stroke="currentColor"
+                        stroke-width="1.1"
+                      /></svg
+                    ><b>43</b><span>stars</span></span
+                  ><span class="fork-count">6 forks</span
+                  ><a
+                    class="text-link"
+                    href="https://github.com/Jason-chen-coder/D3-EasyFlowRender"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><span data-i18n="project.1.link">查看项目</span
+                    ><span aria-hidden="true">↗</span></a
+                  >
+                </div>
+              </div>
+              <figure class="film-player project-film-player">
+                <video
+                  controls playsinline preload="none" data-promo-video
+                  src="./assets/videos/d3.mp4"
+                  poster="./assets/videos/d3-poster.webp"
+                  aria-label="D3-EasyFlowRender 宣传短片"
+                  data-i18n-aria-label="film.d3.label"
+                ><a href="./assets/videos/d3.mp4" data-i18n="film.fallback">直接打开视频</a></video>
+                <figcaption>
+                  <span data-i18n="film.d3.caption">布局、关系与节点详情，一眼看清。</span>
+                  <a class="film-download" href="./assets/videos/d3.mp4" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
+                </figcaption>
+                <div class="film-error" data-film-error hidden role="status"><span data-i18n="film.error">暂时无法播放，可以直接打开或下载短片。</span></div>
+              </figure>
+            </article>
+            <article
+              class="project-row reveal gold"
+              aria-labelledby="project-2"
+            >
+              <div class="project-index">
+                <i>03</i><span data-i18n="project.index">开源</span>
+              </div>
+              <div class="project-copy">
+                <p class="project-repo" lang="en">
+                  Flutter-EasySpeechRecognition
+                </p>
+                <h3 id="project-2">
+                  <a
+                    href="https://github.com/Jason-chen-coder/Flutter-EasySpeechRecognition"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><span data-i18n="project.2.title">端侧实时语音识别</span
+                    ><span aria-hidden="true">↗</span></a
+                  >
+                </h3>
+                <div class="project-tags">
+                  <span lang="en">Flutter</span><span lang="en">Dart</span
+                  ><span lang="en">Sherpa-ONNX</span>
+                </div>
+                <p data-i18n="project.2.body" class="project-description">
+                  基于 Flutter 与 Sherpa-ONNX
+                  的端侧实时语音识别应用，支持按需下载模型、音频流处理与识别结果展示，让声音在本地变成文字。
+                </p>
+                <div class="project-bottom">
+                  <span class="project-stars" aria-label="34 GitHub stars"
+                    ><svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path
+                        d="m10 2 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8Z"
+                        stroke="currentColor"
+                        stroke-width="1.1"
+                      /></svg
+                    ><b>34</b><span>stars</span></span
+                  ><span class="fork-count">9 forks</span
+                  ><a
+                    class="text-link"
+                    href="https://github.com/Jason-chen-coder/Flutter-EasySpeechRecognition"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><span data-i18n="project.2.link">查看项目</span
+                    ><span aria-hidden="true">↗</span></a
+                  >
+                </div>
+              </div>
+              <figure class="film-player project-film-player">
+                <video
+                  controls playsinline preload="none" data-promo-video
+                  src="./assets/videos/speech.mp4"
+                  poster="./assets/videos/speech-poster.webp"
+                  aria-label="Flutter-EasySpeechRecognition 宣传短片"
+                  data-i18n-aria-label="film.speech.label"
+                ><a href="./assets/videos/speech.mp4" data-i18n="film.fallback">直接打开视频</a></video>
+                <figcaption>
+                  <span data-i18n="film.speech.caption">从模型准备到端侧语音识别。</span>
+                  <a class="film-download" href="./assets/videos/speech.mp4" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
+                </figcaption>
+                <div class="film-error" data-film-error hidden role="status"><span data-i18n="film.error">暂时无法播放，可以直接打开或下载短片。</span></div>
+              </figure>
+            </article>
+            <article
+              class="project-row reveal teal"
+              aria-labelledby="project-3"
+            >
+              <div class="project-index">
+                <i>04</i><span data-i18n="project.index">开源</span>
+              </div>
+              <div class="project-copy">
+                <p class="project-repo" lang="en">Monaco-EasyCodeEditor</p>
+                <h3 id="project-3">
+                  <a
+                    href="https://github.com/Jason-chen-coder/Monaco-EasyCodeEditor"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><span data-i18n="project.3.title">可嵌入的代码编辑器</span
+                    ><span aria-hidden="true">↗</span></a
+                  >
+                </h3>
+                <div class="project-tags">
+                  <span lang="en">Monaco Editor</span><span lang="en">Vue</span
+                  ><span lang="en">Developer tools</span>
+                </div>
+                <p data-i18n="project.3.body" class="project-description">
+                  基于 Monaco Editor
+                  封装的代码编辑器组件，连接编辑能力与业务界面，探索可复用的开发者工具体验。
+                </p>
+                <div class="project-bottom">
+                  <span class="project-stars" aria-label="27 GitHub stars"
+                    ><svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path
+                        d="m10 2 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8Z"
+                        stroke="currentColor"
+                        stroke-width="1.1"
+                      /></svg
+                    ><b>27</b><span>stars</span></span
+                  ><span class="fork-count">11 forks</span
+                  ><a
+                    class="text-link"
+                    href="https://github.com/Jason-chen-coder/Monaco-EasyCodeEditor"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><span data-i18n="project.3.link">查看项目</span
+                    ><span aria-hidden="true">↗</span></a
+                  >
+                </div>
+              </div>
+              <figure class="film-player project-film-player">
+                <video
+                  controls playsinline preload="none" data-promo-video
+                  src="./assets/videos/monaco.mp4"
+                  poster="./assets/videos/monaco-poster.webp"
+                  aria-label="Monaco-EasyCodeEditor 宣传短片"
+                  data-i18n-aria-label="film.monaco.label"
+                ><a href="./assets/videos/monaco.mp4" data-i18n="film.fallback">直接打开视频</a></video>
+                <figcaption>
+                  <span data-i18n="film.monaco.caption">从代码输入到差异对比。</span>
+                  <a class="film-download" href="./assets/videos/monaco.mp4" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
+                </figcaption>
+                <div class="film-error" data-film-error hidden role="status"><span data-i18n="film.error">暂时无法播放，可以直接打开或下载短片。</span></div>
+              </figure>
+            </article>
+          </div>
+          <div class="more-projects reveal">
+            <div>
+              <p data-i18n="more.label" class="eyebrow">还有这些探索</p>
             </div>
-          </article>
-
-          <article class="project-spread project-primegen" aria-labelledby="primegen-title">
-            <figure class="project-media reveal">
-              <img src="./assets/images/plate-primegen.webp" alt="Cinematic interpretation of an intelligent experimental workflow" data-i18n-alt="work.primegen.alt" loading="lazy" />
-              <figcaption><span data-i18n="work.primegen.type">02 / Intelligent workflow</span><span data-i18n="work.primegen.process">Intent · Tools · State</span></figcaption>
-            </figure>
-            <div class="project-copy">
-              <p class="technical-label reveal" lang="en">PrimeGen / MGI</p>
-              <h3 id="primegen-title" class="reveal" data-split data-i18n="work.primegen.title">Language becomes an operable plan.</h3>
-              <p class="project-summary reveal" data-i18n="work.primegen.summary">An AI-assisted experimental workflow connecting search, design, script generation, execution, and quality control.</p>
-              <dl class="evidence-grid reveal">
-                <div><dt data-i18n="work.contribution">Contribution</dt><dd data-i18n="work.primegen.contribution">Agent-facing interaction design, context and workflow state, visual experiment editing, and live monitoring.</dd></div>
-                <div><dt data-i18n="work.system">System</dt><dd lang="en">Vue, TypeScript, NestJS, LLM applications, Redis, WebSocket.</dd></div>
-              </dl>
-              <a class="command-link project-link reveal" href="https://mp.weixin.qq.com/s/jXKv9ZQzOUUefsgutNwPng" target="_blank" rel="noreferrer"><span data-i18n="work.primegen.link">View PrimeGen</span> <span aria-hidden="true">↗</span></a>
+            <div class="more-project-list">
+              <a
+                href="https://github.com/Jason-chen-coder/JsPlumb-EasyFlowEditor"
+                target="_blank"
+                rel="noopener noreferrer"
+                ><span class="more-name" lang="en">JsPlumb-EasyFlowEditor</span
+                ><span
+                  data-i18n="more.JsPlumb-EasyFlowEditor"
+                  class="more-description"
+                  >另一种流程编排实现</span
+                ><span class="more-stars">☆ 24</span
+                ><span aria-hidden="true">↗</span></a
+              >
+              <a
+                href="https://github.com/Jason-chen-coder/Webpack5Mfp-Node-Nacos"
+                target="_blank"
+                rel="noopener noreferrer"
+                ><span class="more-name" lang="en">Webpack5Mfp-Node-Nacos</span
+                ><span
+                  data-i18n="more.Webpack5Mfp-Node-Nacos"
+                  class="more-description"
+                  >微前端与服务发现</span
+                ><span class="more-stars">☆ 22</span
+                ><span aria-hidden="true">↗</span></a
+              >
+              <a
+                href="https://github.com/Jason-chen-coder/dev-skills"
+                target="_blank"
+                rel="noopener noreferrer"
+                ><span class="more-name" lang="en">dev-skills</span
+                ><span data-i18n="more.dev-skills" class="more-description"
+                  >AI 协作开发工作流</span
+                ><span class="more-stars">☆ 7</span
+                ><span aria-hidden="true">↗</span></a
+              >
             </div>
-          </article>
-
-          <article class="project-spread project-oxygen" aria-labelledby="oxygen-title">
-            <figure class="project-media reveal">
-              <img src="./assets/images/plate-oxygen.webp" alt="Cinematic interpretation of a connected oxygen chamber interface" data-i18n-alt="work.oxygen.alt" loading="lazy" />
-              <figcaption><span data-i18n="work.oxygen.type">03 / Connected device</span><span data-i18n="work.oxygen.process">Sense · Control · Sync</span></figcaption>
-            </figure>
-            <div class="project-copy">
-              <p class="technical-label reveal" lang="en">Oxygen Future / MGI</p>
-              <h3 id="oxygen-title" class="reveal" data-split data-i18n="work.oxygen.title">One device state across many surfaces.</h3>
-              <p class="project-summary reveal" data-i18n="work.oxygen.summary">A connected product system spanning an app, embedded screen, operations console, and mini program.</p>
-              <dl class="evidence-grid reveal">
-                <div><dt data-i18n="work.contribution">Contribution</dt><dd data-i18n="work.oxygen.contribution">Device state modeling, BLE control, OTA flows, cloud synchronization, visualization, and release work.</dd></div>
-                <div><dt data-i18n="work.system">System</dt><dd lang="en">Flutter, Vue, BLE, SQLite, UniApp, connected-device operations.</dd></div>
-              </dl>
-              <a class="command-link project-link reveal" href="https://www.mgi-tech.com/827/258.html" target="_blank" rel="noreferrer"><span data-i18n="work.oxygen.link">View Oxygen Future</span> <span aria-hidden="true">↗</span></a>
+          </div>
+          <article class="studio-feature reveal" id="yourdream" aria-labelledby="yourdream-title">
+            <div class="studio-feature-copy">
+              <p class="eyebrow" data-i18n="studio.label">个人产品探索</p>
+              <h3 id="yourdream-title" lang="en">YourDream Studio</h3>
+              <p class="studio-lead" data-i18n="studio.title">让创作的每一步，连接起来。</p>
+              <p class="studio-description" data-i18n="studio.body">围绕 AI 创作探索桌面工作空间，把灵感发现、素材整理与画布编排放在同一条创作路径里。</p>
+              <p class="studio-film-note"><span data-i18n="studio.note">观看产品短片</span><span lang="en">00:48</span></p>
             </div>
-          </article>
-
-          <article class="project-spread project-imaging" aria-labelledby="imaging-title">
-            <figure class="project-media reveal">
-              <img src="./assets/images/plate-imaging.webp" alt="Cinematic interpretation of a remote medical imaging consultation" data-i18n-alt="work.imaging.alt" loading="lazy" />
-              <figcaption><span data-i18n="work.imaging.type">04 / Remote imaging</span><span data-i18n="work.imaging.process">Connect · Render · Operate</span></figcaption>
+            <figure class="film-player studio-feature-film">
+              <video controls playsinline preload="none" data-promo-video src="./assets/videos/yourdream.mp4" poster="./assets/videos/yourdream-poster.webp" aria-label="YourDream Studio 宣传短片" data-i18n-aria-label="film.yourdream.label"><a href="./assets/videos/yourdream.mp4" data-i18n="film.fallback">直接打开视频</a></video>
+              <figcaption><span data-i18n="film.yourdream.caption">从灵感、素材到画布的创作流程。</span><a class="film-download" href="./assets/videos/yourdream.mp4" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a></figcaption>
+              <div class="film-error" data-film-error hidden role="status"><span data-i18n="film.error">暂时无法播放，可以直接打开或下载短片。</span></div>
             </figure>
-            <div class="project-copy">
-              <p class="technical-label reveal" lang="en">Cloud Imaging / MGI</p>
-              <h3 id="imaging-title" class="reveal" data-split data-i18n="work.imaging.title">Distance becomes a shared workspace.</h3>
-              <p class="project-summary reveal" data-i18n="work.imaging.summary">A remote consultation system across desktop, web, and mobile, with live media and hardware communication.</p>
-              <dl class="evidence-grid reveal">
-                <div><dt data-i18n="work.contribution">Contribution</dt><dd data-i18n="work.imaging.contribution">Shared UI systems, multi-window desktop architecture, serial communication, and media integration.</dd></div>
-                <div><dt data-i18n="work.system">System</dt><dd lang="en">React, Electron, Flutter, WebRTC, Mediasoup, serial communication.</dd></div>
-              </dl>
-              <a class="command-link project-link reveal" href="https://www.mgi-tech.com/671/157.html" target="_blank" rel="noreferrer"><span data-i18n="work.imaging.link">View Cloud Imaging</span> <span aria-hidden="true">↗</span></a>
-            </div>
           </article>
-        </div>
-      </section>
-
-      <section id="craft" class="chapter craft" data-chapter-section="craft" aria-labelledby="craft-title">
-        <div class="chapter-wash"></div>
-        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.craft">Craft</div>
-        <div class="chapter-inner editorial-grid">
-          <header class="chapter-heading">
-            <p class="chapter-label reveal" data-i18n="craft.chapter">Chapter 03 / Capabilities</p>
-            <h2 id="craft-title" class="reveal" data-split data-i18n="craft.title">Make the invisible easy to operate.</h2>
-          </header>
-          <ol class="principles">
-            <li class="reveal"><span>01</span><h3 data-i18n="craft.principleModelTitle">Model the system</h3><p data-i18n="craft.principleModelBody">Turn devices, protocols, agents, and permissions into explicit states a team can reason about.</p></li>
-            <li class="reveal"><span>02</span><h3 data-i18n="craft.principleDistanceTitle">Reduce the distance</h3><p data-i18n="craft.principleDistanceBody">Give design, software, hardware, and operations a shared language for the work.</p></li>
-            <li class="reveal"><span>03</span><h3 data-i18n="craft.principleEvidenceTitle">Ship the evidence</h3><p data-i18n="craft.principleEvidenceBody">Use tests, quality gates, release discipline, and useful documentation to support each decision.</p></li>
-          </ol>
-          <div class="capability-index" aria-label="Technical capabilities" data-i18n-aria-label="a11y.capabilities">
-            <div class="reveal"><span data-i18n="craft.frontend">Frontend</span><p lang="en">Vue · TypeScript · React · Flutter · Electron</p></div>
-            <div class="reveal"><span data-i18n="craft.systems">Systems</span><p lang="en">Node.js · NestJS · Monorepos · Micro-frontends · CI/CD</p></div>
-            <div class="reveal"><span data-i18n="craft.connected">Connected</span><p lang="en">BLE · Serial · WebSocket · Socket.IO · WebRTC</p></div>
-            <div class="reveal"><span data-i18n="craft.intelligent">Intelligent</span><p lang="en">LLM applications · Function calling · Agent interfaces</p></div>
+          <div class="section-end">
+            <a
+              class="text-link"
+              href="https://github.com/Jason-chen-coder?tab=repositories"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><span data-i18n="opensource.all">去 GitHub 看更多</span
+              ><span aria-hidden="true">↗</span></a
+            >
           </div>
         </div>
       </section>
-
-      <section id="experience" class="chapter experience" data-chapter-section="experience" aria-labelledby="experience-title">
-        <div class="chapter-wash"></div>
-        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.experience">Experience</div>
-        <div class="chapter-inner editorial-grid">
-          <header class="chapter-heading">
-            <p class="chapter-label reveal" data-i18n="experience.chapter">Chapter 04 / Experience</p>
-            <h2 id="experience-title" class="reveal" data-split data-i18n="experience.title">Responsibility grows with the system.</h2>
+      <section id="work" class="section work" aria-labelledby="work-title">
+        <div class="shell">
+          <header class="section-heading reveal">
+            <div>
+              <p data-i18n="work.label" class="eyebrow">走进真实场景</p>
+              <h2 id="work-title">
+                <span data-i18n="work.title1">软件与物理世界</span><br /><span
+                  data-i18n="work.title2"
+                  >相遇的地方</span
+                >
+              </h2>
+            </div>
+            <p data-i18n="work.intro" class="section-intro">
+              在真实产品中，界面要与设备、协议和运行状态保持一致。我的工作，是把这些复杂关系转化成清晰、可信、可以操作的体验。
+            </p>
           </header>
-          <ol class="timeline">
-            <li class="reveal">
-              <div class="timeline-marker"><span data-i18n="experience.currentPeriod">2021—Present</span><i aria-hidden="true"></i></div>
-              <div><p class="technical-label" lang="en">MGI</p><h3 data-i18n="experience.leadRole">Frontend Development Lead</h3><p data-i18n="experience.leadBody">Frontend delivery for laboratory, medical imaging, and connected-device products, with work across architecture, implementation, integration, and engineering practice.</p></div>
-            </li>
-            <li class="reveal">
-              <div class="timeline-marker"><span>2020—2021</span><i aria-hidden="true"></i></div>
-              <div><p class="technical-label" data-i18n="experience.changliang">Changliang Technology</p><h3 data-i18n="experience.frontendRole">Frontend Engineer</h3><p data-i18n="experience.frontendBody">Enterprise product work spanning shared components, micro-frontend foundations, and release workflows.</p></div>
-            </li>
-            <li class="reveal">
-              <div class="timeline-marker"><span>2018—2020</span><i aria-hidden="true"></i></div>
-              <div><p class="technical-label" data-i18n="experience.shenzhen">Shenzhen</p><h3 data-i18n="experience.webRole">Web Engineering</h3><p data-i18n="experience.webBody">Responsive business systems and customer-facing products across web, mobile, and operational interfaces.</p></div>
-            </li>
-          </ol>
+          <div class="work-grid">
+            <article class="work-item reveal">
+              <a
+                class="work-image work-image-alab"
+                href="https://www.mgi-tech.com/lab-management-system/209.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="αLab Studio"
+                ><img
+                  src="./assets/images/alab-protocol-orchestration.webp"
+                  alt="αLab Studio"
+                  loading="lazy"
+                  width="760"
+                  height="480"
+                /><span class="work-image-note" lang="en"
+                  >Protocol / Execute / Observe</span
+                ><span class="image-arrow" aria-hidden="true">↗</span></a
+              >
+              <div class="work-item-copy">
+                <p class="eyebrow" lang="en">αLab Studio / MGI</p>
+                <h3><span data-i18n="work.alab.title">实验室自动化</span></h3>
+                <p data-i18n="work.alab.body">
+                  协议编排、设备执行与实验进程，连接成一个可操作的工作空间。参与前端架构、协议工具与设备执行界面的建设。
+                </p>
+                <a
+                  class="text-link"
+                  href="https://www.mgi-tech.com/lab-management-system/209.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ><span data-i18n="work.alab.link">了解产品</span
+                  ><span aria-hidden="true">↗</span></a
+                >
+              </div>
+            </article>
+            <article class="work-item reveal" id="ai-workflows">
+              <a
+                class="work-image work-image-primegen"
+                href="https://mp.weixin.qq.com/s/jXKv9ZQzOUUefsgutNwPng"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="PrimeGen"
+                ><img
+                  src="./assets/images/primegen-camera-composite-poster.webp"
+                  alt="PrimeGen"
+                  loading="lazy"
+                  width="760"
+                  height="480"
+                /><span class="work-image-note" lang="en"
+                  >Intent / Tools / State</span
+                ><span class="image-arrow" aria-hidden="true">↗</span></a
+              >
+              <div class="work-item-copy">
+                <p class="eyebrow" lang="en">PrimeGen / MGI</p>
+                <h3>
+                  <span data-i18n="work.primegen.title">AI 辅助实验工作流</span>
+                </h3>
+                <p data-i18n="work.primegen.body">
+                  从意图、工具到实验状态，让 AI 生成的计划进入真实工作流。参与
+                  Agent 交互、可视化编排与运行监控。
+                </p>
+                <a
+                  class="text-link"
+                  href="https://mp.weixin.qq.com/s/jXKv9ZQzOUUefsgutNwPng"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ><span data-i18n="work.primegen.link">了解产品</span
+                  ><span aria-hidden="true">↗</span></a
+                >
+              </div>
+            </article>
+            <article class="work-item reveal">
+              <a
+                class="work-image work-image-oxygen"
+                href="https://www.mgi-tech.com/827/258.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Oxygen Future"
+                ><img
+                  src="./assets/images/oxygen-rigid-chamber.webp"
+                  alt="Oxygen Future"
+                  loading="lazy"
+                  width="1024"
+                  height="679"
+                /><span class="work-image-note" lang="en"
+                  >Sense / Control / Sync</span
+                ><span class="image-arrow" aria-hidden="true">↗</span></a
+              >
+              <div class="work-item-copy">
+                <p class="eyebrow" lang="en">Oxygen Future / MGI</p>
+                <h3>
+                  <span data-i18n="work.oxygen.title">氧生未来</span>
+                </h3>
+                <p data-i18n="work.oxygen.body">
+                  移动触控端、小程序和设备屏，共同承载设备控制与状态呈现。覆盖
+                  BLE、OTA、云端同步及跨平台界面。
+                </p>
+                <a
+                  class="text-link"
+                  href="https://www.mgi-tech.com/827/258.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ><span data-i18n="work.oxygen.link">了解产品</span
+                  ><span aria-hidden="true">↗</span></a
+                >
+              </div>
+            </article>
+            <article class="work-item reveal">
+              <a
+                class="work-image work-image-imaging"
+                href="https://www.mgi-tech.com/671/157.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Cloud Imaging"
+                ><img
+                  src="./assets/images/cloud-remote-ultrasound-system.webp"
+                  alt="Cloud Imaging"
+                  loading="lazy"
+                  width="760"
+                  height="480"
+                /><span class="work-image-note" lang="en"
+                  >Connect / Render / Operate</span
+                ><span class="image-arrow" aria-hidden="true">↗</span></a
+              >
+              <div class="work-item-copy">
+                <p class="eyebrow" lang="en">Cloud Imaging / MGI</p>
+                <h3>
+                  <span data-i18n="work.imaging.title">远程医疗影像</span>
+                </h3>
+                <p data-i18n="work.imaging.body">
+                  跨桌面、Web
+                  与移动端的远程协作，连接实时音视频与硬件通信。参与共享界面、多窗口架构与媒体集成。
+                </p>
+                <a
+                  class="text-link"
+                  href="https://www.mgi-tech.com/671/157.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ><span data-i18n="work.imaging.link">了解产品</span
+                  ><span aria-hidden="true">↗</span></a
+                >
+              </div>
+            </article>
+          </div>
         </div>
       </section>
-
-      <section id="contact" class="chapter contact" data-chapter-section="contact" aria-labelledby="contact-title">
-        <div class="chapter-wash"></div>
-        <div class="vertical-title" aria-hidden="true" data-i18n="vertical.contact">Contact</div>
-        <div class="chapter-inner contact-inner">
-          <p class="chapter-label reveal" data-i18n="contact.chapter">Chapter 05 / Contact</p>
-          <h2 id="contact-title" class="reveal" data-split data-i18n="contact.title">Have a difficult surface to build?</h2>
-          <p class="contact-copy reveal" data-i18n="contact.body">Bring the system, the constraints, and the people who need to operate it.</p>
-          <div class="contact-actions reveal">
-            <a class="contact-primary" href="mailto:hongxin.jasonchen@gmail.com"><span lang="en">hongxin.jasonchen@gmail.com</span> <span aria-hidden="true">↗</span></a>
-            <a href="https://github.com/Jason-chen-coder" target="_blank" rel="noreferrer"><span lang="en">GitHub</span> <span aria-hidden="true">↗</span></a>
+      <section
+        id="about"
+        class="section about band"
+        aria-labelledby="about-title"
+      >
+        <div class="shell">
+          <header class="section-heading reveal">
+            <div>
+              <p data-i18n="about.label" class="eyebrow">关于我</p>
+              <h2 id="about-title">
+                <span data-i18n="about.title1">不只是写代码</span><br /><em
+                  ><span data-i18n="about.title2">更喜欢造东西</span></em
+                >
+              </h2>
+            </div>
+            <div class="about-intro">
+              <p data-i18n="about.body" class="section-intro">
+                我是一名高级前端工程师，工作与生活在深圳。关注可视化编辑、跨平台应用、设备交互和
+                AI 工具，也喜欢把项目中的真实问题，沉淀成可以分享的代码与方法。
+              </p>
+              <a class="button button-soft" href="./resume.pdf"
+                ><span data-i18n="about.resume">查看我的简历</span
+                ><span aria-hidden="true">↗</span></a
+              >
+            </div>
+          </header>
+          <div class="about-details reveal">
+            <div class="capabilities">
+              <p class="eyebrow">
+                <span data-i18n="about.toolbox">常用的工具箱</span>
+              </p>
+              <dl>
+                <div>
+                  <dt>Interface</dt>
+                  <dd>Vue · React · TypeScript · D3.js</dd>
+                </div>
+                <div>
+                  <dt>Platform</dt>
+                  <dd>Flutter · Electron · Web</dd>
+                </div>
+                <div>
+                  <dt>Connected</dt>
+                  <dd>WebSocket · BLE · Serial · WebRTC</dd>
+                </div>
+                <div>
+                  <dt>Workflow</dt>
+                  <dd>Node.js · AI agents · Monorepo</dd>
+                </div>
+              </dl>
+              <p class="personal-note" lang="en">“Not a coder. A builder.”</p>
+            </div>
+            <div class="experience" id="experience">
+              <p class="eyebrow">
+                <span data-i18n="experience.label">走过的路</span>
+              </p>
+              <ol>
+                <li>
+                  <div class="experience-date" lang="en">2021 — Now</div>
+                  <div>
+                    <p class="experience-company">
+                      <span data-i18n="experience.0.company">MGI</span>
+                    </p>
+                    <h3>
+                      <span data-i18n="experience.0.role">前端开发负责人</span>
+                    </h3>
+                    <p data-i18n="experience.0.body">
+                      围绕实验室、医疗影像与互联设备产品，参与架构、实现、集成与工程实践。
+                    </p>
+                  </div>
+                </li>
+                <li>
+                  <div class="experience-date" lang="en">2020 — 2021</div>
+                  <div>
+                    <p class="experience-company">
+                      <span data-i18n="experience.1.company">长亮科技</span>
+                    </p>
+                    <h3>
+                      <span data-i18n="experience.1.role">前端工程师</span>
+                    </h3>
+                    <p data-i18n="experience.1.body">
+                      企业产品、公共组件、微前端基础与交付流程。
+                    </p>
+                  </div>
+                </li>
+                <li>
+                  <div class="experience-date" lang="en">2018 — 2020</div>
+                  <div>
+                    <p class="experience-company">
+                      <span data-i18n="experience.2.company">深圳</span>
+                    </p>
+                    <h3>
+                      <span data-i18n="experience.2.role">Web 工程开发</span>
+                    </h3>
+                    <p data-i18n="experience.2.body">
+                      业务系统与面向用户的 Web、移动端交互。
+                    </p>
+                  </div>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section
+        id="contact"
+        class="section contact"
+        aria-labelledby="contact-title"
+      >
+        <div class="shell">
+          <div class="contact-orbit" aria-hidden="true">
+            <span></span><span></span><i></i>
+          </div>
+          <div class="contact-content reveal">
+            <p data-i18n="contact.label" class="eyebrow">保持连接</p>
+            <h2 id="contact-title">
+              <span data-i18n="contact.title1">有想法，</span><br /><span
+                data-i18n="contact.title2"
+                >一起做出来。</span
+              >
+            </h2>
+            <p data-i18n="contact.body" class="contact-description">
+              关于产品、工程、开源，或一个值得解决的问题。
+            </p>
+            <div class="contact-actions">
+              <a
+                class="button button-dark"
+                href="mailto:hongxin.jasonchen@gmail.com"
+                ><span data-i18n="contact.email">写封邮件</span
+                ><span aria-hidden="true">↗</span></a
+              ><button
+                class="button button-soft copy-email"
+                type="button"
+                data-copy-email
+              >
+                <span data-i18n="contact.copy">复制邮箱</span
+                ><span aria-hidden="true">⧉</span>
+              </button>
+            </div>
+            <a
+              class="email-address"
+              href="mailto:hongxin.jasonchen@gmail.com"
+              lang="en"
+              >hongxin.jasonchen@gmail.com</a
+            >
+            <p class="copy-status" aria-live="polite" role="status"></p>
           </div>
         </div>
       </section>
     </main>
-
-    <footer class="manifesto-footer">
-      <p data-i18n="footer.tagline">Built for complex work.</p>
-      <div><span lang="en">© 2026 Jason Chen</span><a href="#top"><span data-i18n="footer.back">Back to top</span> <span aria-hidden="true">↑</span></a></div>
+    <footer class="footer">
+      <div class="shell">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <a class="brand" href="#top"
+              ><svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                <path
+                  d="M27 10v13c0 8-13 10-14 1"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M15 12c-9 4-7 17 1 19 7 2 15-3 16-10"
+                  stroke="currentColor"
+                  stroke-width="1.1"
+                />
+                <circle cx="27" cy="10" r="2.2" fill="#aa8143" />
+                <circle cx="13" cy="24" r="1.7" fill="#00696e" />
+                <path
+                  d="M11 9h8M7 15h6M26 30h7"
+                  stroke="#a39b8d"
+                  stroke-width=".7"
+                /></svg
+              ><span class="brand-name" lang="en">Jason Chen</span></a
+            >
+            <p data-i18n="footer.statement">把复杂系统，做成好用的产品。</p>
+          </div>
+          <div class="footer-links">
+            <p class="eyebrow">
+              <span data-i18n="footer.explore">站内探索</span>
+            </p>
+            <a data-i18n="footer.opensource" href="#opensource">开源作品</a>
+            <a data-i18n="footer.work" href="#work">产品实践</a>
+            <a data-i18n="footer.about" href="#about">关于我</a>
+          </div>
+          <div class="footer-links">
+            <p class="eyebrow">
+              <span data-i18n="footer.elsewhere">在别处</span>
+            </p>
+            <a
+              class=""
+              href="https://github.com/Jason-chen-coder"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><span data-i18n="footer.github">GitHub</span
+              ><span aria-hidden="true">↗</span></a
+            ><a data-i18n="footer.resume" href="./resume.pdf">个人简历</a
+            ><a
+              data-i18n="footer.email"
+              href="mailto:hongxin.jasonchen@gmail.com"
+              >电子邮件</a
+            >
+          </div>
+          <div class="footer-location">
+            <p class="eyebrow">
+              <span data-i18n="footer.locationLabel">此时此地</span>
+            </p>
+            <p data-i18n="footer.location">中国 · 深圳</p>
+            <p lang="en">22.54° N · 114.06° E</p>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p lang="en">© 2026 Jason Chen</p>
+          <p>
+            <span data-i18n="footer.inspired">设计灵感：</span
+            ><a
+              href="https://zhu.eitech.edu.cn/zh/"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><span data-i18n="footer.reference">朱宸课题组</span></a
+            >
+          </p>
+          <a href="#top"
+            ><span data-i18n="footer.top">回到顶部</span>
+            <span aria-hidden="true">↑</span></a
+          >
+        </div>
+      </div>
     </footer>
-
-    <div class="cursor-dot" aria-hidden="true"></div>
-    <div class="cursor-ring" aria-hidden="true"></div>
-
-    <script defer src="./i18n.js"></script>
-    <script defer src="./script.js"></script>
-    <script type="module" src="./scene.js"></script>
   </body>
 </html>

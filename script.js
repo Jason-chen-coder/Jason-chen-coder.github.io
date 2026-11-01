@@ -1,330 +1,223 @@
-document.documentElement.classList.add('js');
-
-const {
-  COPY,
-  STORAGE_KEY,
-  normalizeLocale,
-  resolveLocale,
-} = globalThis.PortfolioI18n;
-const root = document.documentElement;
-const READING_LINE_RATIO = 0.46;
-const PROJECT_DETAIL_STAGGER_MS = 140;
-const EXPERIENCE_TIMELINE_STAGGER_MS = 100;
-const menuToggle = document.querySelector('.menu-toggle');
-const siteNav = document.querySelector('.site-nav');
-const wordmark = document.querySelector('.wordmark');
-const localeButtons = [...document.querySelectorAll('.locale-switch [data-locale]')];
-const chapterSections = [...document.querySelectorAll('[data-chapter-section]')];
-const chapterLinks = [...document.querySelectorAll('.site-nav a[href^="#"], .chapter-rail a[href^="#"]')];
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const mobileNavQuery = window.matchMedia('(max-width: 720px)');
-const menuInertTargets = [
-  document.querySelector('main'),
-  document.querySelector('.chapter-rail'),
-  document.querySelector('.manifesto-footer'),
-].filter(Boolean);
-let currentLocale = 'en';
-
-function translate(key, locale = currentLocale) {
-  return COPY[locale]?.[key] ?? COPY.en[key] ?? key;
-}
-
-function readSavedLocale() {
+(function initializePortfolio() {
+  "use strict";
+  const root = document.documentElement;
+  const i18n = globalThis.PortfolioI18n;
+  const masthead = document.querySelector(".masthead");
+  const menuButton = document.querySelector(".menu-toggle");
+  const menu = document.getElementById("site-nav");
+  const methodButtons = [...document.querySelectorAll("[data-method]")];
+  const email = "hongxin.jasonchen@gmail.com";
+  let activeMethod = 0;
+  let copyStatusTimer;
+  let savedLocale;
   try {
-    return localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
+    savedLocale = localStorage.getItem(i18n.STORAGE_KEY);
+  } catch {}
+  i18n.applyLocale(i18n.resolveLocale({ savedLocale }), { persist: false });
+
+  function closeMenu({ restoreFocus = false } = {}) {
+    menu.classList.remove("is-open");
+    menuButton.setAttribute("aria-expanded", "false");
+    menuButton.dataset.i18nAriaLabel = "nav.open";
+    menuButton.setAttribute(
+      "aria-label",
+      i18n.translate("nav.open", root.lang),
+    );
+    if (restoreFocus) menuButton.focus();
   }
-}
-
-function applyLocale(locale, { persist = false } = {}) {
-  locale = normalizeLocale(locale) ?? 'en';
-  currentLocale = locale;
-  root.lang = locale;
-  root.dataset.locale = locale;
-
-  document.querySelectorAll('[data-i18n]').forEach((element) => {
-    element.textContent = translate(element.dataset.i18n, locale);
+  menuButton.addEventListener("click", () => {
+    const open = menuButton.getAttribute("aria-expanded") !== "true";
+    menu.classList.toggle("is-open", open);
+    menuButton.setAttribute("aria-expanded", String(open));
+    menuButton.dataset.i18nAriaLabel = open ? "nav.close" : "nav.open";
+    menuButton.setAttribute(
+      "aria-label",
+      i18n.translate(open ? "nav.close" : "nav.open", root.lang),
+    );
   });
-  const localizedAttributes = {
-    'aria-label': 'data-i18n-aria-label',
-    alt: 'data-i18n-alt',
-    content: 'data-i18n-content',
-    title: 'data-i18n-title',
-  };
-  Object.entries(localizedAttributes).forEach(([attribute, dataAttribute]) => {
-    document.querySelectorAll(`[${dataAttribute}]`).forEach((element) => {
-      element.setAttribute(attribute, translate(element.getAttribute(dataAttribute), locale));
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      menuButton.getAttribute("aria-expanded") === "true"
+    )
+      closeMenu({ restoreFocus: true });
+  });
+  document.addEventListener("click", (event) => {
+    if (!masthead.contains(event.target)) closeMenu();
+  });
+  for (const link of menu.querySelectorAll("a"))
+    link.addEventListener("click", () => closeMenu());
+  const mobileViewport = matchMedia("(max-width: 720px)");
+  mobileViewport.addEventListener("change", () => closeMenu());
+
+  for (const button of document.querySelectorAll("button[data-locale]")) {
+    button.addEventListener("click", () =>
+      i18n.applyLocale(button.dataset.locale),
+    );
+  }
+  function setMethod(index, { focus = false } = {}) {
+    activeMethod =
+      ((index % methodButtons.length) + methodButtons.length) %
+      methodButtons.length;
+    for (const [buttonIndex, button] of methodButtons.entries()) {
+      const selected = buttonIndex === activeMethod;
+      button.setAttribute("aria-selected", String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    }
+    const title = document.getElementById("method-title");
+    const body = document.getElementById("method-body");
+    title.dataset.i18n = `method.${activeMethod}.title`;
+    body.dataset.i18n = `method.${activeMethod}.body`;
+    title.textContent = i18n.translate(title.dataset.i18n, root.lang);
+    body.textContent = i18n.translate(body.dataset.i18n, root.lang);
+    document
+      .getElementById("method-panel")
+      .setAttribute("aria-labelledby", `method-tab-${activeMethod}`);
+    document.querySelector(".loop-illustration").dataset.methodState =
+      String(activeMethod);
+    for (const node of document.querySelectorAll("[data-loop-node]"))
+      node.classList.toggle(
+        "is-current",
+        Number(node.dataset.loopNode) === activeMethod,
+      );
+    if (focus) methodButtons[activeMethod].focus();
+  }
+  for (const [index, button] of methodButtons.entries()) {
+    button.addEventListener("click", () => setMethod(index));
+    button.addEventListener("keydown", (event) => {
+      const actions = {
+        ArrowRight: index + 1,
+        ArrowLeft: index - 1,
+        Home: 0,
+        End: methodButtons.length - 1,
+      };
+      if (Object.hasOwn(actions, event.key)) {
+        event.preventDefault();
+        setMethod(actions[event.key], { focus: true });
+      }
     });
+  }
+  document.addEventListener("portfolio:localechange", () => {
+    setMethod(activeMethod);
+    const status = document.querySelector(".copy-status");
+    if (status.dataset.i18n)
+      status.textContent = i18n.translate(status.dataset.i18n, root.lang);
   });
 
-  const menuKey = siteNav?.classList.contains('is-open') ? 'nav.close' : 'nav.open';
-  menuToggle?.setAttribute('aria-label', translate(menuKey, locale));
-  localeButtons.forEach((button) => {
-    button.setAttribute('aria-pressed', String(button.dataset.locale === locale));
-  });
-  document.querySelectorAll('[data-split]').forEach((element) => splitWords(element, locale));
-
-  if (persist) {
+  function updateScrollState() {
+    masthead.classList.toggle("is-compact", window.scrollY > 50);
+  }
+  updateScrollState();
+  window.addEventListener("scroll", updateScrollState, { passive: true });
+  const navLinks = [...masthead.querySelectorAll("[data-nav]")];
+  function setActiveNavigation(id) {
+    const navId =
+      id === "craft"
+        ? "top"
+        : id === "experience"
+          ? "about"
+          : id === "ai-workflows"
+            ? "work"
+            : id;
+    for (const link of navLinks) {
+      if (link.dataset.nav === navId)
+        link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    }
+  }
+  const sections = [...document.querySelectorAll("main > section")];
+  let navigationFrame = 0;
+  function updateActiveNavigation() {
+    navigationFrame = 0;
+    const readingLine = 160;
+    let current = sections[0];
+    for (const section of sections) {
+      if (section.getBoundingClientRect().top <= readingLine) current = section;
+      else break;
+    }
+    if (window.scrollY + window.innerHeight >= root.scrollHeight - 2)
+      current = sections.at(-1);
+    if (current) setActiveNavigation(current.id);
+  }
+  function queueNavigationUpdate() {
+    if (!navigationFrame)
+      navigationFrame = requestAnimationFrame(updateActiveNavigation);
+  }
+  window.addEventListener("scroll", queueNavigationUpdate, { passive: true });
+  window.addEventListener("resize", queueNavigationUpdate, { passive: true });
+  window.addEventListener("load", queueNavigationUpdate, { once: true });
+  document.addEventListener("portfolio:localechange", queueNavigationUpdate);
+  document.fonts?.ready.then(queueNavigationUpdate);
+  function revealHashTarget() {
+    let id;
     try {
-      localStorage.setItem(STORAGE_KEY, locale);
+      id = decodeURIComponent(location.hash.slice(1));
     } catch {
-      // The active locale still applies when storage is unavailable.
+      return;
     }
+    const target = document.getElementById(id);
+    if (!target) return;
+    for (const element of target.querySelectorAll(".is-pending"))
+      element.classList.remove("is-pending");
+    target.closest(".reveal")?.classList.remove("is-pending");
+    setActiveNavigation(id);
   }
-  requestAnimationFrame(() => {
-    window.dispatchEvent(new Event('resize'));
-  });
-}
+  setActiveNavigation(location.hash.slice(1) || "top");
+  window.addEventListener("hashchange", revealHashTarget);
 
-function setBackgroundInert(isInert) {
-  menuInertTargets.forEach((element) => { element.inert = isInert; });
-}
-
-function closeMenu({ restoreFocus = false } = {}) {
-  if (!siteNav || !menuToggle) return;
-  siteNav.classList.remove('is-open');
-  menuToggle.setAttribute('aria-expanded', 'false');
-  menuToggle.setAttribute('aria-label', translate('nav.open'));
-  root.classList.remove('menu-open');
-  setBackgroundInert(false);
-  if (restoreFocus) menuToggle.focus();
-}
-
-menuToggle?.addEventListener('click', () => {
-  const willOpen = !siteNav?.classList.contains('is-open');
-  siteNav?.classList.toggle('is-open', willOpen);
-  menuToggle.setAttribute('aria-expanded', String(willOpen));
-  menuToggle.setAttribute('aria-label', translate(willOpen ? 'nav.close' : 'nav.open'));
-  root.classList.toggle('menu-open', willOpen);
-  setBackgroundInert(willOpen);
-  if (willOpen) siteNav?.querySelector('a')?.focus();
-});
-
-siteNav?.addEventListener('click', (event) => {
-  if (event.target.closest('a')) closeMenu({ restoreFocus: siteNav.classList.contains('is-open') });
-});
-
-wordmark?.addEventListener('click', () => closeMenu());
-
-document.addEventListener('keydown', (event) => {
-  const menuIsOpen = siteNav?.classList.contains('is-open');
-  if (event.key === 'Escape' && menuIsOpen) {
-    closeMenu({ restoreFocus: true });
-    return;
-  }
-
-  if (event.key === 'Tab' && menuIsOpen) {
-    const focusable = [...siteNav.querySelectorAll('a'), ...localeButtons, menuToggle];
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  if ("IntersectionObserver" in window && !reducedMotion.matches) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.remove("is-pending");
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" },
+    );
+    for (const element of document.querySelectorAll(".reveal")) {
+      if (element.getBoundingClientRect().top > window.innerHeight)
+        element.classList.add("is-pending");
+      observer.observe(element);
     }
+    reducedMotion.addEventListener("change", (event) => {
+      if (event.matches)
+        for (const element of document.querySelectorAll(".is-pending"))
+          element.classList.remove("is-pending");
+    });
   }
-});
+  root.classList.add("js");
+  revealHashTarget();
+  queueNavigationUpdate();
 
-mobileNavQuery.addEventListener?.('change', (event) => {
-  if (!event.matches) closeMenu();
-});
-
-function segmentLabel(label, locale) {
-  if (locale === 'zh-CN' && typeof Intl.Segmenter === 'function') {
-    return [...new Intl.Segmenter(locale, { granularity: 'word' }).segment(label)]
-      .map(({ segment }) => segment.trim())
-      .filter(Boolean);
-  }
-  if (locale === 'zh-CN') {
-    return label.match(/[\p{Script=Han}]|[A-Za-z0-9]+(?:[./+-][A-Za-z0-9]+)*|[^\s]/gu) ?? [];
-  }
-  return label.split(/\s+/);
-}
-
-function splitWords(element, locale = currentLocale) {
-  const label = element.textContent.trim();
-  if (!label) return;
-
-  element.classList.remove('split-ready');
-  element.setAttribute('aria-label', label);
-  element.replaceChildren();
-  segmentLabel(label, locale).forEach((word, index) => {
-    const mask = document.createElement('span');
-    const inner = document.createElement('span');
-    mask.className = 'word-mask';
-    mask.setAttribute('aria-hidden', 'true');
-    inner.className = 'word-inner';
-    inner.style.setProperty('--word-index', index);
-    inner.textContent = word;
-    mask.append(inner);
-    element.append(mask);
-  });
-  element.classList.add('split-ready');
-}
-
-const initialLocale = resolveLocale({
-  savedLocale: readSavedLocale(),
-  navigatorLanguages: navigator.languages,
-  navigatorLanguage: navigator.language,
-});
-applyLocale(initialLocale);
-localeButtons.forEach((button) => {
-  button.addEventListener('click', () => applyLocale(button.dataset.locale, { persist: true }));
-});
-
-const revealElements = [...document.querySelectorAll('.reveal')];
-const projectDetailSequences = new Map(
-  [...document.querySelectorAll('.project-copy h3.reveal')].map((title) => {
-    const siblings = [...title.parentElement.children];
-    const titleIndex = siblings.indexOf(title);
-    const details = siblings.slice(titleIndex + 1)
-      .filter((element) => element.classList.contains('reveal'));
-    return [title, details];
-  }),
-);
-const experienceTitle = document.querySelector('#experience-title');
-const experienceTimelineItems = [...document.querySelectorAll('.timeline > li.reveal')];
-const revealSequences = new Map(projectDetailSequences);
-if (experienceTitle) revealSequences.set(experienceTitle, experienceTimelineItems);
-const sequencedRevealElements = new Set([...revealSequences.values()].flat());
-const pendingRevealElements = new Set(revealElements);
-
-function revealEverything() {
-  revealElements.forEach((element) => element.classList.add('is-visible'));
-  pendingRevealElements.clear();
-}
-
-function revealElement(element) {
-  element.classList.add('is-visible');
-  pendingRevealElements.delete(element);
-  const staggerMs = element === experienceTitle
-    ? EXPERIENCE_TIMELINE_STAGGER_MS
-    : PROJECT_DETAIL_STAGGER_MS;
-  revealSequences.get(element)?.forEach((detail, index) => {
-    detail.style.setProperty('--reveal-delay', `${(index + 1) * staggerMs}ms`);
-    detail.classList.add('is-visible');
-    pendingRevealElements.delete(detail);
-  });
-}
-
-function revealAtReadingLine(readingLine) {
-  const initialChapter = chapterSections[0];
-  const atPageStart = window.scrollY <= 1;
-  const readyToReveal = [];
-
-  pendingRevealElements.forEach((element) => {
-    if (sequencedRevealElements.has(element)) return;
-    const isInitialContent = atPageStart && initialChapter?.contains(element);
-    if (isInitialContent || element.getBoundingClientRect().top <= readingLine) {
-      readyToReveal.push(element);
-    }
-  });
-
-  readyToReveal.forEach(revealElement);
-}
-
-if (reducedMotion.matches) revealEverything();
-
-reducedMotion.addEventListener?.('change', (event) => {
-  if (event.matches) revealEverything();
-});
-
-let activeChapter = '';
-let chapterFrame = 0;
-
-function updateActiveChapter() {
-  chapterFrame = 0;
-  const readingLine = window.innerHeight * READING_LINE_RATIO;
-  if (!reducedMotion.matches) revealAtReadingLine(readingLine);
-
-  if (!chapterSections.length) return;
-  let nearest = chapterSections[0];
-  let nearestDistance = Number.POSITIVE_INFINITY;
-
-  for (const section of chapterSections) {
-    const rect = section.getBoundingClientRect();
-    if (rect.top <= readingLine && rect.bottom > readingLine) {
-      nearest = section;
-      break;
-    }
-    const distance = Math.min(Math.abs(rect.top - readingLine), Math.abs(rect.bottom - readingLine));
-    if (distance < nearestDistance) {
-      nearest = section;
-      nearestDistance = distance;
-    }
-  }
-
-  const nextChapter = nearest.dataset.chapterSection;
-  const rect = nearest.getBoundingClientRect();
-  const localProgress = Math.min(1, Math.max(0, (readingLine - rect.top) / Math.max(rect.height, 1)));
-  root.style.setProperty('--chapter-progress', localProgress.toFixed(4));
-
-  if (nextChapter === activeChapter) return;
-  activeChapter = nextChapter;
-  root.dataset.chapter = activeChapter;
-
-  chapterLinks.forEach((link) => {
-    const isCurrent = link.getAttribute('href') === `#${activeChapter}`;
-    if (isCurrent) link.setAttribute('aria-current', 'location');
-    else link.removeAttribute('aria-current');
-  });
-
-  window.dispatchEvent(new CustomEvent('kage:chapterchange', {
-    detail: { id: activeChapter, index: chapterSections.indexOf(nearest) },
-  }));
-}
-
-function requestChapterUpdate() {
-  if (!chapterFrame) chapterFrame = requestAnimationFrame(updateActiveChapter);
-}
-
-window.addEventListener('scroll', requestChapterUpdate, { passive: true });
-window.addEventListener('resize', requestChapterUpdate, { passive: true });
-window.addEventListener('hashchange', requestChapterUpdate);
-updateActiveChapter();
-
-const finePointer = window.matchMedia('(pointer: fine)');
-const cursorDot = document.querySelector('.cursor-dot');
-const cursorRing = document.querySelector('.cursor-ring');
-
-if (finePointer.matches && cursorDot && cursorRing && !reducedMotion.matches) {
-  root.classList.add('cursor-enabled');
-  let pointerX = -100;
-  let pointerY = -100;
-  let ringX = -100;
-  let ringY = -100;
-  let cursorFrame = 0;
-
-  const moveRing = () => {
-    ringX += (pointerX - ringX) * 0.18;
-    ringY += (pointerY - ringY) * 0.18;
-    cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
-    cursorFrame = requestAnimationFrame(moveRing);
-  };
-
-  window.addEventListener('pointermove', (event) => {
-    pointerX = event.clientX;
-    pointerY = event.clientY;
-    cursorDot.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
-  }, { passive: true });
-
-  document.addEventListener('pointerover', (event) => {
-    cursorRing.classList.toggle('is-interactive', Boolean(event.target.closest('a, button, .project-media')));
-  });
-
-  window.addEventListener('pagehide', () => {
-    cancelAnimationFrame(cursorFrame);
-    cursorFrame = 0;
-  });
-  window.addEventListener('pageshow', (event) => {
-    if (event.persisted && !cursorFrame) cursorFrame = requestAnimationFrame(moveRing);
-  });
-  cursorFrame = requestAnimationFrame(moveRing);
-}
-
-window.addEventListener('kage:webgl-fallback', () => {
-  root.dataset.webgl = 'fallback';
-});
+  document
+    .querySelector("[data-copy-email]")
+    .addEventListener("click", async () => {
+      const status = document.querySelector(".copy-status");
+      clearTimeout(copyStatusTimer);
+      let copied = false;
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(email);
+          copied = true;
+        } else {
+          const input = document.createElement("textarea");
+          input.value = email;
+          input.setAttribute("readonly", "");
+          input.style.cssText = "position:fixed;left:-9999px;top:0;";
+          document.body.append(input);
+          input.select();
+          copied = document.execCommand("copy");
+          input.remove();
+        }
+      } catch {}
+      status.dataset.i18n = copied ? "contact.copied" : "contact.copyFailed";
+      status.textContent = i18n.translate(status.dataset.i18n, root.lang);
+      copyStatusTimer = setTimeout(() => {
+        status.textContent = "";
+        delete status.dataset.i18n;
+      }, 5000);
+    });
+})();

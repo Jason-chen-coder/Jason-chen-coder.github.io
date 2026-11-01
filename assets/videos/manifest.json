@@ -1,0 +1,42 @@
+{
+  "created": "2026-11-01",
+  "video_format": "H.264/AAC, 1920x1080, 30fps",
+  "variants": "Original music versions, byte-identical to delivered videos; no re-encoding.",
+  "files": {
+    "mxgraph": {
+      "filename": "mxgraph.mp4",
+      "sha256": "4a79dc7f02ae290382ae0c67306fd528d9f93c933574c425099f3bea7750cb9f",
+      "bytes": 11333696,
+      "poster": "mxgraph-poster.webp",
+      "poster_sha256": "580b4bb7246ebef5497acd138055713d80a799a2f690aa74c500c6d15bc7f861"
+    },
+    "d3": {
+      "filename": "d3.mp4",
+      "sha256": "6690f76add852e063b8d66b95e9169af1cf145d58926ce1ff6af430cc720461f",
+      "bytes": 4915969,
+      "poster": "d3-poster.webp",
+      "poster_sha256": "e3c92a15efb8a496a8c53e74f6cf66bf2bddc09cd511b2a0a9008d574a66cd61"
+    },
+    "speech": {
+      "filename": "speech.mp4",
+      "sha256": "cc054002d554460d362465b2ef6d384f487354d263ffbc1c837e3a2a32fd68e0",
+      "bytes": 3126062,
+      "poster": "speech-poster.webp",
+      "poster_sha256": "6c7455df028a0696d88473dc38890e094643d73d09a56b25b1030455d91a4b1b"
+    },
+    "monaco": {
+      "filename": "monaco.mp4",
+      "sha256": "30052e8d48e6b87cae2ca255f2eee77fe7b2bd068bc493cd5e962b494a3687a2",
+      "bytes": 5734873,
+      "poster": "monaco-poster.webp",
+      "poster_sha256": "8f98d016d5e888bdb448e412591985bd3b5b57b02ed2772f7005a62296931cac"
+    },
+    "yourdream": {
+      "filename": "yourdream.mp4",
+      "sha256": "66382569e1e07132c19652635ee9e0a7aed7713b3c01bf85092a2e35ef1d51b4",
+      "bytes": 17548070,
+      "poster": "yourdream-poster.webp",
+      "poster_sha256": "e37ceb2ce08e85703fe417eb680c91b4e1458cd8d36e1f2eb4c7f248779717f5"
+    }
+  }
+}

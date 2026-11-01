@@ -1,0 +1,71 @@
+{
+  "generated_on": "2026-11-01",
+  "tool": "image_gen",
+  "mode": "built-in, reference-guided original generation",
+  "prompt_file": "./PROMPTS.md",
+  "style_reference": "https://zhu.eitech.edu.cn/zh/",
+  "purpose": "Conceptual illustrations of engineering topics; not actual product screenshots",
+  "assets": [
+    {
+      "id": "flow",
+      "path": "./flow-ceramic.webp",
+      "source_generation": "exec-a5c2c2b0-14da-4827-b6ac-088493ba4a9b.png",
+      "source_width": 1536,
+      "source_height": 1024,
+      "width": 1200,
+      "height": 800,
+      "postprocessing": "Resize and WebP encode only; q86, method6, metadata removed",
+      "bytes": 39872,
+      "sha256": "d6e7356945270b690393432eda5c013b1c164495dc63a939d0e67fbd81fcf6d3"
+    },
+    {
+      "id": "network",
+      "path": "./network-ceramic.webp",
+      "source_generation": "exec-7d5a06a6-9919-4ee2-80e6-99f2020edc03.png",
+      "source_width": 1536,
+      "source_height": 1024,
+      "width": 1200,
+      "height": 800,
+      "postprocessing": "Resize and WebP encode only; q86, method6, metadata removed",
+      "bytes": 37506,
+      "sha256": "4c9d58793220891a0a2f7882e57b405ad9f52c04dfb56fe83f25efe7089bccb8"
+    },
+    {
+      "id": "speech",
+      "path": "./speech-ceramic.webp",
+      "source_generation": "exec-6b0056bf-1fd7-4385-a799-e60cd1259dda.png",
+      "source_width": 1536,
+      "source_height": 1024,
+      "width": 1200,
+      "height": 800,
+      "postprocessing": "Resize and WebP encode only; q86, method6, metadata removed",
+      "bytes": 44984,
+      "sha256": "106187b11d3e6840d149deb9a6d51aad738486f9e1d6adec8aa9e305af17b56c"
+    },
+    {
+      "id": "code",
+      "path": "./code-ceramic.webp",
+      "source_generation": "exec-88533313-bc67-4006-a8d3-6ad0e7735c76.png",
+      "source_width": 1536,
+      "source_height": 1024,
+      "width": 1200,
+      "height": 800,
+      "postprocessing": "Resize and WebP encode only; q86, method6, metadata removed",
+      "bytes": 45312,
+      "sha256": "603f1a9f479eb198444a778f6591b994511106a43b475e7a3c3d108e2c6b5644"
+    },
+    {
+      "id": "engineering-loop",
+      "path": "./engineering-loop-ceramic.webp",
+      "source_generation": "exec-ac4b9316-e4b4-44b5-850f-323a4b39b865.png",
+      "source_width": 1536,
+      "source_height": 1024,
+      "width": 1200,
+      "height": 800,
+      "postprocessing": "Resize and WebP encode only; q86, method6, metadata removed",
+      "bytes": 58276,
+      "sha256": "d8f5f482600b9b74749c0f87a482b3275cf72b46f479daba9b228d39888122dd"
+    }
+  ],
+  "total_bytes": 225950
+}
