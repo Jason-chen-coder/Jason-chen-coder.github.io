@@ -496,13 +496,29 @@
                 </div>
               </div>
               <figure class="film-player project-film-player">
-                <video
-                  controls playsinline preload="none" data-promo-video
+                <div class="film-stage">
+                  <div class="film-meta" hidden data-film-meta><span>PROJECT FILM</span><span data-film-duration-label>00:37</span></div>
+                  <div class="film-screen">
+                    <video
+                  controls playsinline preload="none" data-promo-video data-film-duration="37.366667"
                   src="./assets/videos/mxgraph.mp4?v=d3e440cb481f"
                   poster="./assets/videos/mxgraph-poster.webp"
                   aria-label="Mxgraph-EasyFlowEditor 宣传短片"
                   data-i18n-aria-label="film.mxgraph.label"
                 ><a href="./assets/videos/mxgraph.mp4?v=d3e440cb481f" data-i18n="film.fallback">直接打开视频</a></video>
+                    <button class="film-cover" type="button" data-film-cover hidden aria-label="播放短片">
+                      <span class="film-cover-disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></span>
+                      <span class="film-cover-label" data-film-cover-label>播放短片</span>
+                    </button>
+                  </div>
+                  <div class="film-controls" data-film-controls hidden role="group" aria-label="视频控制">
+                    <button class="film-control film-toggle" type="button" data-film-toggle aria-label="播放短片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></button>
+                    <input class="film-seek" type="range" data-film-seek min="0" max="37.366667" step="0.1" value="0" disabled aria-label="播放进度" />
+                    <span class="film-time" data-film-time>00:00 <span aria-hidden="true">/</span> 00:37</span>
+                    <button class="film-control" type="button" data-film-mute aria-label="静音" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></svg></button>
+                    <button class="film-control" type="button" data-film-fullscreen aria-label="全屏播放"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+                  </div>
+                </div>
                 <figcaption>
                   <span data-i18n="film.mxgraph.caption">从拖拽节点到流程编排。</span>
                   <a class="film-download" href="./assets/videos/mxgraph.mp4?v=d3e440cb481f" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
@@ -557,13 +573,29 @@
                 </div>
               </div>
               <figure class="film-player project-film-player">
-                <video
-                  controls playsinline preload="none" data-promo-video
+                <div class="film-stage">
+                  <div class="film-meta" hidden data-film-meta><span>PROJECT FILM</span><span data-film-duration-label>00:35</span></div>
+                  <div class="film-screen">
+                    <video
+                  controls playsinline preload="none" data-promo-video data-film-duration="35.533333"
                   src="./assets/videos/d3.mp4?v=d2bf1fcefa68"
                   poster="./assets/videos/d3-poster.webp"
                   aria-label="D3-EasyFlowRender 宣传短片"
                   data-i18n-aria-label="film.d3.label"
                 ><a href="./assets/videos/d3.mp4?v=d2bf1fcefa68" data-i18n="film.fallback">直接打开视频</a></video>
+                    <button class="film-cover" type="button" data-film-cover hidden aria-label="播放短片">
+                      <span class="film-cover-disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></span>
+                      <span class="film-cover-label" data-film-cover-label>播放短片</span>
+                    </button>
+                  </div>
+                  <div class="film-controls" data-film-controls hidden role="group" aria-label="视频控制">
+                    <button class="film-control film-toggle" type="button" data-film-toggle aria-label="播放短片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></button>
+                    <input class="film-seek" type="range" data-film-seek min="0" max="35.533333" step="0.1" value="0" disabled aria-label="播放进度" />
+                    <span class="film-time" data-film-time>00:00 <span aria-hidden="true">/</span> 00:35</span>
+                    <button class="film-control" type="button" data-film-mute aria-label="静音" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></svg></button>
+                    <button class="film-control" type="button" data-film-fullscreen aria-label="全屏播放"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+                  </div>
+                </div>
                 <figcaption>
                   <span data-i18n="film.d3.caption">布局、关系与节点详情，一眼看清。</span>
                   <a class="film-download" href="./assets/videos/d3.mp4?v=d2bf1fcefa68" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
@@ -620,13 +652,29 @@
                 </div>
               </div>
               <figure class="film-player project-film-player">
-                <video
-                  controls playsinline preload="none" data-promo-video
+                <div class="film-stage">
+                  <div class="film-meta" hidden data-film-meta><span>PROJECT FILM</span><span data-film-duration-label>00:36</span></div>
+                  <div class="film-screen">
+                    <video
+                  controls playsinline preload="none" data-promo-video data-film-duration="36"
                   src="./assets/videos/speech.mp4?v=c54556a8c9e8"
                   poster="./assets/videos/speech-poster.webp"
                   aria-label="Flutter-EasySpeechRecognition 宣传短片"
                   data-i18n-aria-label="film.speech.label"
                 ><a href="./assets/videos/speech.mp4?v=c54556a8c9e8" data-i18n="film.fallback">直接打开视频</a></video>
+                    <button class="film-cover" type="button" data-film-cover hidden aria-label="播放短片">
+                      <span class="film-cover-disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></span>
+                      <span class="film-cover-label" data-film-cover-label>播放短片</span>
+                    </button>
+                  </div>
+                  <div class="film-controls" data-film-controls hidden role="group" aria-label="视频控制">
+                    <button class="film-control film-toggle" type="button" data-film-toggle aria-label="播放短片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></button>
+                    <input class="film-seek" type="range" data-film-seek min="0" max="36" step="0.1" value="0" disabled aria-label="播放进度" />
+                    <span class="film-time" data-film-time>00:00 <span aria-hidden="true">/</span> 00:36</span>
+                    <button class="film-control" type="button" data-film-mute aria-label="静音" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></svg></button>
+                    <button class="film-control" type="button" data-film-fullscreen aria-label="全屏播放"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+                  </div>
+                </div>
                 <figcaption>
                   <span data-i18n="film.speech.caption">从模型准备到端侧语音识别。</span>
                   <a class="film-download" href="./assets/videos/speech.mp4?v=c54556a8c9e8" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
@@ -681,13 +729,29 @@
                 </div>
               </div>
               <figure class="film-player project-film-player">
-                <video
-                  controls playsinline preload="none" data-promo-video
+                <div class="film-stage">
+                  <div class="film-meta" hidden data-film-meta><span>PROJECT FILM</span><span data-film-duration-label>00:35</span></div>
+                  <div class="film-screen">
+                    <video
+                  controls playsinline preload="none" data-promo-video data-film-duration="35.533333"
                   src="./assets/videos/monaco.mp4?v=55925eaee3cb"
                   poster="./assets/videos/monaco-poster.webp"
                   aria-label="Monaco-EasyCodeEditor 宣传短片"
                   data-i18n-aria-label="film.monaco.label"
                 ><a href="./assets/videos/monaco.mp4?v=55925eaee3cb" data-i18n="film.fallback">直接打开视频</a></video>
+                    <button class="film-cover" type="button" data-film-cover hidden aria-label="播放短片">
+                      <span class="film-cover-disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></span>
+                      <span class="film-cover-label" data-film-cover-label>播放短片</span>
+                    </button>
+                  </div>
+                  <div class="film-controls" data-film-controls hidden role="group" aria-label="视频控制">
+                    <button class="film-control film-toggle" type="button" data-film-toggle aria-label="播放短片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></button>
+                    <input class="film-seek" type="range" data-film-seek min="0" max="35.533333" step="0.1" value="0" disabled aria-label="播放进度" />
+                    <span class="film-time" data-film-time>00:00 <span aria-hidden="true">/</span> 00:35</span>
+                    <button class="film-control" type="button" data-film-mute aria-label="静音" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></svg></button>
+                    <button class="film-control" type="button" data-film-fullscreen aria-label="全屏播放"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+                  </div>
+                </div>
                 <figcaption>
                   <span data-i18n="film.monaco.caption">从代码输入到差异对比。</span>
                   <a class="film-download" href="./assets/videos/monaco.mp4?v=55925eaee3cb" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
@@ -746,7 +810,23 @@
               <p class="studio-film-note"><span data-i18n="studio.note">观看产品短片</span><span lang="en">00:48</span></p>
             </div>
             <figure class="film-player studio-feature-film">
-              <video controls playsinline preload="none" data-promo-video src="./assets/videos/yourdream.mp4?v=967ad9c45e71" poster="./assets/videos/yourdream-poster.webp" aria-label="YourDream Studio 宣传短片" data-i18n-aria-label="film.yourdream.label"><a href="./assets/videos/yourdream.mp4?v=967ad9c45e71" data-i18n="film.fallback">直接打开视频</a></video>
+              <div class="film-stage">
+                  <div class="film-meta" hidden data-film-meta><span>PROJECT FILM</span><span data-film-duration-label>00:48</span></div>
+                  <div class="film-screen">
+                    <video controls playsinline preload="none" data-promo-video data-film-duration="48.32" src="./assets/videos/yourdream.mp4?v=967ad9c45e71" poster="./assets/videos/yourdream-poster.webp" aria-label="YourDream Studio 宣传短片" data-i18n-aria-label="film.yourdream.label"><a href="./assets/videos/yourdream.mp4?v=967ad9c45e71" data-i18n="film.fallback">直接打开视频</a></video>
+                    <button class="film-cover" type="button" data-film-cover hidden aria-label="播放短片">
+                      <span class="film-cover-disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></span>
+                      <span class="film-cover-label" data-film-cover-label>播放短片</span>
+                    </button>
+                  </div>
+                  <div class="film-controls" data-film-controls hidden role="group" aria-label="视频控制">
+                    <button class="film-control film-toggle" type="button" data-film-toggle aria-label="播放短片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></button>
+                    <input class="film-seek" type="range" data-film-seek min="0" max="48.32" step="0.1" value="0" disabled aria-label="播放进度" />
+                    <span class="film-time" data-film-time>00:00 <span aria-hidden="true">/</span> 00:48</span>
+                    <button class="film-control" type="button" data-film-mute aria-label="静音" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></svg></button>
+                    <button class="film-control" type="button" data-film-fullscreen aria-label="全屏播放"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+                  </div>
+                </div>
               <figcaption><span data-i18n="film.yourdream.caption">从灵感、素材到画布的创作流程。</span><a class="film-download" href="./assets/videos/yourdream.mp4?v=967ad9c45e71" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a></figcaption>
               <div class="film-error" data-film-error hidden role="status"><span data-i18n="film.error">暂时无法播放，可以直接打开或下载短片。</span></div>
             </figure>
@@ -980,10 +1060,10 @@
                   <div class="experience-date" lang="en">2021 — Now</div>
                   <div>
                     <p class="experience-company">
-                      <span data-i18n="experience.0.company">MGI</span>
+                      <span data-i18n="experience.0.company">华大智造</span>
                     </p>
                     <h3>
-                      <span data-i18n="experience.0.role">前端开发负责人</span>
+                      <span data-i18n="experience.0.role">全栈开发工程师</span>
                     </h3>
                     <p data-i18n="experience.0.body">
                       围绕实验室、医疗影像与互联设备产品，参与架构、实现、集成与工程实践。
