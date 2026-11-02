@@ -105,7 +105,12 @@ test('catalogs cover all static translation markers and match the Chinese no-Jav
     assert.notEqual(fallback, undefined);
     assert.equal(decodeHtml(fallback), api.COPY['zh-CN'][match[2]], `${match[2]} retains a static attribute`);
   }
-  assert.ok(html.indexOf('src="./i18n.js"') < html.indexOf('src="./script.js"'));
+  const scriptSources = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(match => match[1].split(/[?#]/)[0]);
+  const i18nIndex = scriptSources.indexOf('./i18n.js');
+  const mainIndex = scriptSources.indexOf('./script.js');
+  assert.ok(i18nIndex >= 0, 'localization script must be present');
+  assert.ok(mainIndex >= 0, 'main script must be present');
+  assert.ok(i18nIndex < mainIndex, 'localization must load before the main script');
 });
 
 test('speech project copy accurately describes the verified on-device Sherpa-ONNX application', async () => {
