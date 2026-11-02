@@ -72,9 +72,13 @@ test('professional work preserves four product destinations and includes the rem
   const checkup = html.match(/<article\b[^>]*id="remote-checkup"[\s\S]*?<\/article>/)?.[0];
   assert.ok(checkup, 'remote checkup has its own professional work entry');
   assert.match(checkup, /华大云影|work\.checkup\.brand/);
-  assert.match(checkup, /服务流程示意/);
+  assert.match(checkup, /用户端演示，使用演示数据/);
   assert.match(checkup, /运营后台及 H5/);
-  assert.doesNotMatch(checkup, /<a\b|<img\b|<button\b/, 'the original service diagram must not imply a product screenshot or unavailable demo');
+  assert.match(checkup, /<video\b[^>]*controls playsinline preload="none"[^>]*data-promo-video/);
+  assert.match(checkup, /src="\.\/assets\/videos\/health-applet-promo\.mp4(?:\?v=[a-f0-9]+)?"/);
+  assert.match(checkup, /poster="\.\/assets\/images\/health-applet-promo-poster\.webp"/);
+  assert.equal([...html.matchAll(/<video\b[^>]*data-promo-video/g)].length, 6, 'all six product films share playback behavior');
+  assert.doesNotMatch(checkup, /checkup-diagram|work\.checkup\.diagram/, 'the source demo replaces the schematic');
   assert.doesNotMatch(html, /(?:提升|提高|降低)[^<]{0,15}\d+%/u, 'do not invent performance or business outcomes');
 });
 

@@ -98,5 +98,41 @@
         "ssim_mean": 0.999742
       }
     }
+  },
+  "produced_media": {
+    "health_applet": {
+      "created": "2026-11-02",
+      "filename": "health-applet-promo.mp4",
+      "sha256": "8da3bbe0bc04da26e2f9ab3f73bdd566969ba083e1a385e4e1003d9009b82d1c",
+      "bytes": 1963808,
+      "poster": "../images/health-applet-promo-poster.webp",
+      "poster_sha256": "148e4ec1c2c74819c31ac86bc5f8c0b610af01da63feb7685b799bc899d5643a",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "frames": 780,
+      "duration_seconds": 26,
+      "audio": "None; intentionally silent portfolio demonstration",
+      "encoding": {
+        "encoder": "libx264",
+        "preset": "slow",
+        "crf": 19,
+        "pixel_format": "yuv420p",
+        "faststart": true
+      },
+      "capture": "Real HealthApplet Vue2/UniApp components rendered in an isolated HBuilderX H5 build, with local compatibility adjustments. Four frozen mobile screens at 390x844, captured at 2x.",
+      "data": "Fictional demonstration data; no production requests or real personal or clinical records.",
+      "screens": [
+        "Checkup service and booking schedule",
+        "Booking confirmation",
+        "Appointment list and status",
+        "Report viewing"
+      ],
+      "quality_against_render_master": {
+        "vmaf_mean": 97.751668,
+        "vmaf_min": 97.427701
+      },
+      "verification": "Independent scan of all 780 encoded frames and review of 46 key and transition frames; web playback and seeking verified."
+    }
   }
 }

@@ -17,8 +17,8 @@
     />
     <title data-i18n="meta.title">Jason Chen · 把复杂系统做成好用的产品</title>
     <link rel="icon" href="./assets/images/cat-logo.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=e7d842f1677b" />
-    <script defer src="./i18n.js?v=f9d7be3c31e8"></script>
+    <link rel="stylesheet" href="./styles.css?v=9df305bbc601" />
+    <script defer src="./i18n.js?v=64506dcaf5ee"></script>
     <script defer src="./script.js"></script>
     <script defer src="./promo-media.js?v=b8672f4369ff"></script>
     <script defer src="./illustration-motion.js"></script>
@@ -1002,33 +1002,36 @@
               </div>
             </article>
             <article class="work-item work-item-checkup reveal" id="remote-checkup" aria-labelledby="checkup-title">
-              <div class="checkup-visual" role="img" aria-label="服务流程示意：在线预约、现场核销、报告查看。" data-i18n-aria-label="work.checkup.diagram">
-                <svg class="checkup-diagram" viewBox="0 0 560 266" fill="none" aria-hidden="true">
-                  <path d="M144 126h86m100 0h86" stroke="#b69a65" stroke-width="1.5" stroke-dasharray="3 5" />
-                  <path d="M216 121l7 5-7 5M402 121l7 5-7 5" stroke="#87642d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                  <g fill="#faf8f3" stroke="#b7ad98" stroke-width="1.5">
-                    <rect x="44" y="30" width="100" height="190" rx="17" />
-                    <rect x="230" y="30" width="100" height="190" rx="17" />
-                    <rect x="416" y="30" width="100" height="190" rx="17" />
-                  </g>
-                  <g stroke="#d0c7b6" stroke-width="2" stroke-linecap="round">
-                    <path d="M82 43h24m162 0h24m162 0h24M82 206h24m162 0h24m162 0h24" />
-                  </g>
-                  <g stroke="#00696e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="68" y="91" width="52" height="50" rx="5" />
-                    <path d="M68 105h52M80 86v11m28-11v11M80 116h5m11 0h5m-21 12h5m11 0h5" />
-                    <path d="M255 104V92h12m26 0h12v12m0 28v12h-12m-26 0h-12v-12M267 118l9 9 18-20" />
-                    <path d="M448 88h28l12 12v48h-40V88Zm28 0v14h12M457 117h22m-22 10h22m-22 10h13" />
-                  </g>
-                  <path d="M54 244h452" stroke="#d8cfbe" stroke-width="1" />
-                </svg>
-                <div class="checkup-steps" aria-hidden="true">
-                  <span><i>01</i><span data-i18n="work.checkup.book">在线预约</span></span>
-                  <span><i>02</i><span data-i18n="work.checkup.checkin">现场核销</span></span>
-                  <span><i>03</i><span data-i18n="work.checkup.report">报告查看</span></span>
+              <figure class="film-player checkup-film">
+                <div class="film-stage">
+                  <div class="film-meta" hidden data-film-meta><span>PROJECT FILM</span><span data-film-duration-label>00:26</span></div>
+                  <div class="film-screen">
+                    <video
+                  controls playsinline preload="none" data-promo-video data-film-duration="26"
+                  src="./assets/videos/health-applet-promo.mp4?v=8da3bbe0bc04"
+                  poster="./assets/images/health-applet-promo-poster.webp"
+                  aria-label="华大云影+ 用户端演示短片"
+                  data-i18n-aria-label="film.health.label"
+                ><a href="./assets/videos/health-applet-promo.mp4?v=8da3bbe0bc04" data-i18n="film.fallback">直接打开视频</a></video>
+                    <button class="film-cover" type="button" data-film-cover hidden aria-label="播放短片">
+                      <span class="film-cover-disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></span>
+                      <span class="film-cover-label" data-film-cover-label>播放短片</span>
+                    </button>
+                  </div>
+                  <div class="film-controls" data-film-controls hidden role="group" aria-label="视频控制">
+                    <button class="film-control film-toggle" type="button" data-film-toggle aria-label="播放短片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></button>
+                    <input class="film-seek" type="range" data-film-seek min="0" max="26" step="0.1" value="0" disabled aria-label="播放进度" />
+                    <span class="film-time" data-film-time>00:00 <span aria-hidden="true">/</span> 00:26</span>
+                    <button class="film-control" type="button" data-film-mute aria-label="静音" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></svg></button>
+                    <button class="film-control" type="button" data-film-fullscreen aria-label="全屏播放"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+                  </div>
                 </div>
-                <p class="checkup-note" data-i18n="work.checkup.flow">服务流程示意</p>
-              </div>
+                <figcaption>
+                  <span data-i18n="film.health.caption">真实源码页面 · 用户端演示，使用演示数据。</span>
+                  <a class="film-download" href="./assets/videos/health-applet-promo.mp4?v=8da3bbe0bc04" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
+                </figcaption>
+                <div class="film-error" data-film-error hidden role="status"><span data-i18n="film.error">暂时无法播放，可以直接打开或下载短片。</span></div>
+              </figure>
               <div class="work-item-copy checkup-copy">
                 <p class="eyebrow" data-i18n="work.checkup.brand">华大云影 / MGI</p>
                 <h3 id="checkup-title"><span data-i18n="work.checkup.title">远程体检预约小程序</span></h3>

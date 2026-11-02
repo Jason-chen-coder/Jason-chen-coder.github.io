@@ -1353,37 +1353,6 @@ html[lang="zh-CN"] .eyebrow {
   border-bottom: 1px solid var(--line);
   scroll-margin-top: 130px;
 }
-.checkup-visual {
-  min-width: 0;
-  padding: 15px 18px 18px;
-  border-radius: 12px;
-  background: #ede9df;
-}
-.checkup-diagram { display: block; width: 100%; height: auto; }
-.checkup-steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: -8px;
-  color: var(--ink-2);
-  text-align: center;
-  font-size: 11px;
-  line-height: 1.5;
-}
-.checkup-steps > span { display: grid; gap: 5px; }
-.checkup-steps i {
-  font-style: normal;
-  color: var(--gold);
-  font-size: 9px;
-  letter-spacing: .1em;
-}
-.checkup-note {
-  margin: 24px 0 0;
-  color: var(--muted);
-  font-size: 9px;
-  letter-spacing: .06em;
-  text-align: center;
-}
 .work-item-checkup .checkup-copy { padding: 0 8px; }
 .checkup-tech {
   display: flex;
@@ -1398,8 +1367,6 @@ html[lang="zh-CN"] .eyebrow {
 @media (max-width: 720px) {
   .work-item-checkup { grid-template-columns: minmax(0, 1fr); gap: 23px; padding-block: 28px; }
   .work-item-checkup .checkup-copy { padding: 0 3px; }
-  .checkup-visual { padding-inline: 10px; }
-  .checkup-steps { font-size: 10px; }
 }
 .about-intro .button {
   margin-top: 22px;
