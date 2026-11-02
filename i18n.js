@@ -168,8 +168,6 @@
     "footer.email": "电子邮件",
     "footer.locationLabel": "此时此地",
     "footer.location": "中国 · 深圳",
-    "footer.inspired": "设计灵感：",
-    "footer.reference": "朱宸课题组",
     "footer.top": "回到顶部",
   };
   const en = {
@@ -341,8 +339,6 @@
     "footer.email": "Email",
     "footer.locationLabel": "BASED IN",
     "footer.location": "Shenzhen, China",
-    "footer.inspired": "Design inspiration: ",
-    "footer.reference": "Zhu Research Group",
     "footer.top": "Back to top",
   };
 

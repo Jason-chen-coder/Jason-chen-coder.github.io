@@ -102,7 +102,7 @@ test('external links and contact actions remain usable and safe without a public
   assert.match(html, /<button\b[^>]*data-copy-email/);
   assert.match(html, /aria-live="polite"[^>]*role="status"|role="status"[^>]*aria-live="polite"/);
   assert.match(html, /href="https:\/\/github\.com\/Jason-chen-coder"/);
-  assert.match(html, /href="https:\/\/zhu\.eitech\.edu\.cn\/zh\/"/);
+  assert.doesNotMatch(html, /zhu\.eitech\.edu\.cn|footer\.(?:inspired|reference)|设计灵感|朱宸课题组/);
 });
 
 test('navigation, language controls and workflow tabs expose accessible states', async () => {
