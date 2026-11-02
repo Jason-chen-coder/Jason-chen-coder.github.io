@@ -63,12 +63,18 @@ test('four featured repositories retain verified popularity order and dated coun
   }
 });
 
-test('professional work preserves all four product destinations and conservative contribution copy', async () => {
+test('professional work preserves four product destinations and includes the remote checkup workflow', async () => {
   const html = await read('index.html');
   for (const href of professionalLinks) assert.ok(html.includes(`href="${href}"`), `${href} must remain linked`);
   for (const name of ['αLab Studio', 'PrimeGen', 'Oxygen Future', 'Cloud Imaging']) assert.ok(html.includes(name));
   assert.match(html, /前端架构|协议工具/);
   assert.match(html, /多窗口架构|媒体集成/);
+  const checkup = html.match(/<article\b[^>]*id="remote-checkup"[\s\S]*?<\/article>/)?.[0];
+  assert.ok(checkup, 'remote checkup has its own professional work entry');
+  assert.match(checkup, /华大云影|work\.checkup\.brand/);
+  assert.match(checkup, /服务流程示意/);
+  assert.match(checkup, /运营后台及 H5/);
+  assert.doesNotMatch(checkup, /<a\b|<img\b|<button\b/, 'the original service diagram must not imply a product screenshot or unavailable demo');
   assert.doesNotMatch(html, /(?:提升|提高|降低)[^<]{0,15}\d+%/u, 'do not invent performance or business outcomes');
 });
 
