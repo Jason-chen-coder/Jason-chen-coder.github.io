@@ -2,330 +2,496 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
+import * as THREE from '../assets/vendor/three/three.module.min.js';
+import {
+  applyDeviceAction,
+  applyMappedTextures,
+  createLaboratoryWorld,
+  snapshotDeviceActions,
+} from '../lab-world.js';
+import {
+  createContextLifecycle,
+  createSceneLayoutInvalidation,
+  getSceneActivationOffset,
+  measureSceneStopMetrics,
+} from '../scene.js';
+import * as sceneRuntime from '../scene.js';
+import {
+  CAMERA_POSES,
+  PROJECT_BAYS,
+  SCENE_STOPS,
+  buildSceneTimeline,
+  evaluateSceneTimeline,
+  interpolateCamera,
+} from '../scene-model.js';
+
 const root = new URL('../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
 
-function hexFrom(source, pattern, label) {
-  const match = source.match(pattern);
-  assert.ok(match, `${label} must be declared`);
-  return Number.parseInt(match[1], 16);
+function rolesIn(rootObject) {
+  const roles = [];
+  rootObject.traverse((object) => {
+    if (object.userData.semanticRole) roles.push(object.userData.semanticRole);
+  });
+  return roles;
 }
 
-function numberFrom(source, pattern, label) {
-  const match = source.match(pattern);
-  assert.ok(match, `${label} must be declared`);
-  return Number(match[1]);
+function byRole(rootObject, role) {
+  let match = null;
+  rootObject.traverse((object) => {
+    if (!match && object.userData.semanticRole === role) match = object;
+  });
+  return match;
 }
 
-function channels(hex) {
-  return [hex >> 16, (hex >> 8) & 0xff, hex & 0xff].map((channel) => channel / 255);
+const PROJECT_FRAMING_VIEWS = Object.freeze([
+  { stopId: 'alab', roles: ['alab-enclosure', 'alab-robot-arm', 'alab-analyzer'] },
+  { stopId: 'primegen', roles: ['primegen-planning-console', 'primegen-instrument-row'] },
+  { stopId: 'oxygen', roles: ['oxygen-rounded-shell'] },
+  { stopId: 'cloud-remote', roles: ['cloud-remote-device-end', 'cloud-remote-consultation-end'] },
+  { stopId: 'cloud-handheld', roles: ['cloud-handheld-station'] },
+]);
+
+const FRAMING_VIEWPORTS = Object.freeze([
+  { width: 1440, height: 900 },
+  { width: 1024, height: 768 },
+  { width: 390, height: 844 },
+  { width: 360, height: 800 },
+]);
+
+function unionRoleBounds(worldRoot, roles) {
+  const bounds = new THREE.Box3();
+  for (const role of roles) {
+    const object = byRole(worldRoot, role);
+    assert.ok(object, `missing framing object ${role}`);
+    bounds.expandByObject(object, true);
+  }
+  assert.equal(bounds.isEmpty(), false, `framing bounds for ${roles.join(', ')} must be non-empty`);
+  return bounds;
 }
 
-function srgbToLinear(channel) {
-  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
-}
+function projectBoxBounds(box, pose, viewport) {
+  const camera = new THREE.PerspectiveCamera(pose.fov, viewport.width / viewport.height, 0.08, 90);
+  camera.position.fromArray(pose.position);
+  camera.up.set(0, 1, 0);
+  camera.lookAt(new THREE.Vector3().fromArray(pose.target));
+  camera.rotation.z = pose.roll;
+  camera.updateProjectionMatrix();
+  camera.updateMatrixWorld(true);
 
-function linearToSrgb(channel) {
-  return channel <= 0.0031308 ? channel * 12.92 : 1.055 * channel ** (1 / 2.4) - 0.055;
-}
-
-function effectiveMappedColor(base, tint) {
-  return channels(base).map((channel, index) => (
-    linearToSrgb(srgbToLinear(channel) * srgbToLinear(channels(tint)[index]))
-  ));
-}
-
-function perceivedLuminance(colorChannels) {
-  return colorChannels[0] * 0.2126 + colorChannels[1] * 0.7152 + colorChannels[2] * 0.0722;
-}
-
-function materialBody(source, name) {
-  const match = source.match(new RegExp(`${name}: new THREE\\.MeshStandardMaterial\\(\\{(?<body>[^}]*)\\}\\)`));
-  assert.ok(match, `${name} material must be declared`);
-  return match.groups.body;
-}
-
-function materialColor(source, name) {
-  return hexFrom(materialBody(source, name), /color:\s*0x([\da-f]+)/i, `${name} color`);
-}
-
-function ruleBody(source, selector) {
-  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const matches = [...source.matchAll(new RegExp(`${escaped}\\s*\\{(?<body>[^}]*)\\}`, 'gs'))];
-  const match = matches.find((candidate) => candidate.groups.body.includes('background:'));
-  assert.ok(match, `${selector} must be declared`);
-  return match.groups.body;
-}
-
-function listedRuleBody(source, selectors) {
-  const pattern = selectors
-    .map((selector) => selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    .join('\\s*,\\s*');
-  return source.match(new RegExp(`${pattern}\\s*\\{(?<body>[^}]*)\\}`, 's'))?.groups?.body ?? null;
-}
-
-function gradientStops(rule, direction) {
-  const line = rule.split('\n').find((candidate) => candidate.includes(`linear-gradient(${direction}deg`));
-  assert.ok(line, `${direction}deg gradient must be declared on one line`);
-  return [...line.matchAll(/(?:rgba\([^)]*,\s*(\d*\.?\d+)\)|(transparent))\s*(\d+(?:\.\d+)?)%?/g)]
-    .map((match) => ({ alpha: match[2] ? 0 : Number(match[1]), position: Number(match[3]) }));
-}
-
-function alphaAt(stops, position) {
-  assert.ok(stops.length >= 2, 'gradient needs at least two opacity stops');
-  if (position <= stops[0].position) return stops[0].alpha;
-  for (let index = 1; index < stops.length; index += 1) {
-    if (position <= stops[index].position) {
-      const previous = stops[index - 1];
-      const span = stops[index].position - previous.position;
-      const progress = span === 0 ? 1 : (position - previous.position) / span;
-      return previous.alpha + (stops[index].alpha - previous.alpha) * progress;
+  const projected = [];
+  for (const x of [box.min.x, box.max.x]) {
+    for (const y of [box.min.y, box.max.y]) {
+      for (const z of [box.min.z, box.max.z]) {
+        const point = new THREE.Vector3(x, y, z).project(camera);
+        projected.push({ x: (point.x + 1) / 2, y: (1 - point.y) / 2 });
+      }
     }
   }
-  return stops.at(-1).alpha;
-}
-
-function vignetteAlpha(rule, x, y, width, height) {
-  const match = rule.match(/box-shadow:[^;]*?(\d+)px\s+rgba\([^)]*,\s*(\d*\.?\d+)\)/);
-  assert.ok(match, 'vignette blur and alpha must be declared');
-  const blur = Number(match[1]);
-  const edgeDistance = Math.min(x * width, (1 - x) * width, y * height, (1 - y) * height);
-  return Number(match[2]) * Math.max(0, 1 - edgeDistance / blur);
-}
-
-function combinedTransmission(hazeRule, chapterRules, { x, y, width, height }) {
-  const horizontal = alphaAt(gradientStops(hazeRule, 90), x * 100);
-  const vertical = alphaAt(gradientStops(hazeRule, 0), (1 - y) * 100);
-  const vignette = vignetteAlpha(hazeRule, x, y, width, height);
-  const wash = Math.max(...chapterRules.map((rule) => alphaAt(gradientStops(rule, 90), x * 100)));
-  return (1 - horizontal) * (1 - vertical) * (1 - vignette) * (1 - wash);
-}
-
-test('mapped architectural materials preserve effective midtones and edge hierarchy', async () => {
-  const scene = await read('scene.js');
-  const textureBases = {
-    stone: hexFrom(scene, /stoneTextures\s*=\s*createSurfaceTextureSet\(0x([\da-f]+)/i, 'stone texture base'),
-    timber: hexFrom(scene, /timberTextures\s*=\s*createSurfaceTextureSet\(0x([\da-f]+)/i, 'timber texture base'),
-    roof: hexFrom(scene, /roofTextures\s*=\s*createSurfaceTextureSet\(0x([\da-f]+)/i, 'roof texture base'),
+  return {
+    minX: Math.min(...projected.map(({ x }) => x)),
+    maxX: Math.max(...projected.map(({ x }) => x)),
+    minY: Math.min(...projected.map(({ y }) => y)),
+    maxY: Math.max(...projected.map(({ y }) => y)),
   };
-  const requirements = {
-    stone: ['stone', 0.28],
-    stoneDark: ['stone', 0.235],
-    timber: ['timber', 0.16],
-    timberDark: ['timber', 0.125],
-    roof: ['roof', 0.235],
-    roofEdge: ['roof', 0.26],
-  };
-  const effective = {};
+}
 
-  for (const [name, [texture, minimum]] of Object.entries(requirements)) {
-    const tint = materialColor(scene, name);
-    const tintChannels = channels(tint);
-    effective[name] = perceivedLuminance(effectiveMappedColor(textureBases[texture], tint));
-    assert.ok(effective[name] >= minimum, `${name} effective midtone ${effective[name].toFixed(3)} must be >= ${minimum}`);
-    assert.ok(Math.min(...tintChannels) >= 0.72, `${name} tint must stay near-neutral so its map carries the material color`);
-    assert.ok(Math.max(...tintChannels) - Math.min(...tintChannels) <= 0.08, `${name} tint channels must remain near-neutral`);
+function formatProjectedBounds(bounds) {
+  return `x=${bounds.minX.toFixed(3)}..${bounds.maxX.toFixed(3)}, y=${bounds.minY.toFixed(3)}..${bounds.maxY.toFixed(3)}`;
+}
+
+test('all five project equipment combinations fit the central viewport framing at four target sizes', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  world.root.updateMatrixWorld(true);
+  const violations = [];
+  const makeConfig = typeof sceneRuntime.responsiveConfigForViewport === 'function'
+    ? sceneRuntime.responsiveConfigForViewport
+    : (width) => ({ lateralScale: width <= 720 ? 0.7 : width <= 1024 ? 0.86 : 1 });
+
+  for (const viewport of FRAMING_VIEWPORTS) {
+    const responsiveConfig = makeConfig(viewport.width, viewport.height);
+    for (const framingView of PROJECT_FRAMING_VIEWS) {
+      const stopIndex = SCENE_STOPS.findIndex(({ id }) => id === framingView.stopId);
+      const pose = interpolateCamera(stopIndex / (CAMERA_POSES.length - 1), CAMERA_POSES, responsiveConfig);
+      const equipmentBounds = unionRoleBounds(world.root, framingView.roles);
+      const equipmentCenter = equipmentBounds.getCenter(new THREE.Vector3()).toArray();
+      for (const axis of [0, 2]) {
+        if (framingView.stopId === 'cloud-handheld') continue;
+        assert.ok(
+          Math.abs(pose.target[axis] - equipmentCenter[axis]) <= 0.001,
+          `${framingView.stopId} target axis ${axis} must remain on the real equipment center`,
+        );
+      }
+      if (framingView.stopId !== 'cloud-handheld') {
+        assert.ok(
+          Math.abs(pose.position[0] - equipmentCenter[0]) <= 1e-6,
+          `${framingView.stopId} camera must face the equipment center head-on`,
+        );
+      } else {
+        assert.ok(
+          Math.abs(pose.position[0] - equipmentCenter[0]) <= 1.6,
+          'Cloud Handheld may use an off-center hero composition while preserving a level camera',
+        );
+      }
+      assert.equal(pose.target[1], pose.position[1], `${framingView.stopId} target must stay at eye level`);
+      assert.ok(pose.position[2] > equipmentBounds.max.z, `${framingView.stopId} camera must stay in front of the equipment`);
+      assert.deepEqual(pose.forward, [0, 0, -1], `${framingView.stopId} must face straight down -Z`);
+      const bounds = projectBoxBounds(equipmentBounds, pose, viewport);
+      const maximumY = framingView.stopId === 'oxygen' ? 0.91 : 0.9;
+      const withinFrame = bounds.minX >= 0.2
+        && bounds.maxX <= 0.8
+        && bounds.minY >= 0.1
+        && bounds.maxY <= maximumY;
+      if (!withinFrame) {
+        violations.push(`${viewport.width}x${viewport.height} ${framingView.stopId}: ${formatProjectedBounds(bounds)}`);
+      }
+      if (viewport.width === 1440 && framingView.stopId === 'oxygen') {
+        assert.ok(bounds.minY >= 0.1, 'the level Oxygen silhouette must retain its top inside the viewport');
+        assert.ok(
+          bounds.maxY <= 0.91,
+          `the level Oxygen silhouette must retain its base inside the viewport: ${formatProjectedBounds(bounds)}`,
+        );
+      }
+    }
   }
 
-  assert.ok(effective.roofEdge >= effective.roof * 1.06, 'roof edge must remain visibly brighter than the roof map');
-});
-
-test('terrain hills preserve a clear stair-to-temple sightline', async () => {
-  const scene = await read('scene.js');
-  const groundStart = scene.indexOf('function addGround(');
-  const stepsStart = scene.indexOf('function createStepGeometry(');
-  const ground = scene.slice(groundStart, stepsStart);
-  assert.ok(groundStart >= 0 && stepsStart > groundStart, 'ground scene block must be available');
-
-  assert.match(ground, /const lateralSeed = range\(31, 52\)/, 'hill placement must retain its deterministic lateral seed');
-  assert.match(
-    ground,
-    /const hillScale = \[range\(1\.3, 2\.8\), range\(0\.8, 2\.1\), range\(1\.5, 3\.2\)\]/,
-    'hill scale must be known before its final lateral placement',
+  world.dispose();
+  assert.equal(
+    violations.length,
+    0,
+    `responsiveConfigForViewport=${typeof sceneRuntime.responsiveConfigForViewport}; framing violations:\n${violations.join('\n')}`,
   );
-  assert.match(ground, /const sightlineClearance = 20/);
-  assert.match(ground, /const hillRadius = 12 \* Math\.max\(\.\.\.hillScale\)/);
-  assert.match(
-    ground,
-    /const hillX = Math\.max\(lateralSeed, sightlineClearance \+ hillRadius\)/,
-    'every scaled and rotated hill must keep its full radius outside the temple sightline',
+});
+
+test('Cloud remote and handheld stations occupy separate lanes with an unobstructed handheld sightline', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  world.root.updateMatrixWorld(true);
+  const remoteBounds = unionRoleBounds(world.root, ['cloud-remote-device-end', 'cloud-remote-consultation-end']);
+  const handheldBounds = unionRoleBounds(world.root, ['cloud-handheld-station']);
+  const handheldPose = SCENE_STOPS.find(({ id }) => id === 'cloud-handheld').pose;
+
+  assert.ok(
+    handheldBounds.max.x < remoteBounds.min.x,
+    `Cloud stations need separate X lanes: handheld max=${handheldBounds.max.x}, remote min=${remoteBounds.min.x}`,
   );
-  assert.match(ground, /hill\.position\.set\(side \* hillX,/);
-  assert.match(ground, /hill\.scale\.set\(\.\.\.hillScale\)/);
-});
-
-test('combined editorial masks preserve scene transmission at reading anchors', async () => {
-  const css = await read('styles.css');
-  const mobileCss = css.slice(css.indexOf('@media (max-width: 720px)'));
-  const chapterRules = ['.chapter-wash', '.hero .chapter-wash', '.work .chapter-wash', '.contact .chapter-wash']
-    .map((selector) => ruleBody(css, selector));
-  const desktopHaze = ruleBody(css, '.scene-haze');
-  const mobileHaze = ruleBody(mobileCss, '.scene-haze');
-
-  const desktopText = combinedTransmission(desktopHaze, chapterRules, { x: 0.18, y: 0.48, width: 1440, height: 900 });
-  const mobileText = combinedTransmission(mobileHaze, chapterRules, { x: 0.12, y: 0.48, width: 390, height: 844 });
-  assert.ok(desktopText >= 0.35, `desktop text anchor transmission ${desktopText.toFixed(3)} must be >= 0.35`);
-  assert.ok(mobileText >= 0.28, `mobile text anchor transmission ${mobileText.toFixed(3)} must be >= 0.28`);
-
-  for (const [label, haze, viewport] of [
-    ['desktop', desktopHaze, { width: 1440, height: 900 }],
-    ['mobile', mobileHaze, { width: 390, height: 844 }],
-  ]) {
-    const center = combinedTransmission(haze, chapterRules, { x: 0.5, y: 0.5, ...viewport });
-    const extremeLeft = combinedTransmission(haze, chapterRules, { x: 0, y: 0.5, ...viewport });
-    assert.ok(center >= 0.7, `${label} center transmission ${center.toFixed(3)} must be >= 0.70`);
-    assert.ok(extremeLeft >= 0.2, `${label} extreme-left transmission ${extremeLeft.toFixed(3)} must be >= 0.20`);
-  }
-});
-
-test('ground fill remains restrained while exposure and bloom stay bounded', async () => {
-  const scene = await read('scene.js');
-  const luma = (hex) => perceivedLuminance(channels(hex));
-  const earth = luma(materialColor(scene, 'earth'));
-  const moss = luma(materialColor(scene, 'moss'));
-  const foliage = luma(materialColor(scene, 'foliage'));
-  const foliageCold = luma(materialColor(scene, 'foliageCold'));
-  assert.ok(earth >= 0.1 && earth <= 0.18, 'earth must retain a dark readable floor value');
-  assert.ok(moss >= 0.22 && moss <= 0.34, 'moss must stay visible without washing gray');
-  assert.ok(foliage >= 0.23 && foliage <= 0.34, 'foliage must separate from the background');
-  assert.ok(foliageCold >= foliage * 1.12 && foliageCold <= 0.4, 'cold foliage must preserve restrained separation');
-
-  const hemisphere = scene.match(/new THREE\.HemisphereLight\(0x([\da-f]+),\s*0x([\da-f]+),\s*(\d*\.?\d+)\)/i);
-  assert.ok(hemisphere, 'hemisphere colors and intensity must remain explicit');
-  assert.ok(luma(Number.parseInt(hemisphere[1], 16)) >= 0.35 && luma(Number.parseInt(hemisphere[1], 16)) <= 0.52);
-  assert.ok(luma(Number.parseInt(hemisphere[2], 16)) >= 0.14 && luma(Number.parseInt(hemisphere[2], 16)) <= 0.22);
-  assert.ok(Number(hemisphere[3]) >= 1.35 && Number(hemisphere[3]) <= 1.6);
-
-  const rim = scene.match(/const rim = new THREE\.DirectionalLight\(0x([\da-f]+),\s*(\d*\.?\d+)\)/i);
-  assert.ok(rim, 'rim color and intensity must remain explicit');
-  assert.ok(luma(Number.parseInt(rim[1], 16)) >= 0.25 && luma(Number.parseInt(rim[1], 16)) <= 0.5);
-  assert.ok(Number(rim[2]) >= 1 && Number(rim[2]) <= 1.2);
-
-  const exposure = numberFrom(scene, /toneMappingExposure\s*=\s*(\d*\.?\d+)/, 'tone mapping exposure');
-  assert.ok(exposure >= 1.05 && exposure <= 1.25);
-  const bloom = scene.match(/new UnrealBloomPass\(\s*new THREE\.Vector2\([^)]*\),\s*(\d*\.?\d+),\s*(\d*\.?\d+),\s*(\d*\.?\d+)\)/);
-  assert.ok(bloom, 'bloom parameters must remain explicit');
-  assert.ok(Number(bloom[1]) <= 0.35 && Number(bloom[2]) <= 0.6 && Number(bloom[3]) >= 0.7);
-  assert.doesNotMatch(scene, /new THREE\.AmbientLight/);
-});
-
-test('global night base keeps blue-charcoal and fog above a readable luminance floor', async () => {
-  const scene = await read('scene.js');
-  const clear = hexFrom(scene, /setClearColor\(0x([\da-f]+),\s*1\)/i, 'renderer clear color');
-  const background = hexFrom(scene, /scene\.background\s*=\s*new THREE\.Color\(0x([\da-f]+)\)/i, 'scene background');
-  const fog = hexFrom(scene, /new THREE\.FogExp2\(0x([\da-f]+),/i, 'fog color');
-  const luma = (hex) => perceivedLuminance(channels(hex));
-  const isBlueCharcoal = (hex) => {
-    const [red, green, blue] = channels(hex);
-    return blue > green && green > red;
+  const remoteCollider = {
+    min: remoteBounds.min.toArray(),
+    max: remoteBounds.max.toArray(),
   };
+  const sightlineHitsRemote = (() => {
+    const start = handheldPose.position;
+    const end = handheldPose.target;
+    let near = 0;
+    let far = 1;
+    for (let axis = 0; axis < 3; axis += 1) {
+      const delta = end[axis] - start[axis];
+      if (Math.abs(delta) < 1e-9) {
+        if (start[axis] < remoteCollider.min[axis] || start[axis] > remoteCollider.max[axis]) return false;
+        continue;
+      }
+      let axisNear = (remoteCollider.min[axis] - start[axis]) / delta;
+      let axisFar = (remoteCollider.max[axis] - start[axis]) / delta;
+      if (axisNear > axisFar) [axisNear, axisFar] = [axisFar, axisNear];
+      near = Math.max(near, axisNear);
+      far = Math.min(far, axisFar);
+      if (near > far) return false;
+    }
+    return true;
+  })();
 
-  assert.equal(clear, background, 'renderer clear and scene background must share one night value');
-  assert.ok(isBlueCharcoal(background), 'background must remain blue-charcoal');
-  assert.ok(isBlueCharcoal(fog), 'fog must remain blue-gray');
-  assert.ok(luma(background) >= 0.085 && luma(background) <= 0.13, `background luminance ${luma(background).toFixed(3)} must remain readable and nocturnal`);
-  assert.ok(luma(fog) >= 0.18 && luma(fog) <= 0.28, `fog luminance ${luma(fog).toFixed(3)} must preserve depth without washing gray`);
-  assert.ok(luma(fog) >= luma(background) * 1.8, 'fog must separate from the background by at least 1.8x');
+  world.dispose();
+  assert.equal(sightlineHitsRemote, false, 'Cloud remote equipment must not obstruct the handheld camera ray');
 });
 
-test('global cold fill lifts the scene without ambient light or bloom escalation', async () => {
-  const scene = await read('scene.js');
-  const luma = (hex) => perceivedLuminance(channels(hex));
-  const hemisphere = scene.match(/new THREE\.HemisphereLight\(0x([\da-f]+),\s*0x([\da-f]+),\s*(\d*\.?\d+)\)/i);
-  const moonKey = scene.match(/const moonKey = new THREE\.DirectionalLight\(0x([\da-f]+),\s*(\d*\.?\d+)\)/i);
-  const rim = scene.match(/const rim = new THREE\.DirectionalLight\(0x([\da-f]+),\s*(\d*\.?\d+)\)/i);
-  assert.ok(hemisphere && moonKey && rim, 'cold fill lights must keep explicit colors and intensities');
-
-  const hemisphereSky = luma(Number.parseInt(hemisphere[1], 16));
-  const hemisphereGround = luma(Number.parseInt(hemisphere[2], 16));
-  assert.ok(hemisphereSky >= 0.45 && hemisphereSky <= 0.55, `hemisphere sky luminance ${hemisphereSky.toFixed(3)} must stay readable and cold`);
-  assert.ok(hemisphereGround >= 0.19 && hemisphereGround <= 0.25, `hemisphere ground luminance ${hemisphereGround.toFixed(3)} must retain a dark fill`);
-  assert.ok(Number(hemisphere[3]) >= 1.55 && Number(hemisphere[3]) <= 1.65);
-
-  const moonLuminance = luma(Number.parseInt(moonKey[1], 16));
-  assert.ok(moonLuminance >= 0.68 && moonLuminance <= 0.78, `moon key luminance ${moonLuminance.toFixed(3)} must preserve cold highlights`);
-  assert.ok(Number(moonKey[2]) >= 2.75 && Number(moonKey[2]) <= 3);
-
-  const rimLuminance = luma(Number.parseInt(rim[1], 16));
-  assert.ok(rimLuminance >= 0.4 && rimLuminance <= 0.5, `rim luminance ${rimLuminance.toFixed(3)} must separate silhouettes`);
-  assert.ok(Number(rim[2]) >= 1.15 && Number(rim[2]) <= 1.25);
-
-  const exposure = numberFrom(scene, /toneMappingExposure\s*=\s*(\d*\.?\d+)/, 'tone mapping exposure');
-  assert.ok(exposure >= 1.16 && exposure <= 1.22, 'exposure lift must stay small and bounded');
-  const bloom = scene.match(/new UnrealBloomPass\(\s*new THREE\.Vector2\([^)]*\),\s*(\d*\.?\d+),\s*(\d*\.?\d+),\s*(\d*\.?\d+)\)/);
-  assert.ok(bloom, 'bloom parameters must remain explicit');
-  assert.deepEqual(bloom.slice(1).map(Number), [0.28, 0.52, 0.86], 'global lift must not use bloom as a shortcut');
-  assert.doesNotMatch(scene, /new THREE\.AmbientLight/);
+test('mobile Cloud Handheld camera keeps the hero probe at inspectable scale', () => {
+  const world = createLaboratoryWorld({ detailTier: 'balanced' });
+  world.root.updateMatrixWorld(true);
+  const handheldBounds = unionRoleBounds(world.root, ['cloud-handheld-waisted-body', 'cloud-handheld-stand']);
+  const stopIndex = SCENE_STOPS.findIndex(({ id }) => id === 'cloud-handheld');
+  const viewport = { width: 390, height: 844 };
+  const pose = interpolateCamera(
+    stopIndex / (CAMERA_POSES.length - 1),
+    CAMERA_POSES,
+    sceneRuntime.responsiveConfigForViewport(viewport.width, viewport.height),
+  );
+  const bounds = projectBoxBounds(handheldBounds, pose, viewport);
+  assert.ok(bounds.maxX - bounds.minX <= 0.62, `Handheld must stay fully readable: ${formatProjectedBounds(bounds)}`);
+  assert.ok(bounds.maxX - bounds.minX >= 0.16, `Handheld must not read as an incidental prop: ${formatProjectedBounds(bounds)}`);
+  world.dispose();
 });
 
-test('narrower editorial masks raise global transmission while retaining text scrims', async () => {
-  const css = await read('styles.css');
-  const mobileCss = css.slice(css.indexOf('@media (max-width: 720px)'));
-  const chapterRules = ['.chapter-wash', '.hero .chapter-wash', '.work .chapter-wash', '.contact .chapter-wash']
-    .map((selector) => ruleBody(css, selector));
-  const desktopHaze = ruleBody(css, '.scene-haze');
-  const mobileHaze = ruleBody(mobileCss, '.scene-haze');
-  const samples = [
-    ['desktop', desktopHaze, { width: 1440, height: 900 }, 0.18, 0.62, 0.74],
-    ['mobile', mobileHaze, { width: 390, height: 844 }, 0.12, 0.5, 0.68],
+test('all four bays expose recognizable equipment roles at authored world-space sides', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  const roles = new Set(rolesIn(world.root));
+  const required = [
+    'alab-enclosure', 'alab-robot-arm', 'alab-robot-joint', 'alab-sample-carrier', 'alab-sample-rack', 'alab-analyzer',
+    'primegen-planning-console', 'primegen-queue-indicator', 'primegen-instrument-row', 'primegen-sample-flow',
+    'oxygen-rounded-shell', 'oxygen-dark-front-frame', 'oxygen-window-section', 'oxygen-high-back-seat', 'oxygen-door-handle',
+    'oxygen-base-frame', 'oxygen-side-depth', 'oxygen-generator', 'oxygen-hose', 'oxygen-integrated-screen', 'oxygen-touch-console',
+    'cloud-remote-equipment-body', 'cloud-remote-caster', 'cloud-remote-column', 'cloud-remote-control-console',
+    'cloud-remote-device-end', 'cloud-remote-consultation-end', 'cloud-dual-monitor',
+    'cloud-handheld-waisted-body', 'cloud-handheld-top-arc', 'cloud-handheld-bottom-arc', 'cloud-handheld-status-line',
+    'cloud-handheld-side-button', 'cloud-handheld-stand', 'cloud-tablet',
+  ];
+  required.forEach((role) => assert.ok(roles.has(role), `missing recognizable role ${role}`));
+
+  for (const [key, bay] of Object.entries(PROJECT_BAYS)) {
+    const group = byRole(world.root, `${key === 'cloud' ? 'cloud-compound' : key}-bay`);
+    assert.ok(group, `${key} bay group must exist`);
+    assert.deepEqual(group.position.toArray(), bay.center);
+  }
+  assert.ok(byRole(world.root, 'alab-bay').position.x < 0);
+  assert.ok(byRole(world.root, 'oxygen-bay').position.x < 0);
+  assert.ok(byRole(world.root, 'primegen-bay').position.x > 0);
+  assert.ok(byRole(world.root, 'cloud-compound-bay').position.x > 0);
+  world.dispose();
+});
+
+test('five actions reset first, remain mutually exclusive and reproduce exact phase state', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  const actions = [
+    'alab-transfer',
+    'primegen-queue',
+    'oxygen-status',
+    'cloud-remote-sync',
+    'cloud-handheld-frame',
   ];
 
-  for (const [label, haze, viewport, textX, textMinimum, textMaximum] of samples) {
-    const textTransmission = combinedTransmission(haze, chapterRules, { x: textX, y: 0.48, ...viewport });
-    const centerTransmission = combinedTransmission(haze, chapterRules, { x: 0.5, y: 0.5, ...viewport });
-    const leftTransmission = combinedTransmission(haze, chapterRules, { x: 0, y: 0.5, ...viewport });
-    assert.ok(textTransmission >= textMinimum && textTransmission <= textMaximum, `${label} text transmission ${textTransmission.toFixed(3)} must lift the scene while retaining a scrim`);
-    assert.ok(centerTransmission >= 0.84, `${label} center transmission ${centerTransmission.toFixed(3)} must be >= 0.84`);
-    assert.ok(leftTransmission >= 0.36 && leftTransmission <= 0.5, `${label} left transmission ${leftTransmission.toFixed(3)} must stay readable and protected`);
+  for (const id of actions) {
+    applyDeviceAction(world.actionController, { id, phase: 0.625 });
+    const first = snapshotDeviceActions(world.actionController);
+    applyDeviceAction(world.actionController, { id, phase: 0.625 });
+    const second = snapshotDeviceActions(world.actionController);
+    assert.deepEqual(second, first);
+    assert.equal(first.activeAction, id);
+    assert.equal(first.actions.filter(({ active }) => active).length, 1);
+    assert.equal(first.actions.find(({ id: candidate }) => candidate === id).phase, 0.625);
   }
 
-  chapterRules.forEach((rule) => {
-    const stops = gradientStops(rule, 90);
-    assert.ok(stops[0].alpha >= 0.28 && stops[0].alpha <= 0.38, 'chapter wash must retain a restrained left scrim');
-    assert.ok(stops.at(-1).alpha === 0 && stops.at(-1).position <= 66, 'chapter wash must clear the scene by 66%');
+  applyDeviceAction(world.actionController, null);
+  const reset = snapshotDeviceActions(world.actionController);
+  assert.equal(reset.activeAction, null);
+  assert.ok(reset.actions.every(({ active, phase }) => !active && phase === 0));
+  world.dispose();
+});
+
+test('approved textures map to their physical screens', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  const makeTexture = () => {
+    const texture = new THREE.Texture({ width: 16, height: 16 });
+    texture.generateMipmaps = false;
+    texture.userData.gpuBytes = 1024;
+    return texture;
+  };
+  const textures = new Map([
+    ['physical-integrated-screen', makeTexture()],
+    ['physical-control-console', makeTexture()],
+    ['physical-dual-monitor-workstation', makeTexture()],
+    ['semantic-foreground-phone-or-tablet', makeTexture()],
+  ]);
+
+  applyMappedTextures(world, textures);
+  assert.equal(world.screens['physical-integrated-screen'].material.map, textures.get('physical-integrated-screen'));
+  assert.equal(world.screens['physical-control-console'].material.map, textures.get('physical-control-console'));
+  assert.equal(world.screens['physical-dual-monitor-workstation'].material.map, textures.get('physical-dual-monitor-workstation'));
+  assert.equal(world.screens['semantic-foreground-phone-or-tablet'].material.map, textures.get('semantic-foreground-phone-or-tablet'));
+  assert.equal('semantic-foreground-phone' in world.screens, false);
+  world.dispose();
+});
+
+test('DOM measurements use every real selector and absolute document position', () => {
+  const elements = new Map(SCENE_STOPS.map((stop, index) => [stop.selector, {
+    getBoundingClientRect: () => ({ top: 100 + index * 900, height: 420 }),
+  }]));
+  const documentRef = { querySelector: (selector) => elements.get(selector) ?? null };
+  const metrics = measureSceneStopMetrics(documentRef, 250);
+
+  assert.deepEqual(metrics.map(({ id }) => id), SCENE_STOPS.map(({ id }) => id));
+  assert.deepEqual(metrics.map(({ top }) => top), SCENE_STOPS.map((_, index) => 350 + index * 900));
+  assert.ok(metrics.every(({ height }) => height === 420));
+  assert.throws(() => measureSceneStopMetrics({ querySelector: () => null }, 0), /scene stop.*not found/i);
+});
+
+test('computed root scroll padding aligns hash landings with scene activation without changing measurement defaults', () => {
+  const documentElement = {};
+  const elements = new Map(SCENE_STOPS.map((stop, index) => [stop.selector, {
+    getBoundingClientRect: () => ({ top: 100 + index * 900, height: 420 }),
+  }]));
+  const documentRef = {
+    documentElement,
+    querySelector: (selector) => elements.get(selector) ?? null,
+  };
+  const activationOffset = getSceneActivationOffset(
+    documentRef,
+    (element) => {
+      assert.equal(element, documentElement);
+      return { scrollPaddingTop: '113.5px' };
+    },
+  );
+
+  assert.equal(activationOffset, 113.5);
+  assert.equal(getSceneActivationOffset(documentRef, () => ({ scrollPaddingTop: 'normal' })), 0);
+  assert.deepEqual(
+    measureSceneStopMetrics(documentRef, 250).map(({ top }) => top),
+    SCENE_STOPS.map((_, index) => 350 + index * 900),
+    'the public measurement helper must keep its zero-offset default',
+  );
+
+  const metrics = measureSceneStopMetrics(documentRef, 250, activationOffset);
+  assert.deepEqual(
+    metrics.map(({ top }) => top),
+    SCENE_STOPS.map((_, index) => 236.5 + index * 900),
+  );
+  const timeline = buildSceneTimeline(metrics, 900);
+  metrics.forEach((metric) => {
+    assert.equal(
+      evaluateSceneTimeline(metric.top, timeline).activeStopId,
+      metric.id,
+      `the ${metric.id} hash landing must activate its matching camera stop`,
+    );
   });
 });
 
-test('mobile Experience and Contact headings keep a local scrim across their real text span', async () => {
-  const css = await read('styles.css');
-  const mobileBreakpoint = css.indexOf('@media (max-width: 720px)');
-  const desktopCss = css.slice(0, mobileBreakpoint);
-  const mobileCss = css.slice(mobileBreakpoint);
-  const mobileHaze = ruleBody(mobileCss, '.scene-haze');
-  const scrimSelectors = [
-    '.experience .chapter-heading h2::before',
-    '.contact h2::before',
-  ];
-  const scrimRule = listedRuleBody(mobileCss, scrimSelectors);
-  const scrimStops = scrimRule
-    ? gradientStops(scrimRule, 90)
-    : [{ alpha: 0, position: 0 }, { alpha: 0, position: 100 }];
-  const viewport = { width: 390, height: 844 };
-  const headingBounds = { start: 20 / viewport.width, end: 0.88 };
-  const chapters = [
-    ['Experience', ruleBody(css, '.chapter-wash'), 0.28],
-    ['Contact', ruleBody(css, '.contact .chapter-wash'), 0.43],
-  ];
-
-  for (const [label, chapterRule, headingY] of chapters) {
-    for (const x of [0.5, 0.65, 0.8]) {
-      const localPosition = ((x - headingBounds.start) / (headingBounds.end - headingBounds.start)) * 100;
-      const sceneTransmission = combinedTransmission(mobileHaze, [chapterRule], { x, y: headingY, ...viewport });
-      const headingTransmission = sceneTransmission * (1 - alphaAt(scrimStops, localPosition));
-      assert.ok(
-        headingTransmission >= 0.52 && headingTransmission <= 0.78,
-        `${label} heading transmission at x=${x.toFixed(2)} is ${headingTransmission.toFixed(3)}; the real text span needs a restrained local scrim`,
-      );
+test('layout invalidation observes every stable stop and cleans locale, image-load and resize hooks', () => {
+  class ListenerHub {
+    constructor() {
+      this.listeners = [];
     }
 
-    const nonHeadingCenter = combinedTransmission(mobileHaze, [chapterRule], { x: 0.5, y: 0.62, ...viewport });
-    assert.ok(nonHeadingCenter >= 0.84, `${label} non-heading center must retain the global lift`);
+    addEventListener(type, listener, options) {
+      this.listeners.push({ type, listener, options });
+    }
+
+    removeEventListener(type, listener, options) {
+      this.listeners = this.listeners.filter((entry) => (
+        entry.type !== type || entry.listener !== listener || entry.options !== options
+      ));
+    }
+
+    emit(type, event = {}) {
+      this.listeners.filter((entry) => entry.type === type).forEach(({ listener }) => listener(event));
+    }
+
+    listenerCount(type) {
+      return this.listeners.filter((entry) => entry.type === type).length;
+    }
   }
 
-  assert.ok(scrimRule, 'mobile Experience and Contact headings must declare a shared local scrim');
-  assert.equal(listedRuleBody(desktopCss, scrimSelectors), null, 'heading scrim must remain mobile-only');
-  assert.doesNotMatch(mobileCss, /^\s*\.chapter-heading h2::before\s*\{/m, 'other chapter headings must not inherit the local scrim');
-  assert.match(scrimRule, /position:\s*absolute/);
-  assert.ok(alphaAt(scrimStops, 90) >= 0.16, 'local scrim must continue protecting the far end of the title');
-  assert.ok(Math.max(...scrimStops.map(({ alpha }) => alpha)) <= 0.44, 'local scrim must not recreate a dark global wash');
+  class ResizeObserverStub {
+    constructor(callback) {
+      this.callback = callback;
+      this.observed = [];
+      this.disconnected = false;
+    }
+
+    observe(element) {
+      this.observed.push(element);
+    }
+
+    disconnect() {
+      this.disconnected = true;
+    }
+  }
+
+  const documentRef = new ListenerHub();
+  const windowRef = new ListenerHub();
+  const body = { id: 'body' };
+  const stopElements = SCENE_STOPS.map(({ id }) => ({ id }));
+  documentRef.body = body;
+  let invalidations = 0;
+  const controller = createSceneLayoutInvalidation({
+    documentRef,
+    windowRef,
+    elements: [body, ...stopElements, stopElements[4]],
+    onInvalidate: () => { invalidations += 1; },
+    ResizeObserverClass: ResizeObserverStub,
+  });
+
+  assert.equal(windowRef.listenerCount('portfolio:localechange'), 1);
+  assert.equal(documentRef.listenerCount('load'), 1);
+  assert.deepEqual(controller.resizeObserver.observed, [body, ...stopElements]);
+  assert.equal(documentRef.listeners.find(({ type }) => type === 'load').options, true);
+
+  documentRef.emit('load', { target: { tagName: 'DIV' } });
+  assert.equal(invalidations, 0, 'non-image capture events do not invalidate layout');
+  documentRef.emit('load', { target: { tagName: 'IMG' } });
+  windowRef.emit('portfolio:localechange');
+  controller.resizeObserver.callback();
+  assert.equal(invalidations, 3);
+
+  controller.dispose();
+  assert.equal(controller.resizeObserver.disconnected, true);
+  assert.equal(windowRef.listenerCount('portfolio:localechange'), 0);
+  assert.equal(documentRef.listenerCount('load'), 0);
+  documentRef.emit('load', { target: { tagName: 'IMG' } });
+  windowRef.emit('portfolio:localechange');
+  assert.equal(invalidations, 3);
+});
+
+test('context lifecycle falls back, restores the same runtime, and removes listeners on cleanup', () => {
+  const canvas = new EventTarget();
+  const calls = [];
+  const lifecycle = createContextLifecycle({
+    canvas,
+    onFallback: (reason) => calls.push(`fallback:${reason}`),
+    onRestore: () => calls.push('restore'),
+  });
+  lifecycle.start();
+
+  const lost = new Event('webglcontextlost', { cancelable: true });
+  canvas.dispatchEvent(lost);
+  assert.equal(lost.defaultPrevented, true);
+  assert.equal(lifecycle.state, 'context-lost');
+  canvas.dispatchEvent(new Event('webglcontextrestored'));
+  assert.equal(lifecycle.state, 'active');
+  assert.deepEqual(calls, ['fallback:context-lost', 'restore']);
+
+  lifecycle.stop();
+  canvas.dispatchEvent(new Event('webglcontextlost', { cancelable: true }));
+  assert.deepEqual(calls, ['fallback:context-lost', 'restore']);
+  assert.equal(lifecycle.state, 'stopped');
+});
+
+test('preserved laboratory runtime creates one scene, camera and world and wires deterministic lifecycle events', async () => {
+  const scene = await read('scene.js');
+
+  assert.equal((scene.match(/new THREE\.Scene\s*\(/g) ?? []).length, 1);
+  assert.equal((scene.match(/new THREE\.PerspectiveCamera\s*\(/g) ?? []).length, 1);
+  assert.equal((scene.match(/createLaboratoryWorld\s*\(/g) ?? []).length, 1);
+  assert.match(scene, /buildSceneTimeline\(metrics, windowRef\.innerHeight\)/);
+  assert.match(scene, /evaluateSceneTimeline\(windowRef\.scrollY, timeline/);
+  assert.match(scene, /listen\(documentRef, 'scroll', requestRender/);
+  assert.doesNotMatch(scene, /window\.addEventListener\('scroll'/);
+  assert.match(scene, /pageshow/);
+  assert.match(scene, /hashchange/);
+  assert.match(scene, /orientationchange/);
+  assert.match(scene, /webglcontextlost/);
+  assert.match(scene, /webglcontextrestored/);
+  assert.match(scene, /event\.persisted/);
+  for (const datasetKey of [
+    'worldId',
+    'sceneState',
+    'activeSceneStop',
+    'activeAction',
+    'progress',
+    'cameraPosition',
+    'cameraForward',
+    'cameraTarget',
+    'cameraRoll',
+    'triangles',
+    'drawables',
+    'geometries',
+    'materials',
+    'transparentDrawables',
+    'textureBytes',
+    'semanticRoles',
+    'budget',
+    'withinBudget',
+  ]) {
+    assert.match(scene, new RegExp(`\\b${datasetKey}:`), `dataset ${datasetKey} must publish`);
+  }
+  assert.match(scene, /emitFallback\('initialization-failed'\)/);
+  assert.match(scene, /cleanupCallbacks\.splice\(0\)\.forEach/);
+  assert.match(scene, /world\.dispose\(\)/);
+  assert.match(scene, /renderer\.dispose\(\)/);
 });

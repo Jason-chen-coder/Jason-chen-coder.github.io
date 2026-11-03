@@ -17,10 +17,10 @@
     />
     <title data-i18n="meta.title">Jason Chen · 把复杂系统做成好用的产品</title>
     <link rel="icon" href="./assets/images/cat-logo.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=9df305bbc601" />
-    <script defer src="./i18n.js?v=64506dcaf5ee"></script>
+    <link rel="stylesheet" href="./styles.css?v=310c466d8608" />
+    <script defer src="./i18n.js?v=a0ac8186a54d"></script>
     <script defer src="./script.js"></script>
-    <script defer src="./promo-media.js?v=b8672f4369ff"></script>
+    <script defer src="./promo-media.js?v=91ae57c11b09"></script>
     <script defer src="./illustration-motion.js"></script>
   </head>
   <body>
@@ -930,22 +930,36 @@
               </div>
             </article>
             <article class="work-item reveal">
-              <a
-                class="work-image work-image-oxygen"
-                href="https://www.mgi-tech.com/827/258.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Oxygen Future"
-                ><img
-                  src="./assets/images/oxygen-rigid-chamber.webp"
-                  alt="Oxygen Future"
-                  loading="lazy"
-                  width="1024"
-                  height="679"
-                /><span class="work-image-note" lang="en"
-                  >Sense / Control / Sync</span
-                ><span class="image-arrow" aria-hidden="true">↗</span></a
-              >
+              <figure class="film-player oxygen-film">
+                <div class="film-stage">
+                  <div class="film-meta" hidden data-film-meta><span>PROJECT FILM</span><span data-film-duration-label>00:35</span></div>
+                  <div class="film-screen">
+                    <video
+                  controls playsinline preload="none" data-promo-video data-film-canvas data-film-duration="35.466667"
+                  src="./assets/videos/oxygen-future.mp4?v=2e48c016226c"
+                  poster="./assets/videos/oxygen-future-poster.webp?v=d8cc65659611"
+                  aria-label="氧生未来产品演示短片"
+                  data-i18n-aria-label="film.oxygen.label"
+                ><a href="./assets/videos/oxygen-future.mp4?v=2e48c016226c" data-i18n="film.fallback">直接打开视频</a></video>
+                    <button class="film-cover" type="button" data-film-cover hidden aria-label="播放短片">
+                      <span class="film-cover-disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></span>
+                      <span class="film-cover-label" data-film-cover-label>播放短片</span>
+                    </button>
+                  </div>
+                  <div class="film-controls" data-film-controls hidden role="group" aria-label="视频控制">
+                    <button class="film-control film-toggle" type="button" data-film-toggle aria-label="播放短片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></button>
+                    <input class="film-seek" type="range" data-film-seek min="0" max="35.466667" step="0.1" value="0" disabled aria-label="播放进度" />
+                    <span class="film-time" data-film-time>00:00 <span aria-hidden="true">/</span> 00:35</span>
+                    <button class="film-control" type="button" data-film-mute aria-label="静音" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></svg></button>
+                    <button class="film-control" type="button" data-film-fullscreen aria-label="全屏播放"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+                  </div>
+                </div>
+                <figcaption>
+                  <span data-i18n="film.oxygen.caption">氧舱控制与数据展示 · 使用离线演示数据。</span>
+                  <a class="film-download" href="./assets/videos/oxygen-future.mp4?v=2e48c016226c" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
+                </figcaption>
+                <div class="film-error" data-film-error hidden role="status"><span data-i18n="film.error">暂时无法播放，可以直接打开或下载短片。</span></div>
+              </figure>
               <div class="work-item-copy">
                 <p class="eyebrow" lang="en">Oxygen Future / MGI</p>
                 <h3>
@@ -1004,15 +1018,15 @@
             <article class="work-item work-item-checkup reveal" id="remote-checkup" aria-labelledby="checkup-title">
               <figure class="film-player checkup-film">
                 <div class="film-stage">
-                  <div class="film-meta" hidden data-film-meta><span>PROJECT FILM</span><span data-film-duration-label>00:26</span></div>
+                  <div class="film-meta" hidden data-film-meta><span>PROJECT FILM</span><span data-film-duration-label>00:56</span></div>
                   <div class="film-screen">
                     <video
-                  controls playsinline preload="none" data-promo-video data-film-duration="26"
-                  src="./assets/videos/health-applet-promo.mp4?v=8da3bbe0bc04"
-                  poster="./assets/images/health-applet-promo-poster.webp"
+                  controls playsinline preload="none" data-promo-video data-film-duration="56.2"
+                  src="./assets/videos/health-applet-promo.mp4?v=318af54e2c54"
+                  poster="./assets/images/health-applet-promo-poster.webp?v=ebb9a3f46c22"
                   aria-label="华大云影+ 用户端演示短片"
                   data-i18n-aria-label="film.health.label"
-                ><a href="./assets/videos/health-applet-promo.mp4?v=8da3bbe0bc04" data-i18n="film.fallback">直接打开视频</a></video>
+                ><a href="./assets/videos/health-applet-promo.mp4?v=318af54e2c54" data-i18n="film.fallback">直接打开视频</a></video>
                     <button class="film-cover" type="button" data-film-cover hidden aria-label="播放短片">
                       <span class="film-cover-disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></span>
                       <span class="film-cover-label" data-film-cover-label>播放短片</span>
@@ -1020,15 +1034,15 @@
                   </div>
                   <div class="film-controls" data-film-controls hidden role="group" aria-label="视频控制">
                     <button class="film-control film-toggle" type="button" data-film-toggle aria-label="播放短片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg></button>
-                    <input class="film-seek" type="range" data-film-seek min="0" max="26" step="0.1" value="0" disabled aria-label="播放进度" />
-                    <span class="film-time" data-film-time>00:00 <span aria-hidden="true">/</span> 00:26</span>
+                    <input class="film-seek" type="range" data-film-seek min="0" max="56.2" step="0.1" value="0" disabled aria-label="播放进度" />
+                    <span class="film-time" data-film-time>00:00 <span aria-hidden="true">/</span> 00:56</span>
                     <button class="film-control" type="button" data-film-mute aria-label="静音" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></svg></button>
                     <button class="film-control" type="button" data-film-fullscreen aria-label="全屏播放"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
                   </div>
                 </div>
                 <figcaption>
-                  <span data-i18n="film.health.caption">真实源码页面 · 用户端演示，使用演示数据。</span>
-                  <a class="film-download" href="./assets/videos/health-applet-promo.mp4?v=8da3bbe0bc04" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
+                  <span data-i18n="film.health.caption">选院与预约流程演示 · 含模拟超声报告。</span>
+                  <a class="film-download" href="./assets/videos/health-applet-promo.mp4?v=318af54e2c54" download><span data-i18n="film.download">下载短片</span><span aria-hidden="true">↗</span></a>
                 </figcaption>
                 <div class="film-error" data-film-error hidden role="status"><span data-i18n="film.error">暂时无法播放，可以直接打开或下载短片。</span></div>
               </figure>

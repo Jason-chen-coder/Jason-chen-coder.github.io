@@ -103,15 +103,15 @@
     "health_applet": {
       "created": "2026-11-02",
       "filename": "health-applet-promo.mp4",
-      "sha256": "8da3bbe0bc04da26e2f9ab3f73bdd566969ba083e1a385e4e1003d9009b82d1c",
-      "bytes": 1963808,
+      "sha256": "318af54e2c540ead39efb18f7d1ed422f17168e6a2548eb4db0a0bdca7f46fc5",
+      "bytes": 3965751,
       "poster": "../images/health-applet-promo-poster.webp",
-      "poster_sha256": "148e4ec1c2c74819c31ac86bc5f8c0b610af01da63feb7685b799bc899d5643a",
+      "poster_sha256": "ebb9a3f46c2259d19d62291d74053194e4987cde3406ac5cbf0fb67a5b95ccb1",
       "width": 1920,
       "height": 1080,
       "fps": 30,
-      "frames": 780,
-      "duration_seconds": 26,
+      "frames": 1686,
+      "duration_seconds": 56.2,
       "audio": "None; intentionally silent portfolio demonstration",
       "encoding": {
         "encoder": "libx264",
@@ -120,19 +120,51 @@
         "pixel_format": "yuv420p",
         "faststart": true
       },
-      "capture": "Real HealthApplet Vue2/UniApp components rendered in an isolated HBuilderX H5 build, with local compatibility adjustments. Four frozen mobile screens at 390x844, captured at 2x.",
-      "data": "Fictional demonstration data; no production requests or real personal or clinical records.",
+      "capture": "Original HealthApplet Vue2/UniApp pages in an isolated HBuilderX H5 build with fictional fixtures. Original draggable hospital recommendation/detail components and selection events use a local simulated map adapter, not an online map service. 138 captured interaction frames include actual drag, map pan and release settling. Final package view exactly matches the existing booking captures in text and layout. Simulated ultrasound gallery/viewer and hospital-style report were added for this authorized demonstration.",
+      "data": "All institutions, experts, locations, personal records and ultrasound-style images are fictional demonstration data. Three AI-generated grayscale ultrasound rasters are not DICOM files. No production requests or real patient data.",
       "screens": [
-        "Checkup service and booking schedule",
-        "Booking confirmation",
-        "Appointment list and status",
-        "Report viewing"
+        "Hospital map, draggable recommendation list, hospital selection, introduction, address, experts and expanded hospital homepage",
+        "Service details, schedule popup, time selection and confirmation",
+        "Appointment person selection and return to booking confirmation",
+        "Appointment status filtering and report entry",
+        "Simulated ultrasound image enlargement, next-image selection, close and continuous report reading scroll"
       ],
       "quality_against_render_master": {
-        "vmaf_mean": 97.751668,
-        "vmaf_min": 97.427701
+        "decoded_frame_md5_identical": true,
+        "frames": 1686,
+        "method": "Video stream copy-remux; identical decoded frames and timing versus encoded H.264 render master. This is not a comparison against uncompressed source."
       },
-      "verification": "Independent scan of all 780 encoded frames and review of 46 key and transition frames; web playback and seeking verified."
+      "verification": "Independent review of all 1686 encoded frames via 17 contact sheets and 91 targeted frames, including 13 tap peaks, 3 drags, hospital selection/release settling, the package handoff and 247px continuous report scroll. Full-frame corruption scan and static holds show no suspects. Original/workbench composition parity: all 22 sampled frame pairs are pixel-identical using serial shared-browser ANGLE rendering. Homepage verified in 8 bilingual responsive layouts with actual 56.2-second 1080p playback, seeking, native no-JS fallback and no initial MP4 downloads. Local-only revision; not committed or deployed.",
+      "revision": "hospital-v3",
+      "interaction_count": 16
+    },
+    "oxygen_future": {
+      "created": "2026-11-03",
+      "filename": "oxygen-future.mp4",
+      "sha256": "2e48c016226cbffc4d2fbe52f162a9f828782db5c92fd584a2f1f88521ac41ea",
+      "bytes": 9640999,
+      "poster": "oxygen-future-poster.webp",
+      "poster_sha256": "d8cc656596114f47664d27623656e727adf324e56b581555beba5c73b94021bc",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "frames": 1064,
+      "duration_seconds": 35.46666666666667,
+      "revision": "v5-graze-face-tour",
+      "audio": "House Vibez by Lily J (Mixkit); CC0 Freesound effects 701104 and 71852",
+      "data": "Isolated offline Flutter captures with fictional demonstration data. No live device or personal health records.",
+      "encoding": {
+        "video": "H.264 Main Level 4.0",
+        "audio": "AAC (copied)",
+        "pixel_format": "yuv420p",
+        "range": "limited",
+        "color": "BT.709",
+        "faststart": true
+      },
+      "quality_against_render_master": {
+        "method": "Browser compatibility encode from approved v5 render; full to limited range, CRF18",
+        "sha256_identical": false
+      }
     }
   }
 }

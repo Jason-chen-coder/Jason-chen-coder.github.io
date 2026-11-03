@@ -2561,7 +2561,7 @@ html:not(.js)
   height: auto;
   object-fit: contain;
   background: #222523;
-  border-radius: 7px;
+  border-radius: 0;
 }
 .film-stage {
   border: 1px solid var(--line);
@@ -2581,7 +2581,14 @@ html:not(.js)
   font-variant-numeric: tabular-nums;
 }
 .film-meta > :last-child { letter-spacing: .06em; }
-.film-screen { position: relative; min-width: 0; }
+/* Clip the player wrapper, keeping rounded clipping off decoded video textures. */
+.film-screen {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 7px;
+  isolation: isolate;
+}
 .film-cover {
   position: absolute;
   inset: 0;

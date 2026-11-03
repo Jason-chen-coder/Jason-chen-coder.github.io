@@ -107,3 +107,13 @@ BGM：House Vibez — Lily J。Mixkit Stock Music Free License。
 - `switch-click-quick.mp3`：Quick switch click · https://assets.mixkit.co/active_storage/sfx/2582/2582-preview.mp3
 
 素材来自本次使用的video-shotcraft本地库，逐文件哈希与测量记录见交付包audio-work/sfx_metadata.json。作品中的品牌图标及真实UI属于YourDream Studio；演示图片为本工程原创几何图形。
+
+## Oxygen Future
+
+Video-shotcraft product film, revision v5. Music: House Vibez — Lily J, Mixkit track 745 (https://assets.mixkit.co/music/745/745.mp3), Mixkit Stock Music Free License: https://mixkit.co/license/.
+
+Sound effects (CC0-1.0; mixed, trimmed and gain adjusted):
+- Whoosh stereo light (transition) — xkeril: https://freesound.org/people/xkeril/sounds/701104/
+- digital_whoosh_soft.wav — ludvique: https://freesound.org/people/ludvique/sounds/71852/
+
+Real application captures use fictional offline demo data. Product UI and marks belong to Oxygen Future / MGI.

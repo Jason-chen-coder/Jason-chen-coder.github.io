@@ -12,6 +12,56 @@
     return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
   };
 
+  // Opt-in presentation bypass for browsers that tile composited video textures.
+  // The video remains the playback, audio and seeking authority.
+  function canvasPresentation(video, scope) {
+    if (!video.hasAttribute?.("data-film-canvas") || !scope.createElement) return null;
+    const screen = video.closest(".film-screen");
+    if (!screen) return null;
+    const canvas = scope.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+    canvas.setAttribute("aria-hidden", "true");
+    Object.assign(canvas.style, { position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none", display: "none" });
+    screen.insertBefore(canvas, video.nextSibling);
+    let pending = null;
+    let usable = false;
+    const useVideoFrames = typeof video.requestVideoFrameCallback === "function";
+    const cancel = () => {
+      if (pending === null) return;
+      if (useVideoFrames) video.cancelVideoFrameCallback?.(pending);
+      else global.cancelAnimationFrame?.(pending);
+      pending = null;
+    };
+    const reset = () => {
+      usable = false;
+      cancel();
+      canvas.style.display = "none";
+      video.style.opacity = "";
+    };
+    const draw = () => {
+      if (!usable || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return;
+      try {
+        if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
+        if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.style.display = "block";
+        video.style.opacity = "0";
+      } catch { reset(); }
+    };
+    const schedule = () => {
+      if (!usable || video.paused || video.ended || pending !== null) return;
+      const callback = () => { pending = null; draw(); schedule(); };
+      if (useVideoFrames) pending = video.requestVideoFrameCallback(callback);
+      else if (global.requestAnimationFrame) pending = global.requestAnimationFrame(callback);
+    };
+    video.addEventListener("loadeddata", () => { usable = true; draw(); schedule(); });
+    video.addEventListener("playing", () => { draw(); schedule(); });
+    for (const event of ["seeked", "pause", "ended"]) video.addEventListener(event, () => { cancel(); draw(); schedule(); });
+    for (const event of ["error", "emptied", "loadstart"]) video.addEventListener(event, reset);
+    return { reset };
+  }
+
   function enhancePlayer(video, scope, error) {
     const figure = video.closest(".film-player");
     const stage = figure?.querySelector(".film-stage");
@@ -28,6 +78,7 @@
     if (![figure, stage, controls, cover, toggle, seek, time, mute, fullscreen, meta, coverLabel, durationLabel].every(Boolean)
       || typeof toggle.addEventListener !== "function" || typeof video.setAttribute !== "function") return;
     if (figure.dataset.filmEnhanced === "true") return;
+    const presentation = canvasPresentation(video, scope);
 
     let scrubbing = false;
     let started = false;
@@ -70,6 +121,7 @@
       } else paintTime(Number(seek.value));
     };
     const restoreNative = () => {
+      presentation?.reset();
       failed = true;
       loading = false;
       video.controls = true;

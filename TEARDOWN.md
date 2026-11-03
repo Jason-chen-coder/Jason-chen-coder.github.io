@@ -1,4 +1,11 @@
+> Archived implementation note: this document describes the previous continuous WebGL laboratory. The redesigned homepage uses semantic HTML, CSS and original SVG diagrams and does not load the scene runtime. See NOTES.md for the current design and validation. Existing scene modules and source assets remain available for recovery.
+
 # Kage reference technical teardown
+
+> **HISTORICAL REFERENCE ONLY (2026-08-09).** This document records research into
+> a superseded reference direction. It does not represent the current design,
+> runtime, production assets, or verification status. The active portfolio is a
+> continuous laboratory world documented in `.impeccable.md` and `NOTES.md`.
 
 Reference revision: `7f6bda72cbd7a1e78238082b3ba454a59a2f3deb`
 

@@ -2,131 +2,235 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
+import * as THREE from '../assets/vendor/three/three.module.min.js';
+
+import {
+  LAB_PALETTE,
+  collectSceneStats,
+  createLaboratoryWorld,
+} from '../lab-world.js';
+import {
+  configureRendererShadows,
+  createLaboratoryReflectionEnvironment,
+} from '../scene.js';
+
 const root = new URL('../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
 
-async function loadSceneModel() {
-  const source = await read('scene-model.js');
-  return import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
-}
-
-function numberFrom(source, pattern, label) {
-  const match = source.match(pattern);
-  assert.ok(match, `${label} must be declared`);
-  return Number(match[1]);
-}
-
-function ruleBody(source, selector) {
-  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const matches = [...source.matchAll(new RegExp(`${escaped}\\s*\\{(?<body>[^}]*)\\}`, 'gs'))];
-  const rule = matches.find((match) => match.groups.body.includes('background:'));
-  assert.ok(rule, `${selector} needs a background rule`);
-  return rule.groups.body;
-}
-
-function rgbaStops(source) {
-  return [...source.matchAll(/rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*(\d*\.?\d+)\s*\)\s*(\d+)%/g)]
-    .map((match) => ({ alpha: Number(match[1]), position: Number(match[2]) }));
-}
-
-function maxRgbaAlpha(source) {
-  const alphas = [...source.matchAll(/rgba\([^)]*,\s*(\d*\.?\d+)\s*\)/g)].map((match) => Number(match[1]));
-  assert.ok(alphas.length > 0, 'rule must contain rgba alpha values');
-  return Math.max(...alphas);
-}
-
-test('camera fog preserves distant temple silhouettes', async () => {
-  const { CAMERA_POSES } = await loadSceneModel();
-  const transmission = (density, distance) => Math.exp(-((density * distance) ** 2));
-
-  assert.deepEqual(CAMERA_POSES.map((pose) => pose.fogDensity), [0.009, 0.011, 0.01, 0.013, 0.011, 0.008]);
-  CAMERA_POSES.forEach((pose, index) => {
-    assert.ok(transmission(pose.fogDensity, 70) >= 0.4, `chapter ${index} must retain at least 40% at 70 units`);
+function objectsWithRole(rootObject, role) {
+  const matches = [];
+  rootObject.traverse((object) => {
+    if (object.userData.semanticRole === role) matches.push(object);
   });
-  assert.ok(transmission(CAMERA_POSES[0].fogDensity, 104) >= 0.4, 'top chapter must retain at least 40% at the temple');
+  return matches;
+}
+
+function lightWithRole(rootObject, role) {
+  let match = null;
+  rootObject.traverse((object) => {
+    if (!match && object.userData.lightRole === role) match = object;
+  });
+  return match;
+}
+
+test('soft shadows are enabled only for the High renderer profile', () => {
+  for (const detailTier of ['high', 'balanced', 'low']) {
+    const renderer = { shadowMap: { enabled: false, type: null } };
+    configureRendererShadows(renderer, detailTier);
+    assert.equal(renderer.shadowMap.enabled, detailTier === 'high');
+    if (detailTier === 'high') assert.equal(renderer.shadowMap.type, THREE.PCFShadowMap);
+  }
 });
 
-test('temple exterior key reveals the hall and both roof tiers independently from window glow', async () => {
-  const scene = await read('scene.js');
-  const templeStart = scene.indexOf('function addTemple(');
-  const forestStart = scene.indexOf('function addForest(');
-  const temple = scene.slice(templeStart, forestStart);
-  assert.ok(templeStart >= 0 && forestStart > templeStart, 'temple scene block must be available');
+test('High uses one bounded key shadow while lower tiers skip the shadow pass', () => {
+  for (const detailTier of ['high', 'balanced', 'low']) {
+    const world = createLaboratoryWorld({ detailTier });
+    const key = lightWithRole(world.root, 'laboratory-key');
+    assert.ok(key?.isDirectionalLight);
+    assert.equal(key.castShadow, detailTier === 'high');
+    const shadowLights = [];
+    world.root.traverse((object) => {
+      if (object.isLight && object.castShadow) shadowLights.push(object);
+    });
+    assert.deepEqual(shadowLights, detailTier === 'high' ? [key] : []);
 
-  const key = temple.match(
-    /const exteriorKey = new THREE\.SpotLight\(0x([\da-f]+),\s*(\d*\.?\d+),\s*(\d*\.?\d+),\s*(\d*\.?\d+),\s*(\d*\.?\d+),\s*(\d*\.?\d+)\)/i,
-  );
-  assert.ok(key, 'the distant temple needs a dedicated exterior key instead of relying on glowing windows');
+    const panes = objectsWithRole(world.root, 'oxygen-window-pane');
+    assert.ok(panes.every((pane) => pane.castShadow === false), `${detailTier} glass must not cast`);
+    const floor = objectsWithRole(world.root, 'laboratory-floor')[0];
+    const shell = objectsWithRole(world.root, 'laboratory-left-shell')[0];
+    assert.equal(floor.castShadow, false);
+    assert.equal(floor.receiveShadow, true);
+    assert.equal(shell.receiveShadow, true);
 
-  const [, colorHex, intensity, distance, angle, penumbra, decay] = key;
-  const color = Number.parseInt(colorHex, 16);
-  const red = color >> 16;
-  const green = (color >> 8) & 0xff;
-  const blue = color & 0xff;
-  assert.ok(blue > green && green > red, 'the exterior key must stay moonlit blue, separate from the warm interior');
-  assert.ok(Number(intensity) >= 360 && Number(intensity) <= 520, 'the exterior key must survive the long hero sightline without flattening the scene');
-  assert.ok(Number(distance) >= 60 && Number(distance) <= 90, 'the exterior key must cover the complete temple depth');
-  assert.ok(Number(angle) >= 0.5 && Number(angle) <= 0.75, 'the key cone must cover the full hall and both roof tiers');
-  assert.ok(Number(penumbra) >= 0.35 && Number(penumbra) <= 0.65, 'the exterior light edge must stay soft');
-  assert.ok(Number(decay) >= 1.2 && Number(decay) <= 1.6, 'the exterior key must remain local to the temple');
+    const opaqueEquipment = [
+      objectsWithRole(world.root, 'oxygen-shell-surface')[0],
+      objectsWithRole(world.root, 'primegen-instrument-row')[0],
+    ];
+    assert.ok(opaqueEquipment.every(Boolean));
+    assert.ok(opaqueEquipment.every((object) => object.castShadow === (detailTier === 'high')));
 
-  const position = temple.match(/exteriorKey\.position\.set\((-?\d*\.?\d+),\s*(-?\d*\.?\d+),\s*(-?\d*\.?\d+)\)/);
-  const target = temple.match(/exteriorKey\.target\.position\.set\((-?\d*\.?\d+),\s*(-?\d*\.?\d+),\s*(-?\d*\.?\d+)\)/);
-  assert.ok(position && target, 'the exterior key needs an explicit architectural position and target');
-  assert.ok(Math.abs(Number(position[1])) >= 10 && Math.abs(Number(position[1])) <= 16, 'the key must rake across the facade from a close off-axis position');
-  assert.ok(Number(position[2]) >= 28 && Number(position[2]) <= 34, 'the key must sit above both roof tiers');
-  assert.ok(Number(position[3]) >= -58 && Number(position[3]) <= -50, 'the key must stay close enough to survive physical light decay');
-  assert.ok(Number(target[2]) >= 18 && Number(target[2]) <= 21.5, 'the key must aim between the main hall and roof line');
-  assert.ok(Number(target[3]) >= -74 && Number(target[3]) <= -70, 'the key must terminate at the stair-end temple');
-  assert.match(temple, /exteriorKey\.userData\.lightRole = 'temple-exterior'/);
-  assert.match(temple, /parent\.add\(exteriorKey, exteriorKey\.target\)/);
-  assert.doesNotMatch(temple, /warmLights\.push\(exteriorKey\)/, 'the moonlit exterior key must not brighten with the windows');
+    if (detailTier === 'high') {
+      assert.deepEqual(key.shadow.mapSize.toArray(), [1024, 1024]);
+      assert.ok(key.shadow.camera.left <= -10 && key.shadow.camera.right >= 10);
+      assert.ok(key.shadow.camera.bottom <= -10 && key.shadow.camera.top >= 10);
+      assert.ok(key.shadow.camera.near > 0 && key.shadow.camera.far >= 40);
+      assert.ok(key.target.position.z <= -12, 'the High shadow camera must reach the continuation corridor');
+      assert.ok(key.shadow.bias < 0);
+      assert.ok(key.shadow.normalBias > 0);
+    }
+    world.dispose();
+  }
 });
 
-test('renderer lighting reveals surfaces without relying on aggressive bloom', async () => {
-  const [scene, { CAMERA_POSES }] = await Promise.all([read('scene.js'), loadSceneModel()]);
-  const exposure = numberFrom(scene, /toneMappingExposure\s*=\s*(\d*\.?\d+)/, 'tone mapping exposure');
-  assert.ok(exposure >= 1.05 && exposure <= 1.25);
-  assert.match(scene, /setClearColor\(0x111a22,\s*1\)/);
-  assert.match(scene, /scene\.background\s*=\s*new THREE\.Color\(0x111a22\)/);
-  assert.match(scene, /new THREE\.FogExp2\(0x263945,/);
+test('laboratory uses neutral white illumination and an explicit non-monochrome material system', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  const lights = [];
+  world.root.traverse((object) => {
+    if (object.isLight) lights.push(object);
+  });
 
-  const bloom = scene.match(/new UnrealBloomPass\(\s*new THREE\.Vector2\([^)]*\),\s*(\d*\.?\d+),\s*(\d*\.?\d+),\s*(\d*\.?\d+)\)/);
-  assert.ok(bloom, 'bloom parameters must remain explicit');
-  const [, bloomStrength, bloomRadius, bloomThreshold] = bloom.map(Number);
-  assert.ok(bloomStrength <= 0.35);
-  assert.ok(bloomRadius <= 0.6);
-  assert.ok(bloomThreshold >= 0.7);
-
-  const dynamicBloom = scene.match(/bloomPass\.strength\s*=\s*(\d*\.?\d+)\s*\+\s*pose\.warmth\s*\*\s*(\d*\.?\d+)/);
-  assert.ok(dynamicBloom, 'dynamic bloom must remain bounded');
-  const maxWarmth = Math.max(...CAMERA_POSES.map((pose) => pose.warmth));
-  assert.ok(Number(dynamicBloom[1]) + maxWarmth * Number(dynamicBloom[2]) <= 0.35);
-
-  for (const material of ['stone', 'roof']) {
-    const body = scene.match(new RegExp(`${material}: new THREE\\.MeshStandardMaterial\\(\\{(?<body>[^}]*)\\}\\)`))?.groups?.body ?? '';
-    const metalness = numberFrom(body, /metalness:\s*(\d*\.?\d+)/, `${material} metalness`);
-    assert.ok(metalness <= 0.08, `${material} metalness must not swallow diffuse light`);
+  assert.ok(lights.length >= 3);
+  assert.ok(lights.some(({ userData }) => userData.lightRole === 'laboratory-ambient'));
+  assert.ok(lights.some(({ userData }) => userData.lightRole === 'laboratory-key'));
+  for (const light of lights) {
+    const channels = [light.color.r, light.color.g, light.color.b];
+    assert.ok(Math.max(...channels) - Math.min(...channels) <= 0.12, `${light.userData.lightRole} must stay neutral`);
   }
 
-  const hemisphere = numberFrom(scene, /new THREE\.HemisphereLight\([^,]+,\s*[^,]+,\s*(\d*\.?\d+)\)/, 'hemisphere intensity');
-  assert.ok(hemisphere >= 1.35 && hemisphere <= 1.6);
-  assert.doesNotMatch(scene, /new THREE\.AmbientLight/);
+  assert.deepEqual(LAB_PALETTE, {
+    floor: 0x252b30,
+    graphite: 0x151b20,
+    shell: 0xe7ecee,
+    silver: 0x9aa6ad,
+    smoked: 0x34434a,
+    clear: 0xb9d4d8,
+    cyan: 0x22c4c8,
+    red: 0xc83c3c,
+    upholstery: 0x69757b,
+  });
+  world.dispose();
 });
 
-test('haze and chapter washes protect text without blacking out the environment', async () => {
-  const css = await read('styles.css');
-  const desktopHaze = ruleBody(css, '.scene-haze');
-  assert.ok(maxRgbaAlpha(desktopHaze) <= 0.5, 'desktop haze and vignette layers must stay at or below 0.5');
+test('physical equipment receives a local six-face studio reflection environment', () => {
+  const drawCalls = [];
+  const documentRef = {
+    createElement(tagName) {
+      assert.equal(tagName, 'canvas');
+      const context = {
+        fillStyle: '',
+        fillRect(...values) {
+          drawCalls.push({ fillStyle: this.fillStyle, values });
+        },
+      };
+      return {
+        width: 0,
+        height: 0,
+        getContext(type) {
+          assert.equal(type, '2d');
+          return context;
+        },
+      };
+    },
+  };
 
-  const mobileCss = css.slice(css.indexOf('@media (max-width: 720px)'));
-  const mobileHaze = ruleBody(mobileCss, '.scene-haze');
-  assert.ok(maxRgbaAlpha(mobileHaze) <= 0.5, 'mobile haze and vignette layers must stay at or below 0.5');
+  const environment = createLaboratoryReflectionEnvironment(documentRef);
+  assert.equal(environment.isCubeTexture, true);
+  assert.equal(environment.images.length, 6);
+  assert.ok(environment.images.every(({ width, height }) => width === 64 && height === 64));
+  assert.equal(environment.colorSpace, THREE.SRGBColorSpace);
+  assert.equal(environment.userData.environmentRole, 'laboratory-studio-reflection');
+  assert.equal(environment.userData.gpuBytes, 64 * 64 * 4 * 6);
+  assert.ok(drawCalls.length >= 18, 'each face needs a base, horizon and practical-light band');
 
-  for (const selector of ['.chapter-wash', '.hero .chapter-wash', '.work .chapter-wash', '.contact .chapter-wash']) {
-    const body = ruleBody(css, selector);
-    assert.ok(maxRgbaAlpha(body) <= 0.65, `${selector} must stay at or below 0.65`);
-    const fadeStop = rgbaStops(body).find(({ alpha, position }) => alpha <= 0.08 && position >= 65 && position <= 72);
-    assert.ok(fadeStop, `${selector} must fade close to transparent between 65% and 72%`);
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  const withoutEnvironment = collectSceneStats(world.root, { detailTier: 'high' });
+  const withEnvironment = collectSceneStats(world.root, {
+    detailTier: 'high',
+    additionalTextures: [environment],
+  });
+  assert.equal(withEnvironment.textureBytes, withoutEnvironment.textureBytes + environment.userData.gpuBytes);
+  assert.equal(withEnvironment.withinBudget, true);
+  world.dispose();
+  environment.dispose();
+});
+
+test('cyan is functional state and red appears only on emergency controls', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  let cyanCount = 0;
+  let redCount = 0;
+
+  world.root.traverse((object) => {
+    if (!object.isMesh) return;
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    for (const material of materials) {
+      if (material.userData.paletteRole === 'functional-cyan') {
+        cyanCount += 1;
+        assert.match(object.userData.semanticRole ?? '', /guide|status|queue|flow|sync|frame|light/);
+      }
+      if (material.userData.paletteRole === 'emergency-red') {
+        redCount += 1;
+        assert.equal(object.userData.semanticRole, 'emergency-stop');
+      }
+    }
+  });
+
+  assert.ok(cyanCount >= 5);
+  assert.equal(redCount, 1);
+  world.dispose();
+});
+
+test('every performance tier keeps equipment grounded and route guides visually restrained', () => {
+  for (const detailTier of ['high', 'balanced', 'low']) {
+    const world = createLaboratoryWorld({ detailTier });
+    try {
+      const contactShadows = objectsWithRole(world.root, 'laboratory-contact-shadow');
+      assert.equal(contactShadows.length, 1);
+      assert.equal(contactShadows[0].isInstancedMesh, true);
+      assert.ok(contactShadows[0].count >= 6);
+      assert.equal(contactShadows[0].material.transparent, true);
+      assert.ok(contactShadows[0].material.opacity <= 0.22);
+      assert.equal(contactShadows[0].material.depthWrite, false);
+
+      for (const role of [
+        'shared-axis-floor-guide',
+        'continuation-corridor-floor-guide',
+        'alab-floor-guide',
+        'primegen-floor-guide',
+        'oxygen-floor-guide',
+        'cloud-floor-guide',
+      ]) {
+        const guide = objectsWithRole(world.root, role)[0];
+        assert.equal(guide?.material.userData.paletteRole, 'navigation-guide');
+        assert.ok((guide.material.emissiveIntensity ?? 0) <= 0.16);
+      }
+    } finally {
+      world.dispose();
+    }
   }
+});
+
+test('continuous ceiling fixtures are instanced and align the main and continuation legs', () => {
+  const world = createLaboratoryWorld({ detailTier: 'balanced' });
+  const mainFixtures = objectsWithRole(world.root, 'main-ceiling-light');
+  const continuationFixtures = objectsWithRole(world.root, 'continuation-ceiling-light');
+
+  assert.equal(mainFixtures.length, 1);
+  assert.equal(continuationFixtures.length, 1);
+  assert.equal(mainFixtures[0].isInstancedMesh, true);
+  assert.equal(continuationFixtures[0].isInstancedMesh, true);
+  assert.ok(mainFixtures[0].count >= 10);
+  assert.ok(continuationFixtures[0].count >= 8);
+  assert.equal(objectsWithRole(world.root, 'main-ceiling-rail').length, 1);
+  assert.equal(objectsWithRole(world.root, 'continuation-ceiling-rail').length, 1);
+  world.dispose();
+});
+
+test('runtime has no post-processing or periodic camera and device animation', async () => {
+  const [scene, laboratory] = await Promise.all([read('scene.js'), read('lab-world.js')]);
+  const runtime = `${scene}\n${laboratory}`;
+
+  assert.doesNotMatch(runtime, /EffectComposer|RenderPass|OutputPass|UnrealBloomPass|WebGLRenderTarget/);
+  assert.doesNotMatch(scene, /\bClock\b|Math\.(?:sin|cos)\s*\(/);
+  assert.doesNotMatch(scene, /pointermove|clientX|clientY|damping|lerp\s*\(/i);
+  assert.match(scene, /renderer\.render\(scene, camera\)/);
 });

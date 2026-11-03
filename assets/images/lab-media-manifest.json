@@ -1,0 +1,444 @@
+{
+  "version": 1,
+  "media": [
+    {
+      "id": "alab-laboratory-overview",
+      "project": "alab",
+      "order": 1,
+      "path": "./assets/images/plate-alab-continuous-lab.webp",
+      "source": {
+        "kind": "generated-safe-substitute",
+        "sourceRef": "imagegen:continuous-lab-plate:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "laboratory-render",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": true,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 641,
+      "sha256": "f4968482cd0bf69aa336fdbfa8645afc7081a9c7fdc7c2625505390416ef65bc",
+      "mapping": "portfolio-alab-laboratory-overview"
+    },
+    {
+      "id": "alab-task-management",
+      "project": "alab",
+      "order": 2,
+      "path": "./assets/images/alab-task-management.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:alab-task-management:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-screenshot",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": true,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 592,
+      "sha256": "9a7d5c07a58977e8bae09657089d096d33bd63432fd55045cbf1ea14d509f886",
+      "mapping": "portfolio-alab-task-management"
+    },
+    {
+      "id": "alab-protocol-orchestration",
+      "project": "alab",
+      "order": 3,
+      "path": "./assets/images/alab-protocol-orchestration.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:alab-protocol-orchestration:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-screenshot",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": false,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 716,
+      "sha256": "6f4565f8114f2330896eac6aa60f0148bc045e9e54c6cd46a52011e425468d9b",
+      "mapping": "portfolio-alab-protocol-orchestration"
+    },
+    {
+      "id": "alab-device-execution",
+      "project": "alab",
+      "order": 4,
+      "path": "./assets/images/alab-device-execution.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:alab-device-execution:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-screenshot",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": true,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 804,
+      "height": 544,
+      "sha256": "fae6e728fc4386ae7c4038bbe326d3525e64a394cb896acf03ec58e2b37fca76",
+      "mapping": "portfolio-alab-device-execution"
+    },
+    {
+      "id": "alab-run-timeline",
+      "project": "alab",
+      "order": 5,
+      "path": "./assets/images/alab-run-timeline.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:alab-run-timeline:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-screenshot",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": false,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 715,
+      "sha256": "4dd98ed63313a3f443af8bfe218e5bee665a9eb689f65092d59e3202bef0acf6",
+      "mapping": "portfolio-alab-run-timeline"
+    },
+    {
+      "id": "primegen-workflow-overview",
+      "project": "primegen",
+      "order": 1,
+      "path": "./assets/images/plate-primegen-workflow.webp",
+      "source": {
+        "kind": "generated-safe-substitute",
+        "sourceRef": "imagegen:primegen-workflow-overview:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "workflow-render",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": true,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 820,
+      "height": 1024,
+      "sha256": "7916ad5072bcf737f21399d28d23495165198ce3fd98f39bfeca4833406a8300",
+      "mapping": "portfolio-primegen-workflow-overview"
+    },
+    {
+      "id": "primegen-ai-workflow",
+      "project": "primegen",
+      "order": 2,
+      "path": "./assets/images/primegen-ai-workflow.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:primegen-ai-workflow:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-animation",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": true,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 575,
+      "sha256": "07c5e25e7543eabfaf44114d60ca3ce473307ecd97d2a62aca3a41455731799f",
+      "mapping": "portfolio-primegen-ai-workflow"
+    },
+    {
+      "id": "primegen-camera-composite",
+      "project": "primegen",
+      "order": 3,
+      "path": "./assets/images/primegen-camera-composite.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:primegen-camera-composite:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-animation",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": true,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 678,
+      "sha256": "4d211b5359fe0dcd4024b03ed09e0cbe937f28e66bd3a5eae1f2488327a52e5f",
+      "mapping": "portfolio-primegen-camera-composite",
+      "reducedMotionPoster": {
+        "path": "./assets/images/primegen-camera-composite-poster.webp",
+        "metadataClean": true,
+        "width": 1024,
+        "height": 678,
+        "sha256": "380411b42f32c2f32a8095678aacaf041195177bde8aa2bc90ce0f83b0cc53f1"
+      }
+    },
+    {
+      "id": "oxygen-rigid-chamber",
+      "project": "oxygen",
+      "order": 1,
+      "path": "./assets/images/oxygen-rigid-chamber.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:oxygen-rigid-chamber:v2"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "product-render",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": false,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 679,
+      "sha256": "88915f786a95f226ba28b5896d8e8c974da28d6a3f2bfdb3cdba1707e110cd5d",
+      "mapping": "physical-chamber-evidence"
+    },
+    {
+      "id": "oxygen-soft-chamber",
+      "project": "oxygen",
+      "order": 2,
+      "path": "./assets/images/oxygen-soft-chamber.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:oxygen-soft-chamber:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "product-photo",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": false,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 679,
+      "sha256": "10d668017cdca3f90ace8409738f01586607df3b2c7efbb79485d4c70b027c73",
+      "mapping": "physical-support-system-evidence"
+    },
+    {
+      "id": "oxygen-device-screen",
+      "project": "oxygen",
+      "order": 3,
+      "path": "./assets/images/oxygen-device-screen.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:oxygen-device-screen:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-screenshot",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": false,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 580,
+      "sha256": "97a5db759d5e633035a2ffc8d1f98827ed7fb482715d02661a75fabbd66a4bf1",
+      "mapping": "physical-integrated-screen"
+    },
+    {
+      "id": "oxygen-touch-client",
+      "project": "oxygen",
+      "order": 4,
+      "path": "./assets/images/oxygen-touch-client.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:oxygen-touch-client:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-screenshot",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": true,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 716,
+      "sha256": "82b508ce318bd1fc6f4e60f469d9b70ab3bed3e1b0cba8b6bb5cac81277d41bf",
+      "mapping": "physical-control-console"
+    },
+    {
+      "id": "oxygen-mini-program",
+      "project": "oxygen",
+      "order": 5,
+      "path": "./assets/images/oxygen-mini-program.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:oxygen-mini-program:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-screenshot",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": false,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 324,
+      "height": 1024,
+      "sha256": "0107c90c7b04fbad8cbf7e160d709a7cc70baabb92f19348a94d84f947d019d2",
+      "mapping": "semantic-foreground-phone"
+    },
+    {
+      "id": "cloud-remote-ultrasound-system",
+      "project": "cloud",
+      "order": 1,
+      "path": "./assets/images/cloud-remote-ultrasound-system.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:cloud-remote-system:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "product-photo",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": false,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 660,
+      "height": 438,
+      "sha256": "9bcb7031d68d8dc54c49d3accb5713c0b571a8855435807003ad79a0cf7b2928",
+      "mapping": "physical-remote-system"
+    },
+    {
+      "id": "cloud-remote-consultation-ui",
+      "project": "cloud",
+      "order": 2,
+      "path": "./assets/images/cloud-remote-consultation-ui.webp",
+      "source": {
+        "kind": "generated-safe-substitute",
+        "sourceRef": "imagegen:cloud-consultation-safe:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-substitute",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": true,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 1024,
+      "height": 658,
+      "sha256": "8293efd8ef79be15359960f2c0da31b07a0af9903a12dc1c98acdb38f27f23ce",
+      "mapping": "physical-dual-monitor-workstation"
+    },
+    {
+      "id": "cloud-handheld-probe",
+      "project": "cloud",
+      "order": 3,
+      "path": "./assets/images/cloud-handheld-probe.webp",
+      "source": {
+        "kind": "user-provided-nonclinical",
+        "sourceRef": "intake:cloud-handheld-probe:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "product-photo",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": false,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 346,
+      "height": 630,
+      "sha256": "30d17cd1becfaf028f5b4f0c9dffdaff4b998eb88ff2c44f948de23ec0b8fc9f",
+      "mapping": "physical-display-stand"
+    },
+    {
+      "id": "cloud-handheld-app",
+      "project": "cloud",
+      "order": 4,
+      "path": "./assets/images/cloud-handheld-app.webp",
+      "source": {
+        "kind": "generated-safe-substitute",
+        "sourceRef": "imagegen:cloud-handheld-safe:v1"
+      },
+      "authStatus": "APPROVED",
+      "assetKind": "interface-substitute",
+      "publicationStatus": "PUBLISHED",
+      "privacy": {
+        "containsClinicalData": false,
+        "containsRecognizableFace": false,
+        "deidentified": true,
+        "humanReviewRequired": false
+      },
+      "metadataClean": true,
+      "width": 498,
+      "height": 1024,
+      "sha256": "d594e1edf72ad58eec03089aad9118baf0b76d3109a97e24f4cac7141285d498",
+      "mapping": "semantic-foreground-phone-or-tablet"
+    }
+  ],
+  "fallback": {
+    "id": "continuous-lab-fallback",
+    "project": "laboratory",
+    "order": 1,
+    "path": "./assets/images/poster-fallback.webp",
+    "source": {
+      "kind": "generated-safe-substitute",
+      "sourceRef": "imagegen:continuous-lab-fallback:v1"
+    },
+    "authStatus": "APPROVED",
+    "assetKind": "fallback-render",
+    "publicationStatus": "PUBLISHED",
+    "privacy": {
+      "containsClinicalData": false,
+      "containsRecognizableFace": false,
+      "deidentified": true,
+      "humanReviewRequired": false
+    },
+    "metadataClean": true,
+    "width": 1024,
+    "height": 585,
+    "sha256": "e3f3073caea023b02cd57345361129bb170e6635d366cd9f21e4f045e7cc2348",
+    "mapping": "webgl-fallback-poster"
+  }
+}

@@ -2,636 +2,648 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const root = new URL('../', import.meta.url);
-const read = (path) => readFile(new URL(path, root), 'utf8');
+import * as THREE from '../assets/vendor/three/three.module.min.js';
+import {
+  TEXTURE_GPU_LIMITS,
+  applyMappedTextures,
+  collectSceneStats,
+  configureRuntimeTexture,
+  createLaboratoryWorld,
+  estimateTextureBytes,
+  loadPublishedSceneTextures,
+  selectPublishedSceneMedia,
+} from '../lab-world.js';
+import {
+  SCENE_DETAIL_PROFILES,
+  getPerformanceProfile,
+  getSceneDetailProfile,
+} from '../scene-model.js';
 
-async function loadSceneModel() {
-  const source = await read('scene-model.js');
-  return import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const manifestUrl = new URL('../assets/images/lab-media-manifest.json', import.meta.url);
+const sculptSpecUrl = new URL('../.img2threejs/object-sculpt-spec.json', import.meta.url);
+const oxygenActionPartIds = Object.freeze([
+  'oxygen-rounded-shell',
+  'oxygen-dark-front-frame',
+  'oxygen-interior-assembly',
+  'oxygen-base-frame',
+  'oxygen-shell-side-depth',
+  'oxygen-shell-top',
+  'oxygen-shell-bottom',
+  'oxygen-window-section',
+  'oxygen-door-hardware',
+  'oxygen-high-back-seat-left',
+  'oxygen-high-back-seat-right',
+  'oxygen-integrated-screen',
+  'oxygen-status-line',
+]);
+
+function objectsWithRole(root, role) {
+  const matches = [];
+  root.traverse((object) => {
+    if (object.userData.semanticRole === role) matches.push(object);
+  });
+  return matches;
 }
 
-async function loadThree() {
-  const source = await read('assets/vendor/three/three.core.min.js');
-  return import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+function worldPosition(object) {
+  return object.getWorldPosition(new THREE.Vector3());
 }
 
-function readTopLevelFunction(source, name) {
-  const start = source.indexOf(`function ${name}(`);
-  assert.notEqual(start, -1, `${name} must exist`);
-  const bodyStart = source.indexOf('{', start);
-  let depth = 0;
-  for (let index = bodyStart; index < source.length; index += 1) {
-    if (source[index] === '{') depth += 1;
-    if (source[index] === '}') depth -= 1;
-    if (depth === 0) return source.slice(start, index + 1);
+test('img2threejs review harness isolates every equipment family with deterministic orbit views', async () => {
+  const source = await readFile(new URL('../.img2threejs/review-harness.js', import.meta.url), 'utf8');
+  assert.match(source, /params\.get\('model'\)/);
+  for (const modelId of ['alab', 'primegen', 'oxygen', 'cloud-remote', 'cloud-handheld']) {
+    assert.match(source, new RegExp(`['"]${modelId}['"]\\s*:`), `missing review subject ${modelId}`);
   }
-  assert.fail(`${name} must have a complete function body`);
-}
+  for (const viewId of ['front', 'three-quarter', 'side', 'rear']) {
+    assert.match(source, new RegExp(`['"]${viewId}['"]\\s*:`), `missing deterministic view ${viewId}`);
+  }
+  assert.match(source, /traverseVisible\(/);
+  assert.match(source, /isolateRoles:\s*\['cloud-remote-device-end',\s*'cloud-remote-consultation-end'\]/);
+  assert.match(source, /createLaboratoryReflectionEnvironment\(document\)/);
+  assert.match(source, /additionalTextures:\s*\[reflectionEnvironment\]/);
+  assert.match(source, /window\.__interactive\s*=\s*false/);
+  assert.match(source, /data(?:set)?\.model|dataset\.model/);
+});
 
-function channels(hex) {
-  return {
-    red: (hex >> 16) & 255,
-    green: (hex >> 8) & 255,
-    blue: hex & 255,
-  };
-}
-
-function luminance(hex) {
-  const color = channels(hex);
-  return (color.red * 0.2126 + color.green * 0.7152 + color.blue * 0.0722) / 255;
-}
-
-function mappedLuminance(base, tint) {
-  const baseChannels = channels(base);
-  const tintChannels = channels(tint);
-  const toLinear = (channel) => {
-    const value = channel / 255;
-    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-  };
-  const toSrgb = (value) => (
-    value <= 0.0031308 ? value * 12.92 : 1.055 * value ** (1 / 2.4) - 0.055
-  );
-  const mapped = Object.fromEntries(['red', 'green', 'blue'].map((channel) => [
-    channel,
-    toSrgb(toLinear(baseChannels[channel]) * toLinear(tintChannels[channel])),
-  ]));
-  return mapped.red * 0.2126 + mapped.green * 0.7152 + mapped.blue * 0.0722;
-}
-
-function readMaterialColor(scene, name) {
-  const match = scene.match(new RegExp(`${name}: new THREE\\.MeshStandardMaterial\\(\\{[\\s\\S]*?color: 0x([0-9a-f]+)`, 'i'));
-  assert.ok(match, `${name} material color must be explicit`);
-  return Number.parseInt(match[1], 16);
-}
-
-function readTextureConfig(scene, name) {
-  const match = scene.match(new RegExp(
-    `const\\s+${name}Textures\\s*=\\s*createSurfaceTextureSet\\(\\s*0x([0-9a-f]+),\\s*[^,]+,\\s*detailProfile\\.textureSize,\\s*\\{\\s*pattern:\\s*'${name}',\\s*repeat:\\s*([\\d.]+)\\s*\\}\\s*\\)`,
-    'i',
-  ));
-  assert.ok(match, `${name} texture must declare its pattern and repeat`);
-  return { baseColor: Number.parseInt(match[1], 16), repeat: Number(match[2]) };
-}
-
-function readNestedFunction(scene, name) {
-  const match = scene.match(new RegExp(`  function ${name}\\([^)]*\\) \\{([\\s\\S]*?)\\n  \\}`));
-  assert.ok(match, `${name} must be declared inside createExperience`);
-  return match[1];
-}
-
-test('performance profiles select a geometry tier independently from motion', async () => {
-  const { getPerformanceProfile } = await loadSceneModel();
-
+test('performance and detail tiers retain exact laboratory ceilings without geometry floors', () => {
   assert.equal(getPerformanceProfile({ width: 1440, hardwareConcurrency: 8 }).detailTier, 'high');
   assert.equal(getPerformanceProfile({ width: 1440, hardwareConcurrency: 8, reducedMotion: true }).detailTier, 'balanced');
   assert.equal(getPerformanceProfile({ width: 390, hardwareConcurrency: 8 }).detailTier, 'balanced');
   assert.equal(getPerformanceProfile({ width: 390, hardwareConcurrency: 8, reducedMotion: true }).detailTier, 'low');
   assert.equal(getPerformanceProfile({ width: 1440, hardwareConcurrency: 4 }).detailTier, 'balanced');
-});
 
-test('scene detail profiles preserve core structures and scale semantic detail monotonically', async () => {
-  const { SCENE_DETAIL_PROFILES, getSceneDetailProfile } = await loadSceneModel();
-  const high = getSceneDetailProfile('high');
-  const balanced = getSceneDetailProfile('balanced');
-  const low = getSceneDetailProfile('low');
-
-  assert.equal(high, SCENE_DETAIL_PROFILES.high);
-  assert.equal(getSceneDetailProfile('unknown'), low);
-
-  for (const profile of [high, balanced, low]) {
-    assert.equal(profile.temple.shojiPanels, 7);
-    assert.equal(profile.torii.count, 3);
-    assert.equal(profile.stairs.count, 39);
-    assert.equal(profile.stairs.variants, 3);
-    assert.equal(profile.lanterns.count, 18);
-    assert.equal(profile.trees.archetypes, 3);
-  }
-
-  const semanticPaths = [
-    ['temple', 'mullionsPerPanel'],
-    ['temple', 'bracketClusters'],
-    ['temple', 'rafters'],
-    ['temple', 'railingPosts'],
-    ['temple', 'roofSegments'],
-    ['torii', 'postSides'],
-    ['torii', 'kasagiSegments'],
-    ['trees', 'crownLayers'],
-    ['trees', 'trunkSides'],
-    ['stairs', 'mossSeams'],
-    ['lanterns', 'frameBars'],
-  ];
-
-  semanticPaths.forEach(([group, key]) => {
-    assert.ok(high[group][key] >= balanced[group][key], `${group}.${key} must decrease for balanced`);
-    assert.ok(balanced[group][key] >= low[group][key], `${group}.${key} must decrease for low`);
-  });
-
-  assert.ok(high.temple.mullionsPerPanel * high.temple.shojiPanels >= 28);
-  assert.ok(high.temple.bracketClusters >= 8);
-  assert.ok(high.temple.rafters >= 16);
-  assert.deepEqual(high.budget, { minTriangles: 30000, maxTriangles: 110000, maxDrawables: 180, maxGeometries: 48, maxMaterials: 20 });
-  assert.deepEqual(balanced.budget, { minTriangles: 18000, maxTriangles: 65000, maxDrawables: 140, maxGeometries: 40, maxMaterials: 20 });
-  assert.deepEqual(low.budget, { minTriangles: 10000, maxTriangles: 35000, maxDrawables: 110, maxGeometries: 32, maxMaterials: 20 });
-});
-
-test('nearest torii carries original hero detailing while distant gates stay lightweight', async () => {
-  const scene = await read('scene.js');
-  const toriiStart = scene.indexOf('function createTorii(');
-  const sequenceStart = scene.indexOf('function addToriiSequence(');
-  const lanternStart = scene.indexOf('function addLanternPath(');
-  assert.ok(toriiStart >= 0 && sequenceStart > toriiStart && lanternStart > sequenceStart);
-
-  const torii = scene.slice(toriiStart, sequenceStart);
-  const sequence = scene.slice(sequenceStart, lanternStart);
-  const heroRoles = [
-    'hero-torii-kasagi',
-    'hero-torii-shimaki',
-    'hero-torii-lacquer-cap',
-    'hero-torii-nuki',
-    'hero-torii-gakuzuka',
-    'hero-torii-plaque',
-    'hero-torii-post-bracket',
-    'hero-torii-wing-support',
-    'hero-torii-stone-footing',
-    'hero-torii-footing-band',
-    'hero-torii-post-collar',
-  ];
-
-  assert.deepEqual(
-    heroRoles.filter((role) => !torii.includes(`'${role}'`)),
-    [],
-    'hero torii must publish every structural role for runtime scene stats',
-  );
-  assert.match(torii, /function createTorii\([^)]*\bisHero\b/);
-  assert.match(sequence, /createTorii\([\s\S]*?index === 0[\s\S]*?\);/);
-  assert.match(torii, /if \(!isHero\) \{[\s\S]*?return;/);
-  assert.match(torii, /const includeHeroOrnaments = detailProfile\.tier !== 'low';/);
-  assert.match(torii, /if \(includeHeroOrnaments\) \{/);
-  assert.match(scene, /function addCurvedToriiBeam\(/);
-  assert.match(torii, /addInstanced\(group, geometries\.band/);
-  for (const retainedRole of ['torii-kasagi', 'torii-nuki', 'torii-plaque']) {
-    assert.match(torii, new RegExp(`'${retainedRole}'`), `distant gates must retain ${retainedRole}`);
-  }
-  assert.doesNotMatch(scene, /sweepPoly|texLacquer|buildTorii/);
-});
-
-test('scene construction consumes detail profiles and publishes stats from the real world graph', async () => {
-  const scene = await read('scene.js');
-
-  assert.match(scene, /getSceneDetailProfile/);
-  assert.match(scene, /const detailProfile = getSceneDetailProfile\(profile\.detailTier\)/);
-  for (const helper of ['createMaterials', 'addGround', 'addStonePath', 'addToriiSequence', 'addLanternPath', 'addTemple', 'addForest']) {
-    assert.match(scene, new RegExp(`${helper}\\([^;\\n]*detailProfile`), `${helper} must consume the active detail profile`);
-  }
-
-  assert.match(scene, /createSeededRandom/);
-  assert.match(scene, /createSurfaceTextureSet/);
-  assert.match(scene, /new THREE\.InstancedMesh/);
-  assert.match(scene, /semanticRole/);
-  assert.match(scene, /collectSceneStats\(world, detailProfile\.tier\)/);
-  assert.match(scene, /targetCanvas\.dataset\.sceneStats = JSON\.stringify\(sceneStats\)/);
-  assert.match(scene, /object\.isInstancedMesh \? object\.count : 1/);
-  assert.match(scene, /geometry\.index\?\.count \?\? geometry\.attributes\.position\?\.count/);
-});
-
-test('scene bootstrap initializes shared geometry before creating the experience', async () => {
-  const scene = await read('scene.js');
-  const sharedGeometryIndex = scene.indexOf('const UNIT_BOX_GEOMETRY =');
-  const bootstrapIndex = scene.indexOf('if (!canvas) {');
-
-  assert.notEqual(sharedGeometryIndex, -1, 'shared geometry declaration must exist');
-  assert.notEqual(bootstrapIndex, -1, 'scene bootstrap must exist');
-  assert.ok(
-    sharedGeometryIndex < bootstrapIndex,
-    'module bootstrap must run after shared geometry constants leave the temporal dead zone',
-  );
-});
-
-test('surface patterns and palette separate architecture from the night background', async () => {
-  const scene = await read('scene.js');
-
-  assert.match(scene, /function createSurfaceTextureSet\(baseColor, seed, size, \{ pattern, repeat \}\)/);
-  for (const pattern of ['stone', 'timber', 'roof']) assert.match(scene, new RegExp(`case '${pattern}'`));
-
-  const stone = readTextureConfig(scene, 'stone');
-  const timber = readTextureConfig(scene, 'timber');
-  const roofTexture = readTextureConfig(scene, 'roof');
-  assert.ok(stone.repeat >= 5 && stone.repeat <= 6);
-  assert.ok(timber.repeat >= 3 && timber.repeat <= 4.5);
-  assert.ok(roofTexture.repeat >= 5.5 && roofTexture.repeat <= 6.5);
-  assert.ok(luminance(roofTexture.baseColor) >= luminance(0x28373a) * 1.12);
-
-  const roof = readMaterialColor(scene, 'roof');
-  const roofEdge = readMaterialColor(scene, 'roofEdge');
-  const timberDark = readMaterialColor(scene, 'timberDark');
-  const foliage = readMaterialColor(scene, 'foliage');
-  const foliageCold = readMaterialColor(scene, 'foliageCold');
-  assert.ok(
-    mappedLuminance(roofTexture.baseColor, roofEdge) >= mappedLuminance(roofTexture.baseColor, roof) * 1.06,
-    'fascia and ridges must read above the mapped roof plane',
-  );
-  assert.ok(mappedLuminance(timber.baseColor, timberDark) >= 0.125 && mappedLuminance(timber.baseColor, timberDark) < 0.2);
-  assert.ok(luminance(foliage) >= luminance(0x101b17) * 1.6 && luminance(foliage) < 0.3);
-  assert.ok(luminance(foliageCold) >= luminance(foliage) * 1.15 && luminance(foliageCold) < 0.36);
-  for (const color of [channels(foliage), channels(foliageCold)]) {
-    assert.ok(color.green > color.red && color.blue > color.red, 'foliage must remain blue-green');
-  }
-
-  const sharedMaterialConstructors = scene.slice(scene.indexOf('function createMaterials'), scene.indexOf('function shadow'))
-    .match(/new THREE\.MeshStandardMaterial/g) ?? [];
-  assert.equal(sharedMaterialConstructors.length, 13, 'material separation must not add shared materials');
-});
-
-test('floating stair treads sit on one continuous inset sloped stone foundation', async () => {
-  const scene = await read('scene.js');
-  const foundationSource = readTopLevelFunction(scene, 'createStairFoundationGeometry');
-  const pathStart = scene.indexOf('function addStonePath(');
-  const pathEnd = scene.indexOf('function addCurvedToriiBeam(', pathStart);
-  const stonePath = scene.slice(pathStart, pathEnd);
-
-  assert.equal((stonePath.match(/'stair-foundation'/g) ?? []).length, 1, 'the flight must expose one foundation drawable');
-  assert.match(
-    stonePath,
-    /new THREE\.Mesh\(createStairFoundationGeometry\(\), materials\.stoneDark\)/,
-    'the foundation must be one mesh reusing stoneDark',
-  );
-
-  const THREE = await loadThree();
-  const geometry = Function('THREE', `${foundationSource}\nreturn createStairFoundationGeometry();`)(THREE);
-  assert.ok(geometry.isBufferGeometry, 'the foundation must use BufferGeometry');
-  assert.equal(geometry.index.count, 36, 'a closed wedge prism must contain twelve triangles');
-  assert.equal(geometry.attributes.uv.count, geometry.attributes.position.count, 'mapped stone needs UVs on every vertex');
-  assert.equal(geometry.attributes.normal.count, geometry.attributes.position.count, 'the wedge must publish computed normals');
-
-  const positions = geometry.attributes.position;
-  const uvs = geometry.attributes.uv;
-  const positionAxes = ['x', 'y', 'z'];
-  const faceVertices = Array.from({ length: positions.count / 4 }, (_, faceIndex) => (
-    Array.from({ length: 4 }, (_, vertexIndex) => {
-      const index = faceIndex * 4 + vertexIndex;
-      return {
-        position: [positions.getX(index), positions.getY(index), positions.getZ(index)],
-        uv: [uvs.getX(index), uvs.getY(index)],
-      };
-    })
-  ));
-  const span = (face, axis) => {
-    const values = face.map(({ position }) => position[axis]);
-    return Math.max(...values) - Math.min(...values);
+  const exact = {
+    high: [110000, 180, 48, 20],
+    balanced: [65000, 140, 40, 20],
+    low: [35000, 110, 32, 20],
   };
-  const mappedFaces = {};
-  const capFaces = [];
-  faceVertices.forEach((face) => {
-    if (span(face, 2) < 1e-5) {
-      mappedFaces[face[0].position[2] > 0 ? 'front' : 'rear'] = { face, axes: [0, 1] };
-      return;
-    }
-    if (span(face, 0) < 1e-5) {
-      mappedFaces[face[0].position[0] < 0 ? 'left side' : 'right side'] = { face, axes: [2, 1] };
-      return;
-    }
-    capFaces.push(face);
-  });
-  const averageY = (face) => face.reduce((sum, vertex) => sum + vertex.position[1] / face.length, 0);
-  capFaces.sort((left, right) => averageY(left) - averageY(right));
-  mappedFaces.bottom = { face: capFaces[0], axes: [0, 2] };
-  mappedFaces.top = { face: capFaces[1], axes: [0, 2] };
-  assert.deepEqual(
-    Object.keys(mappedFaces).sort(),
-    ['bottom', 'front', 'left side', 'rear', 'right side', 'top'],
-    'the UV contract must classify all six foundation faces',
-  );
-  const uvWorldScale = 5.5;
-  for (const label of ['left side', 'right side', 'top', 'front', 'rear', 'bottom']) {
-    const { face, axes } = mappedFaces[label];
-    const origin = face[0];
-    face.slice(1).forEach((vertex) => {
-      const expectedU = (vertex.position[axes[0]] - origin.position[axes[0]]) / uvWorldScale;
-      const expectedV = (vertex.position[axes[1]] - origin.position[axes[1]]) / uvWorldScale;
-      assert.ok(
-        Math.abs((vertex.uv[0] - origin.uv[0]) - expectedU) < 1e-5,
-        `${label} U must track world ${positionAxes[axes[0]]} at one UV per ${uvWorldScale} units`,
-      );
-      assert.ok(
-        Math.abs((vertex.uv[1] - origin.uv[1]) - expectedV) < 1e-5,
-        `${label} V must track world ${positionAxes[axes[1]]} at one UV per ${uvWorldScale} units`,
-      );
-    });
+  for (const [tier, expected] of Object.entries(exact)) {
+    const profile = getSceneDetailProfile(tier);
+    assert.equal(profile, SCENE_DETAIL_PROFILES[tier]);
+    assert.deepEqual(Object.values(profile.budget), expected);
+    assert.equal('minTriangles' in profile.budget, false);
+    assert.equal(profile.laboratory.transparentLayers <= 2, true);
   }
+});
 
-  const uniqueCorners = [...new Map(Array.from({ length: positions.count }, (_, index) => {
-    const corner = [positions.getX(index), positions.getY(index), positions.getZ(index)];
-    return [corner.map((value) => value.toFixed(5)).join(','), corner];
-  })).values()];
-  assert.equal(uniqueCorners.length, 8, 'the foundation must be one trapezoidal prism');
+test('each tier builds required laboratory structure inside real scene budgets', () => {
+  const requiredRoles = [
+    'continuous-laboratory',
+    'shared-axis-floor-guide',
+    'main-ceiling-rail',
+    'entrance-sign',
+    'continuation-glass-corridor',
+    'alab-enclosure',
+    'primegen-planning-console',
+    'oxygen-rounded-shell',
+    'cloud-compound-bay',
+  ];
 
-  const xs = uniqueCorners.map(([x]) => x);
-  const zs = uniqueCorners.map(([, , z]) => z);
-  const minX = Math.min(...xs);
-  const maxX = Math.max(...xs);
-  const frontZ = Math.max(...zs);
-  const rearZ = Math.min(...zs);
-  const expectedFrontZ = 22 + 2.5 / 2;
-  const expectedRearZ = 22 - (39 - 1) * 2.35 - 2.5 / 2;
-  assert.ok(maxX - minX >= 4.6 && maxX - minX <= 4.8, 'foundation width must retain tread side overhang');
-  assert.ok(5.5 - 0.28 > maxX - minX, 'even the narrowest tread must overhang the foundation');
-  assert.ok(Math.abs(frontZ - expectedFrontZ) < 1e-5, 'foundation must start at the first tread front edge');
-  assert.ok(Math.abs(rearZ - expectedRearZ) < 1e-5, 'foundation must end at the last tread rear edge');
+  for (const tier of ['high', 'balanced', 'low']) {
+    const world = createLaboratoryWorld({ detailTier: tier });
+    const stats = collectSceneStats(world.root, { detailTier: tier });
+    const budget = getSceneDetailProfile(tier).budget;
 
-  const frontYs = uniqueCorners.filter(([, , z]) => Math.abs(z - frontZ) < 1e-5).map(([, y]) => y);
-  const rearYs = uniqueCorners.filter(([, , z]) => Math.abs(z - rearZ) < 1e-5).map(([, y]) => y);
-  const frontTopY = Math.max(...frontYs);
-  const frontBottomY = Math.min(...frontYs);
-  const rearTopY = Math.max(...rearYs);
-  const rearBottomY = Math.min(...rearYs);
-  const frontThickness = frontTopY - frontBottomY;
-  const rearThickness = rearTopY - rearBottomY;
-  assert.ok(frontThickness >= 0.85 && frontThickness <= 0.95, 'front foundation thickness must stay near 0.9 instead of reaching terrain');
-  assert.ok(rearThickness >= 0.85 && rearThickness <= 0.95, 'rear foundation thickness must stay near 0.9 instead of reaching terrain');
-
-  const slope = (rearTopY - frontTopY) / (frontZ - rearZ);
-  const bottomSlope = (rearBottomY - frontBottomY) / (frontZ - rearZ);
-  assert.ok(Math.abs(slope - 0.34 / 2.35) < 1e-6, 'foundation top must follow the stair rise/run');
-  assert.ok(Math.abs(bottomSlope - slope) < 1e-6, 'foundation bottom must stay parallel to its top');
-  for (let index = 0; index < 39; index += 1) {
-    const treadZ = 22 - index * 2.35;
-    const treadUnderside = index * 0.34 - 0.48 / 2;
-    const foundationTop = frontTopY + (frontZ - treadZ) * slope;
-    const clearance = treadUnderside - foundationTop;
-    assert.ok(clearance >= 0.05 - 1e-5 && clearance <= 0.1 + 1e-5, `tread ${index} must float just above the foundation`);
+    assert.equal(world.root.userData.worldId, 'continuous-laboratory');
+    assert.ok(stats.triangles > 0);
+    assert.ok(stats.drawables > 0);
+    assert.ok(stats.instancedCount > 0, `${tier} must use instancing for repeated lab structure`);
+    assert.ok(stats.triangles <= budget.maxTriangles, `${tier} triangle budget`);
+    assert.ok(stats.drawables <= budget.maxDrawables, `${tier} drawable budget`);
+    assert.ok(stats.geometries <= budget.maxGeometries, `${tier} geometry budget`);
+    assert.ok(stats.materials <= budget.maxMaterials, `${tier} material budget`);
+    assert.ok(stats.transparentDrawables <= 20, `${tier} transparent drawable budget`);
+    assert.ok(stats.maxVisibilityLayers <= getSceneDetailProfile(tier).laboratory.transparentLayers);
+    assert.ok(stats.textureBytes <= TEXTURE_GPU_LIMITS[tier]);
+    assert.equal(stats.withinBudget, true);
+    requiredRoles.forEach((role) => assert.ok(stats.semanticRoles.includes(role), `${tier} missing ${role}`));
+    world.dispose();
   }
+});
 
-  const terrainHelperSource = readTopLevelFunction(scene, 'liftTerrainForStairFoundation');
-  const pathElevationModel = (z) => Math.min(13.2, Math.max(0, (22 - z) * 0.145));
-  const liftTerrain = Function(
-    'pathElevation',
-    `${terrainHelperSource}\nreturn liftTerrainForStairFoundation;`,
-  )(pathElevationModel);
-  for (let index = 0; index < 39; index += 1) {
-    const treadZ = 22 - index * 2.35;
-    const foundationBottom = frontBottomY + (frontZ - treadZ) * bottomSlope;
-    const terrainY = liftTerrain(0, -20, treadZ);
-    const overlap = terrainY - foundationBottom;
-    assert.ok(overlap >= 0.08 && overlap <= 0.16, `terrain must overlap the foundation beneath tread ${index}`);
-  }
-
-  const coreZ = -20;
-  const naturalY = -5;
-  const targetBedY = pathElevationModel(coreZ) - 1.1;
-  for (const x of [-3, 0, 3]) {
-    assert.ok(Math.abs(liftTerrain(x, naturalY, coreZ) - targetBedY) < 1e-9, `x=${x} must receive full stair support`);
-  }
-  const sideFalloffY = liftTerrain(5.75, naturalY, coreZ);
-  assert.ok(sideFalloffY > naturalY && sideFalloffY < targetBedY, 'side support must fade between x=3 and x=8.5');
-  for (const x of [-9, -8.5, 8.5, 9]) {
-    assert.equal(liftTerrain(x, naturalY, coreZ), naturalY, `x=${x} must preserve natural terrain`);
-  }
-
-  const frontTargetY = pathElevationModel(25) - 1.1;
-  assert.ok(Math.abs(liftTerrain(0, naturalY, 25) - frontTargetY) < 1e-9, 'front support must remain full through z=25');
-  assert.equal(liftTerrain(0, naturalY, 34), naturalY, 'front support must fade out by z=34');
-  assert.ok(liftTerrain(0, naturalY, 29.5) > naturalY && liftTerrain(0, naturalY, 29.5) < frontTargetY, 'front support must fade gradually');
-  const rearTargetY = pathElevationModel(-80) - 1.1;
-  assert.ok(Math.abs(liftTerrain(0, naturalY, -80) - rearTargetY) < 1e-9, 'rear support must remain full through z=-80');
-  assert.equal(liftTerrain(0, naturalY, -94), naturalY, 'rear support must fade out by z=-94');
-  assert.ok(liftTerrain(0, naturalY, -87) > naturalY && liftTerrain(0, naturalY, -87) < rearTargetY, 'rear support must fade gradually');
-  for (const [x, z] of [[0, coreZ], [5.75, 29.5], [0, -87]]) {
-    assert.equal(liftTerrain(x, 20, z), 20, 'stair support must never lower natural terrain');
-  }
-
-  const groundSource = readTopLevelFunction(scene, 'addGround');
-  for (const contract of [
-    /const groundPosition = \[0, -1\.2, -30\]/,
-    /const localPlaneY = positions\.getY\(index\)/,
-    /const worldZ = groundPosition\[2\] - localPlaneY/,
-    /const liftedWorldY = terrainElevation\(x, worldZ\)/,
-    /positions\.setZ\(index, liftedWorldY - groundPosition\[1\]\)/,
-    /ground\.position\.set\(\.\.\.groundPosition\)/,
-  ]) assert.match(groundSource, contract, 'ground shaping must convert between plane-local and world coordinates');
-
-  const landingRearZ = -70 - 16 / 2;
-  const landingFrontZ = -70 + 16 / 2;
-  const landingBottomY = 12.75 - 1.1 / 2;
-  const landingTopY = 12.75 + 1.1 / 2;
-  assert.ok(rearZ >= landingRearZ && rearZ <= landingFrontZ, 'upper foundation end must stay inside the landing footprint');
-  assert.ok(rearTopY >= landingBottomY && rearTopY <= landingTopY, 'upper foundation end must meet without rising through the landing');
-
-  const center = uniqueCorners.reduce(
-    (sum, [x, y, z]) => [sum[0] + x / 8, sum[1] + y / 8, sum[2] + z / 8],
-    [0, 0, 0],
-  );
-  const indices = geometry.index.array;
-  for (let offset = 0; offset < indices.length; offset += 3) {
-    const vertices = [indices[offset], indices[offset + 1], indices[offset + 2]].map((index) => (
-      [positions.getX(index), positions.getY(index), positions.getZ(index)]
-    ));
-    const ab = vertices[1].map((value, axis) => value - vertices[0][axis]);
-    const ac = vertices[2].map((value, axis) => value - vertices[0][axis]);
-    const normal = [
-      ab[1] * ac[2] - ab[2] * ac[1],
-      ab[2] * ac[0] - ab[0] * ac[2],
-      ab[0] * ac[1] - ab[1] * ac[0],
+test('shared laboratory architecture reads as a built environment instead of an empty box', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  try {
+    const requiredRoles = [
+      'laboratory-ceiling-coffer',
+      'laboratory-floor-joint',
+      'laboratory-structural-column',
+      'laboratory-glass-partition-frame',
+      'laboratory-service-trunk',
+      'laboratory-bay-task-light',
     ];
-    const triangleCenter = [0, 1, 2].map((axis) => (
-      (vertices[0][axis] + vertices[1][axis] + vertices[2][axis]) / 3
-    ));
-    const outward = normal.reduce((dot, value, axis) => dot + value * (triangleCenter[axis] - center[axis]), 0);
-    assert.ok(outward > 1e-5, `triangle ${offset / 3} must wind outward`);
+
+    for (const role of requiredRoles) {
+      assert.ok(objectsWithRole(world.root, role).length > 0, `built environment missing ${role}`);
+    }
+    assert.ok(objectsWithRole(world.root, 'laboratory-ceiling-coffer')[0].isInstancedMesh);
+    assert.ok(objectsWithRole(world.root, 'laboratory-floor-joint')[0].isInstancedMesh);
+    assert.ok(objectsWithRole(world.root, 'laboratory-structural-column')[0].isInstancedMesh);
+    assert.ok(objectsWithRole(world.root, 'laboratory-bay-task-light').every((light) => light.isSpotLight));
+  } finally {
+    world.dispose();
   }
 });
 
-test('lantern footings reach the side terrain instead of floating beside the stairs', async () => {
-  const scene = await read('scene.js');
-  const terrainSource = readTopLevelFunction(scene, 'terrainElevation');
-  const meshTerrainSource = readTopLevelFunction(scene, 'terrainMeshElevation');
-  const groundSource = readTopLevelFunction(scene, 'addGround');
-  const lanternSource = readTopLevelFunction(scene, 'addLanternPath');
-
-  assert.match(groundSource, /terrainElevation\(x, worldZ\)/, 'ground and lanterns must share one height model');
-  assert.match(lanternSource, /const groundY = terrainMeshElevation\(x, z, detailProfile\.terrainSegments\)/);
-  assert.match(lanternSource, /const y = Math\.max\(pathY, groundY \+ 0\.75\);/);
-  assert.match(lanternSource, /lanterns\.push\(\{ x, y, z, groundY \}\)/);
-  assert.match(lanternSource, /const footingTop = y \+ 0\.375;/);
-  assert.match(lanternSource, /const footingBottom = groundY - 0\.12;/);
-  assert.match(lanternSource, /position: \[x, \(footingTop \+ footingBottom\) \/ 2, z\]/);
-  assert.match(lanternSource, /scale: \[0\.75, footingTop - footingBottom, 0\.75\]/);
-
-  const terrainElevation = Function(
-    'pathElevation',
-    `${readTopLevelFunction(scene, 'liftTerrainForStairFoundation')}\n${terrainSource}\nreturn terrainElevation;`,
-  )((z) => Math.min(13.2, Math.max(0, (22 - z) * 0.145)));
-
-  const terrainMeshElevation = Function(
-    'terrainElevation',
-    `${meshTerrainSource}\nreturn terrainMeshElevation;`,
-  )(terrainElevation);
-  const THREE = await loadThree();
-  const { SCENE_DETAIL_PROFILES } = await loadSceneModel();
-  for (const [tier, { terrainSegments }] of Object.entries(SCENE_DETAIL_PROFILES)) {
-    const geometry = new THREE.PlaneGeometry(120, 190, ...terrainSegments);
-    const positions = geometry.attributes.position;
-    for (let vertex = 0; vertex < positions.count; vertex += 1) {
-      const x = positions.getX(vertex);
-      const worldZ = -30 - positions.getY(vertex);
-      positions.setZ(vertex, terrainElevation(x, worldZ) + 1.2);
-    }
-    geometry.computeVertexNormals();
-    const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.set(0, -1.2, -30);
-    mesh.updateMatrixWorld(true);
-    const raycaster = new THREE.Raycaster();
-
-    for (let index = 3; index < 37; index += 4) {
-      const z = 22 - index * 2.35;
-      const pathY = index * 0.34 + 0.2;
-      for (const side of [-1, 1]) {
-        const x = side * (4.1 + Math.sin(index) * 0.18);
-        raycaster.set(new THREE.Vector3(x, 30, z), new THREE.Vector3(0, -1, 0));
-        const visibleGroundY = raycaster.intersectObject(mesh, false)[0]?.point.y;
-        assert.ok(Number.isFinite(visibleGroundY), `${tier} lantern ${index}/${side} must sit above terrain`);
-        const sampledGroundY = terrainMeshElevation(x, z, terrainSegments);
-        const y = Math.max(pathY, sampledGroundY + 0.75);
-        assert.ok(Math.abs(sampledGroundY - visibleGroundY) < 1e-5, `${tier} mesh sampler must match rendered terrain`);
-        const footingTop = y + 0.375;
-        const footingBottom = sampledGroundY - 0.12;
-        assert.ok(footingBottom < visibleGroundY, `${tier} lantern ${index}/${side} footing must penetrate terrain`);
-        assert.ok(footingTop > y + 0.325, `${tier} lantern ${index}/${side} footing must overlap its stem`);
-        assert.ok(footingTop - footingBottom > 1, `${tier} lantern ${index}/${side} needs a substantial buried footing`);
-      }
-    }
-  }
-});
-
-test('torii footings reach terrain outside the stair foundation', async () => {
-  const scene = await read('scene.js');
-  const toriiSource = readTopLevelFunction(scene, 'createTorii');
-  const terrainSource = readTopLevelFunction(scene, 'terrainElevation');
-  const meshTerrainSource = readTopLevelFunction(scene, 'terrainMeshElevation');
-
-  assert.match(toriiSource, /const footingTransforms = \[-1, 1\]\.map\(\(side\) => \{/);
-  assert.match(toriiSource, /const worldPostX = x \+ side \* 3\.1 \* scale;/);
-  assert.match(toriiSource, /const groundY = terrainMeshElevation\(worldPostX, z, detailProfile\.terrainSegments\);/);
-  assert.match(toriiSource, /const footingTop = 0\.43;/);
-  assert.match(toriiSource, /const footingBottom = \(groundY - 0\.12 - y\) \/ scale;/);
-  assert.match(toriiSource, /position: \[side \* 3\.1, \(footingTop \+ footingBottom\) \/ 2, 0\]/);
-  assert.match(toriiSource, /scale: \[1, \(footingTop - footingBottom\) \/ 0\.5, 1\]/);
-
-  const pathElevationModel = (z) => Math.min(13.2, Math.max(0, (22 - z) * 0.145));
-  const terrainElevation = Function(
-    'pathElevation',
-    `${readTopLevelFunction(scene, 'liftTerrainForStairFoundation')}\n${terrainSource}\nreturn terrainElevation;`,
-  )(pathElevationModel);
-  const terrainMeshElevation = Function(
-    'terrainElevation',
-    `${meshTerrainSource}\nreturn terrainMeshElevation;`,
-  )(terrainElevation);
-  const { SCENE_DETAIL_PROFILES } = await loadSceneModel();
-
-  for (const [tier, { terrainSegments }] of Object.entries(SCENE_DETAIL_PROFILES)) {
-    for (const [gateIndex, stepIndex] of [5, 17, 29].entries()) {
-      const x = Math.sin(gateIndex * 2.1) * 0.2;
-      const y = stepIndex * 0.34 + 0.3;
-      const z = 22 - stepIndex * 2.35;
-      const scale = 1 - gateIndex * 0.04;
-      for (const side of [-1, 1]) {
-        const worldPostX = x + side * 3.1 * scale;
-        const groundY = terrainMeshElevation(worldPostX, z, terrainSegments);
-        const footingTopWorld = y + 0.43 * scale;
-        const footingBottomWorld = groundY - 0.12;
-        assert.ok(footingBottomWorld < groundY, `${tier} torii ${gateIndex}/${side} must penetrate terrain`);
-        assert.ok(footingTopWorld > y - 0.15 * scale, `${tier} torii ${gateIndex}/${side} footing must overlap its post`);
-        assert.ok(footingTopWorld > footingBottomWorld, `${tier} torii ${gateIndex}/${side} footing scale must stay positive`);
-      }
-    }
-  }
-});
-
-test('the summit terrain supports the full temple footprint', async () => {
-  const scene = await read('scene.js');
-  const terrainSource = readTopLevelFunction(scene, 'terrainElevation');
-  const meshTerrainSource = readTopLevelFunction(scene, 'terrainMeshElevation');
-  const { SCENE_DETAIL_PROFILES } = await loadSceneModel();
-
-  assert.match(terrainSource, /templePlateau/, 'terrain must include a summit plateau beneath the temple');
-  assert.match(terrainSource, /Math\.max\(naturalWorldY, templePlateau\)/);
-
-  const pathElevationModel = (z) => Math.min(13.2, Math.max(0, (22 - z) * 0.145));
-  const terrainElevation = Function(
-    'pathElevation',
-    `${readTopLevelFunction(scene, 'liftTerrainForStairFoundation')}\n${terrainSource}\nreturn terrainElevation;`,
-  )(pathElevationModel);
-  const terrainMeshElevation = Function(
-    'terrainElevation',
-    `${meshTerrainSource}\nreturn terrainMeshElevation;`,
-  )(terrainElevation);
-
-  for (const [tier, { terrainSegments }] of Object.entries(SCENE_DETAIL_PROFILES)) {
-    for (const x of [-12, -6, 0, 6, 12]) {
-      for (const z of [-79.5, -75.75, -72, -68.25, -64.5]) {
-        assert.ok(
-          terrainMeshElevation(x, z, terrainSegments) >= 12.45,
-          `${tier} terrain at ${x},${z} must overlap the temple base`,
-        );
-      }
-    }
-  }
-});
-
-test('every tree trunk is planted into the rendered terrain mesh', async () => {
-  const scene = await read('scene.js');
-  const forestSource = readTopLevelFunction(scene, 'addForest');
-
-  assert.match(
-    forestSource,
-    /const groundY = terrainMeshElevation\(x, z, detailProfile\.terrainSegments\);/,
-    'forest placement must sample the same triangulated surface that is rendered',
+test('oxygen chamber reconstruction uses rounded hard-surface geometry and tiered reference details', () => {
+  const worlds = Object.fromEntries(
+    ['high', 'balanced', 'low'].map((detailTier) => [detailTier, createLaboratoryWorld({ detailTier })]),
   );
-  assert.match(forestSource, /y: groundY - 0\.12/);
-  assert.doesNotMatch(forestSource, /pathElevation\(z\) \+ range/);
+
+  try {
+    for (const [detailTier, world] of Object.entries(worlds)) {
+      const roundedShells = objectsWithRole(world.root, 'oxygen-shell-surface');
+      assert.ok(roundedShells.length >= 4, `${detailTier} must retain the chamber macro silhouette`);
+      assert.ok(
+        roundedShells.every((mesh) => mesh.geometry.userData.shapeFamily === 'rounded-box'),
+        `${detailTier} chamber shell must use real rounded hard-surface geometry`,
+      );
+      const cornerReturns = objectsWithRole(world.root, 'oxygen-shell-radius');
+      assert.equal(cornerReturns.length, 2);
+      assert.ok(
+        cornerReturns.every((mesh) => mesh.scale.z <= 0.5),
+        `${detailTier} corner returns must stay attached instead of projecting as long rails`,
+      );
+    }
+
+    const balancedRoles = collectSceneStats(worlds.balanced.root, { detailTier: 'balanced' }).semanticRoles;
+    const highRoles = collectSceneStats(worlds.high.root, { detailTier: 'high' }).semanticRoles;
+    const lowRoles = collectSceneStats(worlds.low.root, { detailTier: 'low' }).semanticRoles;
+
+    for (const role of ['oxygen-door-hinge', 'oxygen-shell-reveal']) {
+      assert.ok(balancedRoles.includes(role), `standard equipment detail must include ${role}`);
+      assert.equal(lowRoles.includes(role), false, `essential equipment detail must omit ${role}`);
+    }
+    for (const role of ['oxygen-seat-armrest', 'oxygen-seat-headrest', 'oxygen-seat-foot']) {
+      assert.ok(highRoles.includes(role), `full equipment detail must include ${role}`);
+      assert.equal(balancedRoles.includes(role), false, `standard equipment detail must omit ${role}`);
+    }
+
+    const highStats = collectSceneStats(worlds.high.root, { detailTier: 'high' });
+    const balancedStats = collectSceneStats(worlds.balanced.root, { detailTier: 'balanced' });
+    const lowStats = collectSceneStats(worlds.low.root, { detailTier: 'low' });
+    assert.ok(highStats.triangles > balancedStats.triangles);
+    assert.ok(balancedStats.triangles > lowStats.triangles);
+    assert.ok(highStats.drawables > balancedStats.drawables);
+    assert.ok(balancedStats.drawables > lowStats.drawables);
+  } finally {
+    Object.values(worlds).forEach((world) => world.dispose());
+  }
 });
 
-test('WebGL context lifecycle suspends stale frames and restores one render loop', async () => {
-  const scene = await read('scene.js');
-  const contextLost = readNestedFunction(scene, 'handleContextLost');
-  const contextRestored = readNestedFunction(scene, 'handleContextRestored');
-  const animate = readNestedFunction(scene, 'animate');
-  const requestStaticRender = readNestedFunction(scene, 'requestStaticRender');
+test('reference material classes use physically expressive material parameters', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  try {
+    for (const materialId of ['shell', 'silver', 'glass', 'upholstery']) {
+      assert.equal(
+        world.materials[materialId].isMeshPhysicalMaterial,
+        true,
+        `${materialId} must use MeshPhysicalMaterial`,
+      );
+    }
+    assert.ok(world.materials.shell.clearcoat >= 0.35);
+    assert.ok(world.materials.silver.metalness >= 0.7);
+    assert.ok(world.materials.glass.transmission >= 0.35);
+    assert.equal(world.materials.glass.depthWrite, false);
+    assert.ok(world.materials.upholstery.sheen >= 0.25);
+    const panes = objectsWithRole(world.root, 'oxygen-window-pane');
+    assert.equal(panes.length, 3);
+    const smokedPanes = panes.filter(({ material }) => material.userData.paletteRole === 'smoked-glass');
+    const clearPanes = panes.filter(({ material }) => material.userData.paletteRole === 'necessary-glass');
+    assert.equal(smokedPanes.length, 1);
+    assert.equal(clearPanes.length, 2);
+    assert.ok(smokedPanes[0].material.opacity > clearPanes[0].material.opacity);
+  } finally {
+    world.dispose();
+  }
+});
 
-  assert.match(scene, /let suspended = false/);
-  for (const contract of [
-    /event\.preventDefault\(\)/,
-    /cancelAnimationFrame\(animationFrame\)/,
-    /cancelAnimationFrame\(resizeFrame\)/,
-    /animationFrame = 0/,
-    /resizeFrame = 0/,
-    /suspended = true/,
-    /targetCanvas\.dataset\.sceneState = 'suspended'/,
-    /markFallback\(\)/,
-  ]) assert.match(contextLost, contract);
+test('procedural PBR micro-surfaces use independent linear textures and dispose with the world', () => {
+  const textureSizes = { high: 1024, balanced: 512, low: 256 };
 
-  for (const contract of [
-    /if \(disposed \|\| !suspended\) return/,
-    /suspended = false/,
-    /root\.dataset\.webgl = 'ready'/,
-    /targetCanvas\.dataset\.sceneState = 'ready'/,
-    /renderer\.setPixelRatio\(runtimeDpr\)/,
-    /renderer\.setSize\(window\.innerWidth, window\.innerHeight, false\)/,
-    /composer\?\.setPixelRatio\(runtimeDpr\)/,
-    /composer\?\.setSize\(window\.innerWidth, window\.innerHeight\)/,
-    /camera\.aspect = window\.innerWidth \/ window\.innerHeight/,
-    /camera\.updateProjectionMatrix\(\)/,
-    /chapterOffsets = measureChapterOffsets\(\)/,
-    /targetProgress = readScrollProgress\(\)/,
-    /currentProgress = targetProgress/,
-    /if \(profile\.animate && !animationFrame\) animationFrame = requestAnimationFrame\(animate\)/,
-    /else requestStaticRender\(\)/,
-  ]) assert.match(contextRestored, contract);
+  for (const detailTier of ['high', 'balanced', 'low']) {
+    const world = createLaboratoryWorld({ detailTier });
+    const expectedSize = textureSizes[detailTier];
+    const bindings = [
+      [world.materials.shell, 'roughnessMap', 'painted-shell', 'roughness'],
+      [world.materials.shell, 'normalMap', 'painted-shell', 'normal'],
+      [world.materials.silver, 'roughnessMap', 'brushed-metal', 'roughness'],
+      [world.materials.silver, 'normalMap', 'brushed-metal', 'normal'],
+      [world.materials.upholstery, 'roughnessMap', 'woven-upholstery', 'roughness'],
+      [world.materials.upholstery, 'normalMap', 'woven-upholstery', 'normal'],
+    ];
 
-  assert.match(animate, /if \(disposed \|\| suspended\)/);
-  assert.match(requestStaticRender, /if \(disposed \|\| suspended \|\| animationFrame\) return/);
-  assert.equal((scene.match(/addEventListener\('webglcontextlost'/g) ?? []).length, 1);
-  assert.equal((scene.match(/addEventListener\('webglcontextrestored'/g) ?? []).length, 1);
-  assert.match(scene, /removeEventListener\('webglcontextlost', handleContextLost\)/);
-  assert.match(scene, /removeEventListener\('webglcontextrestored', handleContextRestored\)/);
+    assert.equal(world.proceduralTextures.size, bindings.length);
+    for (const [material, mapSlot, surfaceRole, pbrChannel] of bindings) {
+      const texture = material[mapSlot];
+      assert.equal(texture?.isDataTexture, true, `${surfaceRole} ${pbrChannel} must be procedural data`);
+      assert.equal(texture.colorSpace, THREE.NoColorSpace, `${pbrChannel} data must stay linear`);
+      assert.equal(texture.generateMipmaps, false);
+      assert.equal(texture.image.width, expectedSize);
+      assert.equal(texture.image.height, expectedSize);
+      assert.equal(texture.userData.surfaceRole, surfaceRole);
+      assert.equal(texture.userData.pbrChannel, pbrChannel);
+      assert.equal(texture.userData.independentFromAlbedo, true);
+      assert.equal(texture.userData.gpuBytes, estimateTextureBytes(expectedSize, expectedSize, false));
+      assert.notEqual(texture, material.map, `${pbrChannel} must not reuse albedo`);
+      const samples = new Set();
+      const sampleStride = Math.max(4, Math.floor(texture.image.data.length / 1024 / 4) * 4);
+      for (let offset = pbrChannel === 'roughness' ? 1 : 0; offset < texture.image.data.length; offset += sampleStride) {
+        samples.add(texture.image.data[offset]);
+        if (pbrChannel === 'normal') samples.add(texture.image.data[offset + 1]);
+      }
+      assert.ok(samples.size >= 8, `${surfaceRole} ${pbrChannel} must contain real variation`);
+    }
+    assert.notEqual(world.materials.shell.roughnessMap, world.materials.shell.normalMap);
+    assert.notEqual(world.materials.silver.roughnessMap, world.materials.silver.normalMap);
+    assert.notEqual(world.materials.upholstery.roughnessMap, world.materials.upholstery.normalMap);
+    assert.notEqual(world.materials.shell.roughnessMap.image.data, world.materials.shell.normalMap.image.data);
+    assert.notEqual(world.materials.silver.roughnessMap.image.data, world.materials.silver.normalMap.image.data);
+    assert.notEqual(world.materials.upholstery.roughnessMap.image.data, world.materials.upholstery.normalMap.image.data);
+
+    const stats = collectSceneStats(world.root, { detailTier });
+    assert.equal(stats.textureBytes, bindings.length * estimateTextureBytes(expectedSize, expectedSize, false));
+    assert.equal(stats.withinBudget, true);
+
+    let disposeCount = 0;
+    world.proceduralTextures.forEach((texture) => {
+      texture.addEventListener('dispose', () => { disposeCount += 1; });
+    });
+    world.dispose();
+    world.dispose();
+    assert.equal(disposeCount, bindings.length, 'procedural textures dispose exactly once');
+  }
+});
+
+test('world exposes an animation-ready semantic hierarchy for the rebuilt equipment', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  try {
+    const runtime = world.root.userData.sculptRuntime;
+    assert.equal(runtime.version, 1);
+    assert.equal(runtime.rootRole, 'continuous-laboratory');
+    assert.ok(runtime.parts.includes('oxygen-rounded-shell'));
+    assert.ok(runtime.parts.includes('alab-robot-arm'));
+    assert.equal(runtime.rigType, 'action-ready-static-rig');
+    assert.doesNotThrow(() => JSON.stringify(runtime), 'root sculpt metadata must stay serializable');
+    assert.ok(Array.isArray(runtime.nodes));
+    const doorNode = runtime.nodes.find(({ id }) => id === 'oxygen-door-hardware');
+    assert.equal(doorNode.nodeType, 'group');
+    assert.equal(doorNode.parentRole, 'oxygen-dark-front-frame');
+    assert.equal(doorNode.actionProfile.animationRole, 'door-control');
+    assert.deepEqual(doorNode.transform.position, [1.93, 0, 1.47]);
+    assert.deepEqual(doorNode.actionProfile.pivot, {
+      mode: 'group-origin',
+      localPosition: [0, 0, 0],
+      axis: [0, 1, 0],
+    });
+    assert.deepEqual(runtime.sockets['oxygen-door'], {
+      parentRole: 'oxygen-door-hardware',
+      position: [0, 0, 0],
+      axis: [0, 1, 0],
+    });
+    assert.deepEqual(runtime.sockets['oxygen-door-hinge'], {
+      parentRole: 'oxygen-door-hardware',
+      position: [0, 1.47, 0],
+      axis: [0, 1, 0],
+    });
+    assert.deepEqual(runtime.sockets['oxygen-left-seat'], {
+      parentRole: 'oxygen-interior-assembly',
+      position: [-0.72, 0, 0.2],
+    });
+    assert.deepEqual(runtime.sockets['oxygen-integrated-screen'], {
+      parentRole: 'oxygen-integrated-screen',
+      position: [0, 0, 0],
+    });
+
+    for (const partId of [
+      'oxygen-rounded-shell',
+      'oxygen-dark-front-frame',
+      'oxygen-window-section',
+      'oxygen-door-hardware',
+      'oxygen-high-back-seat-left',
+    ]) {
+      const collider = runtime.colliders[partId];
+      assert.equal(collider.type, 'box');
+      assert.equal(collider.proxy, true);
+      assert.equal(collider.isTrigger, false);
+      assert.equal(collider.size.length, 3);
+      assert.ok(collider.size.every((dimension) => dimension > 0));
+      assert.deepEqual(runtime.destruction[partId], {
+        breakable: false,
+        fractureGroup: partId,
+        seamRefs: [],
+        detachableFragments: [],
+        breakImpulse: 0,
+      });
+    }
+    assert.deepEqual(runtime.destructionPolicy, {
+      mode: 'metadata-only',
+      defaultBreakable: false,
+      debrisStrategy: 'detach-semantic-groups',
+    });
+    assert.ok(world.sculptRuntime.nodes.get('oxygen-rounded-shell')?.isGroup);
+    assert.ok(world.sculptRuntime.nodes.get('alab-robot-arm')?.isGroup);
+    assert.equal(world.sculptRuntime.metadata, runtime);
+    assert.deepEqual(
+      world.sculptRuntime.nodes.get('oxygen-door-hardware').userData.actionProfile,
+      doorNode.actionProfile,
+    );
+    for (const partId of [
+      'oxygen-rounded-shell',
+      'oxygen-dark-front-frame',
+      'oxygen-interior-assembly',
+      'oxygen-base-frame',
+      'oxygen-shell-side-depth',
+      'oxygen-shell-top',
+      'oxygen-shell-bottom',
+      'oxygen-window-section',
+      'oxygen-door-hardware',
+      'oxygen-high-back-seat-left',
+      'oxygen-high-back-seat-right',
+      'oxygen-integrated-screen',
+      'oxygen-status-line',
+    ]) {
+      assert.ok(world.sculptRuntime.nodes.get(partId), `sculpt runtime missing ${partId}`);
+    }
+  } finally {
+    world.dispose();
+    assert.equal(world.sculptRuntime.nodes.size, 0, 'dispose clears live Object3D handles');
+  }
+});
+
+test('oxygen door group rotates its real panel about the right hinge axis', () => {
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  try {
+    const door = world.sculptRuntime.nodes.get('oxygen-door-hardware');
+    const shell = world.sculptRuntime.nodes.get('oxygen-rounded-shell');
+    const hinges = objectsWithRole(door, 'oxygen-door-hinge');
+    const [handle] = objectsWithRole(door, 'oxygen-door-handle');
+    const [pane] = objectsWithRole(door, 'oxygen-window-pane');
+    const screen = world.sculptRuntime.nodes.get('oxygen-integrated-screen');
+    const doorFrame = objectsWithRole(door, 'oxygen-door-frame-member');
+
+    assert.equal(door?.isGroup, true);
+    assert.equal(hinges.length, 3);
+    assert.ok(handle);
+    assert.ok(pane, 'the actual right glass pane belongs to the door pivot');
+    assert.equal(screen?.parent, door, 'integrated screen belongs to the moving door');
+    assert.deepEqual(screen.position.toArray(), [-0.43, 2.26, -0.01]);
+    assert.ok(doorFrame.length >= 4, 'the moving pane retains its necessary frame');
+    assert.equal(pane.parent, door);
+    assert.ok(doorFrame.every((member) => member.parent === door));
+
+    world.root.updateMatrixWorld(true);
+    const pivotBefore = worldPosition(door);
+    const shellOrigin = worldPosition(shell);
+    const hingeBefore = hinges.map(worldPosition);
+    const handleBefore = worldPosition(handle);
+    const paneBefore = worldPosition(pane);
+    const screenBefore = worldPosition(screen);
+    assert.ok(screenBefore.distanceTo(new THREE.Vector3(-4.3, 2.26, -7.64)) < 1e-8, 'closed screen world pose stays unchanged');
+    assert.ok(pivotBefore.distanceTo(shellOrigin) > 1.5, 'door pivot must be at the right hinge, not chamber center');
+
+    door.rotation.y = Math.PI / 4;
+    world.root.updateMatrixWorld(true);
+    const pivotAfter = worldPosition(door);
+    const handleAfter = worldPosition(handle);
+    const paneAfter = worldPosition(pane);
+    const screenAfter = worldPosition(screen);
+
+    assert.ok(pivotAfter.distanceTo(pivotBefore) < 1e-8, 'door pivot stays fixed while rotating');
+    hinges.forEach((hinge, index) => {
+      assert.ok(worldPosition(hinge).distanceTo(hingeBefore[index]) < 1e-8, 'hinge axis stays fixed');
+    });
+    assert.ok(handleAfter.distanceTo(handleBefore) > 0.05, 'handle follows the rotating door');
+    assert.ok(handleAfter.distanceTo(handleBefore) < 0.3, 'handle rotates locally instead of orbiting chamber center');
+    assert.ok(paneAfter.distanceTo(paneBefore) > 0.3, 'right door pane follows the rotating door');
+    assert.ok(screenAfter.distanceTo(screenBefore) > 0.2, 'integrated screen follows the rotating door');
+    assert.ok(Math.abs(handleAfter.distanceTo(pivotAfter) - handleBefore.distanceTo(pivotBefore)) < 1e-8);
+    assert.ok(Math.abs(paneAfter.distanceTo(pivotAfter) - paneBefore.distanceTo(pivotBefore)) < 1e-8);
+    assert.ok(Math.abs(screenAfter.distanceTo(pivotAfter) - screenBefore.distanceTo(pivotBefore)) < 1e-8);
+  } finally {
+    world.dispose();
+  }
+});
+
+test('sculpt spec interaction hierarchy and proxies match production metadata', async () => {
+  const spec = JSON.parse(await readFile(sculptSpecUrl, 'utf8'));
+  const components = new Map(spec.componentTree.map((component) => [component.id, component]));
+  const world = createLaboratoryWorld({ detailTier: 'high' });
+  try {
+    const runtime = world.root.userData.sculptRuntime;
+    const runtimeNodes = new Map(runtime.nodes.map((node) => [node.id, node]));
+    assert.deepEqual(Object.keys(runtime.colliders).sort(), [...oxygenActionPartIds].sort());
+    let comparedParts = 0;
+    for (const partId of oxygenActionPartIds) {
+      const component = components.get(partId);
+      const runtimeNode = runtimeNodes.get(partId);
+      assert.ok(component, `spec missing ${partId}`);
+      assert.equal(component.parent, runtimeNode.parentRole, `${partId} parent`);
+      assert.deepEqual(component.transform, runtimeNode.transform, `${partId} Group transform`);
+      assert.equal(component.actionProfile.animationRole, runtimeNode.actionProfile.animationRole);
+      assert.deepEqual(component.actionProfile.pivot, runtimeNode.actionProfile.pivot);
+      assert.deepEqual(component.actionProfile.transformChannels, runtimeNode.actionProfile.transformChannels);
+      assert.equal(component.actionProfile.collider.type, runtime.colliders[partId].type);
+      assert.deepEqual(component.actionProfile.collider.offset, runtime.colliders[partId].offset);
+      assert.deepEqual(component.actionProfile.collider.scale, runtime.colliders[partId].size);
+      assert.equal(component.actionProfile.collider.isTrigger, runtime.colliders[partId].isTrigger);
+      assert.equal(component.actionProfile.destruction.breakable, runtime.destruction[partId].breakable);
+      assert.equal(component.actionProfile.destruction.fractureGroup, runtime.destruction[partId].fractureGroup);
+      assert.equal(component.actionProfile.destruction.breakImpulse, runtime.destruction[partId].breakImpulse);
+      comparedParts += 1;
+    }
+    assert.equal(comparedParts, 13, 'all action-ready Oxygen components must match production');
+    assert.deepEqual(components.get('oxygen-integrated-screen').actionProfile.sockets, [{
+      id: 'screen-center',
+      localPosition: [0, 0, 0],
+      localRotation: [0, 0, 0],
+    }]);
+  } finally {
+    world.dispose();
+  }
+});
+
+test('scene stats traverse geometry and multiply indexed triangles by InstancedMesh count', () => {
+  const root = new THREE.Group();
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const material = new THREE.MeshStandardMaterial();
+  const instances = new THREE.InstancedMesh(geometry, material, 4);
+  instances.userData.semanticRole = 'fixture-row';
+  root.add(instances);
+
+  const stats = collectSceneStats(root, { detailTier: 'low' });
+  const trianglesPerBox = geometry.index.count / 3;
+  assert.equal(stats.triangles, trianglesPerBox * 4);
+  assert.equal(stats.drawables, 1);
+  assert.equal(stats.geometries, 1);
+  assert.equal(stats.materials, 1);
+  assert.equal(stats.instancedCount, 4);
+  assert.deepEqual(stats.semanticRoles, ['fixture-row']);
+});
+
+test('manifest gate selects only published approved physical screen mappings', async () => {
+  const manifest = JSON.parse(await readFile(manifestUrl, 'utf8'));
+  const selected = selectPublishedSceneMedia(manifest);
+
+  assert.deepEqual([...selected.keys()], [
+    'physical-integrated-screen',
+    'physical-control-console',
+    'physical-dual-monitor-workstation',
+    'semantic-foreground-phone-or-tablet',
+  ]);
+  assert.equal(selected.has('semantic-foreground-phone'), false, 'Oxygen mini program stays semantic foreground only');
+  for (const item of selected.values()) {
+    assert.equal(item.authStatus, 'APPROVED');
+    assert.equal(item.publicationStatus, 'PUBLISHED');
+    assert.match(item.path, /^\.\/assets\/images\/[a-z0-9-]+\.webp$/);
+    assert.ok(Math.max(item.width, item.height) <= 1024);
+  }
+});
+
+function publishedMediaItem({
+  id,
+  mapping,
+  width = 64,
+  height = 32,
+}) {
+  return {
+    id,
+    mapping,
+    width,
+    height,
+    path: `./assets/images/${id}.webp`,
+    authStatus: 'APPROVED',
+    publicationStatus: 'PUBLISHED',
+  };
+}
+
+function disposableTexture() {
+  const texture = new THREE.Texture({ width: 64, height: 32 });
+  let disposeCount = 0;
+  texture.dispose = () => { disposeCount += 1; };
+  return { texture, get disposeCount() { return disposeCount; } };
+}
+
+test('manifest texture dimensions must be positive finite integers no larger than 1024', () => {
+  const mapping = 'physical-integrated-screen';
+  const candidates = [
+    publishedMediaItem({ id: 'negative-width', mapping, width: -1 }),
+    publishedMediaItem({ id: 'zero-height', mapping, height: 0 }),
+    publishedMediaItem({ id: 'fractional-width', mapping, width: 63.5 }),
+    publishedMediaItem({ id: 'nan-width', mapping, width: Number.NaN }),
+    publishedMediaItem({ id: 'infinite-height', mapping, height: Number.POSITIVE_INFINITY }),
+    publishedMediaItem({ id: 'oversized', mapping, width: 1025 }),
+  ];
+
+  for (const item of candidates) {
+    assert.equal(
+      selectPublishedSceneMedia({ media: [item] }).size,
+      0,
+      `${item.id} must fail the runtime texture gate`,
+    );
+  }
+  assert.equal(
+    selectPublishedSceneMedia({ media: [publishedMediaItem({ id: 'valid-size', mapping, width: 1024, height: 1 })] }).size,
+    1,
+  );
+});
+
+test('texture loaded before configuration failure is disposed and rejection reaches the caller', async () => {
+  const probe = disposableTexture();
+  probe.texture.userData = Object.freeze({});
+  const manifest = { media: [publishedMediaItem({ id: 'configure-failure', mapping: 'physical-integrated-screen' })] };
+  const textureLoader = { loadAsync: async () => probe.texture };
+
+  await assert.rejects(
+    loadPublishedSceneTextures(manifest, { textureLoader }),
+    (error) => error instanceof AggregateError && /laboratory scene textures/i.test(error.message),
+  );
+  assert.equal(probe.disposeCount, 1);
+});
+
+test('texture loader transport failures reject instead of returning an empty map', async () => {
+  const manifest = { media: [publishedMediaItem({ id: 'missing-screen', mapping: 'physical-integrated-screen' })] };
+  const textureLoader = { loadAsync: async () => { throw new Error('404 missing-screen'); } };
+  let resolved = false;
+
+  await assert.rejects(
+    loadPublishedSceneTextures(manifest, { textureLoader }).then(() => { resolved = true; }),
+    (error) => error instanceof AggregateError
+      && error.errors.some((cause) => /404 missing-screen/.test(cause.message)),
+  );
+  assert.equal(resolved, false);
+});
+
+test('mixed texture batches dispose fulfilled textures and never return a partial map', async () => {
+  const success = disposableTexture();
+  const manifest = {
+    media: [
+      publishedMediaItem({ id: 'successful-screen', mapping: 'physical-integrated-screen' }),
+      publishedMediaItem({ id: 'failed-screen', mapping: 'physical-dual-monitor-workstation' }),
+    ],
+  };
+  const textureLoader = {
+    loadAsync: async (url) => {
+      if (url.includes('failed-screen')) throw new Error('404 failed-screen');
+      return success.texture;
+    },
+  };
+  let returnedMap = null;
+
+  await assert.rejects(
+    loadPublishedSceneTextures(manifest, { textureLoader }).then((loaded) => { returnedMap = loaded; }),
+    (error) => error instanceof AggregateError && error.errors.length === 1,
+  );
+  assert.equal(success.disposeCount, 1);
+  assert.equal(returnedMap, null);
+});
+
+test('runtime texture configuration disables mipmaps and uses the explicit GPU formula', () => {
+  assert.equal(estimateTextureBytes(1024, 658, false), 1024 * 658 * 4);
+  assert.equal(estimateTextureBytes(12, 10, true), 12 * 10 * 4 * 4 / 3);
+
+  const texture = new THREE.Texture({ width: 1024, height: 658 });
+  const configured = configureRuntimeTexture(texture, { width: 1024, height: 658 });
+  assert.equal(configured, texture);
+  assert.equal(texture.colorSpace, THREE.SRGBColorSpace);
+  assert.equal(texture.generateMipmaps, false);
+  assert.equal(texture.minFilter, THREE.LinearFilter);
+  assert.equal(texture.magFilter, THREE.LinearFilter);
+  assert.equal(texture.userData.gpuBytes, 1024 * 658 * 4);
+  assert.throws(
+    () => configureRuntimeTexture(new THREE.Texture(), { width: 1025, height: 400 }),
+    /longest edge.*1024/i,
+  );
+  assert.throws(
+    () => configureRuntimeTexture(new THREE.Texture(), { width: 12.5, height: 10 }),
+    /positive integer dimensions/i,
+  );
+});
+
+test('scene stats account for every mapped screen texture without mip overhead', () => {
+  const world = createLaboratoryWorld({ detailTier: 'low' });
+  const proceduralBytes = collectSceneStats(world.root, { detailTier: 'low' }).textureBytes;
+  const definitions = [
+    ['physical-integrated-screen', 1024, 580],
+    ['physical-control-console', 1024, 716],
+    ['physical-dual-monitor-workstation', 1024, 658],
+    ['semantic-foreground-phone-or-tablet', 498, 1024],
+  ];
+  const textures = new Map(definitions.map(([mapping, width, height]) => [
+    mapping,
+    configureRuntimeTexture(new THREE.Texture({ width, height }), { width, height }),
+  ]));
+  applyMappedTextures(world, textures);
+
+  const stats = collectSceneStats(world.root, { detailTier: 'low' });
+  const expectedBytes = definitions.reduce(
+    (total, [, width, height]) => total + estimateTextureBytes(width, height, false),
+    0,
+  );
+  assert.equal(stats.textureBytes, expectedBytes + proceduralBytes);
+  assert.equal(stats.maxTextureEdge, 1024);
+  assert.ok(stats.textureBytes < TEXTURE_GPU_LIMITS.low);
+  assert.equal(stats.withinBudget, true);
+  world.dispose();
 });

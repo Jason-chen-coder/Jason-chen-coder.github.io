@@ -102,7 +102,7 @@ class Control extends EventTarget {
   setAttribute(key, value) { this.attributes.set(key, String(value)); }
   querySelector(selector) { return selector === 'svg' ? this.icon : null; }
 }
-function enhancedPlayer({ broken = false } = {}) {
+function enhancedPlayer({ broken = false, canvas = false, drawFails = false } = {}) {
   const controls = Object.fromEntries(['controls', 'cover', 'toggle', 'seek', 'time', 'mute', 'fullscreen', 'meta', 'cover-label', 'duration-label'].map(key => [key, new Control()]));
   const stage = new Control();
   const figure = new Control();
@@ -110,8 +110,17 @@ function enhancedPlayer({ broken = false } = {}) {
   figure.querySelector = selector => selector === '.film-stage' ? stage : selector === '[data-film-error]' ? error : controls[selector.slice(11, -1)] ?? null;
   if (broken) delete controls.toggle;
   const video = new Control();
+  const draws = [];
+  const frameCallbacks = new Map();
+  let frameId = 0;
+  const surface = new Control();
+  surface.getContext = () => ({drawImage: (...args) => { if (drawFails) throw new Error('Canvas unavailable'); draws.push(args); }});
+  const screen = {insertBefore: (element) => { screen.canvas = element; }};
   Object.assign(video, {controls:true, paused:true, ended:false, currentTime:0, duration:NaN, volume:1, muted:false, dataset:{filmDuration:'37.366667'}});
-  video.closest = selector => selector === '.film-player' ? figure : null;
+  video.hasAttribute = name => canvas && name === 'data-film-canvas';
+  video.closest = selector => selector === '.film-player' ? figure : selector === '.film-screen' ? screen : null;
+  video.requestVideoFrameCallback = callback => { frameCallbacks.set(++frameId, callback); return frameId; };
+  video.cancelVideoFrameCallback = id => frameCallbacks.delete(id);
   video.pause = () => {video.paused = true;video.dispatchEvent(new Event('pause'));};
   video.play = async () => {
     if(video.rejectPlay) throw new Error('Playback denied');
@@ -121,12 +130,45 @@ function enhancedPlayer({ broken = false } = {}) {
   };
   const scope = new EventTarget();
   scope.documentElement = {lang:'zh-CN'};
+  scope.createElement = () => surface;
   scope.querySelectorAll = () => [video];
   const context = vm.createContext({PortfolioI18n:{translate:(key, locale) => `${locale}:${key}`}});
   vm.runInContext(source, context);
   context.PortfolioFilms.initProjectFilms(scope);
-  return {video, controls, figure, stage, error, scope};
+  return {video, controls, figure, stage, error, scope, screen, surface, draws, frameCallbacks};
 }
+
+test('opt-in canvas waits for decoded data, refreshes seeks and pauses, and restores native pixels on failure', async () => {
+  const normal = enhancedPlayer();
+  assert.equal(normal.screen.canvas, undefined, 'other players keep native presentation');
+  const media = enhancedPlayer({canvas:true});
+  const {video, surface, draws, frameCallbacks} = media;
+  assert.equal(surface.style.display, 'none');
+  assert.equal(video.style.opacity, undefined, 'poster remains visible before data loads');
+  Object.assign(video, {readyState:2, videoWidth:1920, videoHeight:1080});
+  video.dispatchEvent(new Event('loadeddata'));
+  assert.equal(draws.length, 1);
+  assert.equal(surface.width, 1920);
+  assert.equal(surface.height, 1080);
+  assert.equal(video.style.opacity, '0');
+  assert.equal(frameCallbacks.size, 0, 'paused videos do not run a render loop');
+  await video.play();
+  assert.equal(frameCallbacks.size, 1);
+  video.pause();
+  assert.equal(frameCallbacks.size, 0);
+  const beforeSeek = draws.length;
+  video.dispatchEvent(new Event('seeked'));
+  assert.equal(draws.length, beforeSeek + 1);
+  video.dispatchEvent(new Event('error'));
+  assert.equal(surface.style.display, 'none');
+  assert.equal(video.style.opacity, '');
+  assert.equal(video.controls, true);
+  const broken = enhancedPlayer({canvas:true,drawFails:true});
+  Object.assign(broken.video, {readyState:2,videoWidth:1920,videoHeight:1080});
+  broken.video.dispatchEvent(new Event('loadeddata'));
+  assert.equal(broken.video.style.opacity, '');
+  assert.equal(broken.surface.style.display, 'none');
+});
 
 test('custom playback waits for user intent, preserves metadata-free load, and synchronizes translated controls', async () => {
   const {video, controls, figure, scope} = enhancedPlayer();
