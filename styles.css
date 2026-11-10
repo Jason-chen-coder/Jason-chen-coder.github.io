@@ -2858,3 +2858,6 @@ html:not(.js)
     padding-block: 30px;
   }
 }
+
+/* Personal-only profile: the toolbox occupies the available width. */
+.about-details-personal { grid-template-columns: 1fr; }

@@ -31,7 +31,7 @@ test('homepage has a Chinese semantic document and a complete navigable journey'
   assert.match(html, /<footer\b/);
   const ids = attributes(html, 'id');
   assert.equal(new Set(ids).size, ids.length, 'document IDs must be unique, including inline SVG definitions');
-  for (const id of ['top', 'opensource', 'work', 'craft', 'about', 'experience', 'contact']) {
+  for (const id of ['top', 'opensource', 'craft', 'about', 'yourdream', 'contact']) {
     assert.ok(ids.includes(id), `existing or new public hash #${id} must resolve`);
   }
   for (const href of attributes(html, 'href').filter((value) => value.startsWith('#'))) {
@@ -63,22 +63,12 @@ test('four featured repositories retain verified popularity order and dated coun
   }
 });
 
-test('professional work preserves four product destinations and includes the remote checkup workflow', async () => {
+test('personal publication omits professional destinations and retains the five personal films', async () => {
   const html = await read('index.html');
-  for (const href of professionalLinks) assert.ok(html.includes(`href="${href}"`), `${href} must remain linked`);
-  for (const name of ['αLab Studio', 'PrimeGen', 'Oxygen Future', 'Cloud Imaging']) assert.ok(html.includes(name));
-  assert.match(html, /前端架构|协议工具/);
-  assert.match(html, /多窗口架构|媒体集成/);
-  const checkup = html.match(/<article\b[^>]*id="remote-checkup"[\s\S]*?<\/article>/)?.[0];
-  assert.ok(checkup, 'remote checkup has its own professional work entry');
-  assert.match(checkup, /华大云影|work\.checkup\.brand/);
-  assert.match(checkup, /选院与预约流程演示 · 含模拟超声报告/);
-  assert.match(checkup, /运营后台及 H5/);
-  assert.match(checkup, /<video\b[^>]*controls playsinline preload="none"[^>]*data-promo-video/);
-  assert.match(checkup, /src="\.\/assets\/videos\/health-applet-promo\.mp4(?:\?v=[a-f0-9]+)?"/);
-  assert.match(checkup, /poster="\.\/assets\/images\/health-applet-promo-poster\.webp(?:\?v=[a-f0-9]+)?"/);
-  assert.equal([...html.matchAll(/<video\b[^>]*data-promo-video/g)].length, 7, 'all seven product films share playback behavior');
-  assert.doesNotMatch(checkup, /checkup-diagram|work\.checkup\.diagram/, 'the source demo replaces the schematic');
+  for (const href of professionalLinks) assert.ok(!html.includes(`href="${href}"`), `${href} must not remain linked`);
+  for (const name of ['αLab Studio', 'PrimeGen', 'Oxygen Future', 'Cloud Imaging', '华大云影', '华大智造', '长亮科技']) assert.ok(!html.includes(name), `${name} must not be public`);
+  assert.doesNotMatch(html, /id="(?:work|experience|remote-checkup)"|work\.checkup|health-applet-promo|oxygen-future/);
+  assert.equal([...html.matchAll(/<video\b[^>]*data-promo-video/g)].length, 5, 'four open-source films and YourDream share playback behavior');
   assert.doesNotMatch(html, /(?:提升|提高|降低)[^<]{0,15}\d+%/u, 'do not invent performance or business outcomes');
 });
 

@@ -394,32 +394,25 @@ test('sensitive originals are absent from the Git index and recursively deployed
   assert.deepEqual(sensitiveContentPaths, [], 'renamed raw avatar or clinical sources must fail by content hash');
 });
 
-test('homepage professional images resolve to approved manifest publications', async () => {
-  const [manifest, html] = await Promise.all([
+test('retained professional images and their manifest are excluded from the personal publication', async () => {
+  const [manifest, html, config] = await Promise.all([
     read('assets/images/lab-media-manifest.json').then(JSON.parse),
     read('index.html').then(String),
+    read('_config.yml').then(String),
   ]);
-  const images = [...html.matchAll(/<img\b([^>]+)>/g)].map((match) => ({
-    src: match[1].match(/\bsrc="([^"]+)"/)?.[1],
-    alt: match[1].match(/\balt="([^"]*)"/)?.[1],
-  })).filter(({ src }) => src?.startsWith('./assets/images/') && src !== './assets/images/cat-logo.svg');
-  const approvedByPath = new Map(manifest.media.flatMap((item) => [
-    [item.path, item],
-    ...(item.reducedMotionPoster ? [[item.reducedMotionPoster.path, item]] : []),
-  ]));
-
-  assert.doesNotMatch(html, /\bdata-media-mapping=/, 'mapping must exist only in the manifest');
-  assert.doesNotMatch(html, /\bdata-publication-status=/, 'publication status must exist only in the manifest');
+  const excluded = new Set([...config.matchAll(/^  - (.+)$/gm)].map(match => match[1]));
+  assert.ok(excluded.has('assets/images/lab-media-manifest.json'));
   assert.deepEqual(manifest.media.map(({ mapping }) => mapping), EXPECTED_MAPPINGS);
-  assert.equal(new Set(EXPECTED_MAPPINGS).size, EXPECTED_MAPPINGS.length, 'semantic mappings must be unique');
-  assert.ok(images.length >= 3, 'the three image-based professional projects retain their visual evidence');
-  assert.match(html, /<video\b[^>]*src="\.\/assets\/videos\/oxygen-future\.mp4(?:\?[^\"]*)?"/, 'Oxygen retains its product film as visual evidence');
-
-  for (const image of images) {
-    const item = approvedByPath.get(image.src);
-    assert.ok(item, `${image.src} must have reviewed provenance in the media manifest`);
-    assert.equal(item.publicationStatus, 'PUBLISHED', `${image.src} must be approved for publication`);
-    assert.ok(image.alt?.trim(), `${image.src} must retain meaningful static alternative text`);
+  assert.equal(new Set(EXPECTED_MAPPINGS).size, EXPECTED_MAPPINGS.length);
+  for (const item of [...manifest.media, manifest.fallback]) {
+    for (const path of [item.path, item.reducedMotionPoster?.path].filter(Boolean)) {
+      assert.ok(excluded.has(path.replace(/^\.\//, '')), `${path} must be excluded from Pages`);
+      assert.ok(!html.includes(path), `${path} must not appear in homepage markup`);
+    }
+  }
+  for (const file of ['assets/videos/oxygen-future.mp4', 'assets/videos/health-applet-promo.mp4']) {
+    assert.ok(excluded.has(file), `${file} must be excluded from Pages`);
+    assert.ok(!html.includes(file), `${file} must not remain embedded`);
   }
 });
 
