@@ -63,12 +63,12 @@ test('four featured repositories retain verified popularity order and dated coun
   }
 });
 
-test('personal publication omits professional destinations and retains the five personal films', async () => {
+test('personal publication omits professional destinations and retains the six personal films', async () => {
   const html = await read('index.html');
   for (const href of professionalLinks) assert.ok(!html.includes(`href="${href}"`), `${href} must not remain linked`);
   for (const name of ['αLab Studio', 'PrimeGen', 'Oxygen Future', 'Cloud Imaging', '华大云影', '华大智造', '长亮科技']) assert.ok(!html.includes(name), `${name} must not be public`);
   assert.doesNotMatch(html, /id="(?:work|experience|remote-checkup)"|work\.checkup|health-applet-promo|oxygen-future/);
-  assert.equal([...html.matchAll(/<video\b[^>]*data-promo-video/g)].length, 5, 'four open-source films and YourDream share playback behavior');
+  assert.equal([...html.matchAll(/<video\b[^>]*data-promo-video/g)].length, 6, 'four open-source films, DevSkills and YourDream share playback behavior');
   assert.doesNotMatch(html, /(?:提升|提高|降低)[^<]{0,15}\d+%/u, 'do not invent performance or business outcomes');
 });
 

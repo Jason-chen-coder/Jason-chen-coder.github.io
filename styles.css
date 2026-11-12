@@ -2861,3 +2861,27 @@ html:not(.js)
 
 /* Personal-only profile: the toolbox occupies the available width. */
 .about-details-personal { grid-template-columns: 1fr; }
+
+/* DevSkills shares the personal-film player and the homepage editorial palette. */
+.devskills-feature .studio-lead { font-family: var(--sans); font-size: clamp(20px, 2vw, 26px); }
+.devskills-detail { margin-top: 13px; color: var(--muted); font-size: 12px; line-height: 1.9; }
+.devskills-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 22px; }
+.devskills-links .text-link { font-size: 12px; }
+.devskills-links .text-link:focus-visible { outline-offset: 5px; }
+
+/* Shared reading palette for the desktop articles and the static fallback. */
+@media (forced-colors: none) {
+  :root[data-theme="dark"] {
+    --paper: #19212e; --paper-deep: #232e3f;
+    --ink: #edf2fa; --ink-2: #c1ccdc; --muted: #a9b6ca;
+    --gold: #e3c184; --teal: #7bd4cf; --indigo: #b4c5f5; --line: #b7cbeb2b;
+  }
+  [data-theme="dark"] ::selection { background: #526b91; color: #fff; }
+  [data-theme="dark"] .project-tags span { background: #d3e2ff0d; border-color: var(--line); box-shadow: none; }
+  [data-theme="dark"] :is(.film-stage, .mac-detail-media) { background: var(--paper-deep); }
+  [data-theme="dark"] :is(.film-cover-disc, .film-cover-label) { background: #26354bea; color: #edf2fa; border-color: var(--line); }
+  [data-theme="dark"] .film-cover:hover .film-cover-disc { background: #3b506e; }
+  [data-theme="dark"] :is(.capabilities dt, .personal-note) { color: var(--gold); }
+  [data-theme="dark"] :is(.experience-date, .experience-company, .project-copy h3 a > span:last-child) { color: var(--muted); }
+  [data-theme="dark"] .capabilities dl > div { border-bottom-color: var(--line); }
+}

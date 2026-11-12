@@ -1,0 +1,78 @@
+/* Appearance is independent of window geometry and animation. */
+#macos-root .mac-theme { position: relative; }
+#macos-root .mac-theme summary { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 999px; cursor: pointer; list-style: none; user-select: none; }
+#macos-root .mac-theme summary::-webkit-details-marker { display: none; }
+#macos-root .mac-theme summary:hover, #macos-root .mac-theme[open] summary { background: var(--glass-hover); }
+#macos-root .mac-theme-panel { position: absolute; top: calc(100% + 9px); right: 0; width: 210px; padding: 8px; border: 1px solid var(--glass-edge); border-radius: 15px; color: var(--glass-ink); background: var(--glass-reading); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-highlight), 0 12px 36px #0a162d38; }
+.mac-theme-heading { padding: 7px 9px 10px; font-size: 11px; font-weight: 600; color: var(--glass-secondary); }
+#macos-root .mac-theme-panel button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 37px; padding: 7px 9px; border-radius: 8px; text-align: left; }
+#macos-root .mac-theme-panel button[aria-pressed="true"], #macos-root .mac-theme-panel button:hover { background: var(--glass-hover); box-shadow: none; }
+.mac-theme-check { margin-left: auto; font-size: 14px; }
+.mac-theme-swatch { width: 21px; height: 18px; border: 1px solid #8b94a280; border-radius: 5px; box-shadow: inset 0 4px #8b94a23d; }
+.mac-theme-swatch.light { background: #f2f4f8; }
+.mac-theme-swatch.dark { background: #252c38; }
+.mac-theme-swatch.system { background: linear-gradient(90deg,#f2f4f8 50%,#252c38 50%); }
+.mac-theme-hint { color: var(--glass-secondary); font-size: 10px; line-height: 1.5; padding: 10px 9px 5px; border-top: 1px solid var(--glass-line); margin-top: 6px; }
+@media(max-width:720px) { .mac-theme-label { display:none; } #macos-root .mac-theme summary { padding: 6px; } #macos-root .mac-theme-panel { position:fixed; top:44px; right:9px; max-width:calc(100vw - 18px); } }
+@media(max-width:360px) { .mac-clock { display:none; } }
+@media(forced-colors:none) {
+ html[data-theme="dark"] #macos-root {
+  --glass-ink: #edf2fa;
+  --glass-secondary: #acb8ca;
+  --glass-tint: rgb(24 32 46 / 77%);
+  --glass-control: rgb(48 60 79 / 82%);
+  --glass-hover: rgb(95 116 147 / 28%);
+  --glass-reading: rgb(25 33 46 / 97%);
+  --glass-edge: rgb(186 208 242 / 19%);
+  --glass-line: rgb(183 203 235 / 17%);
+  --glass-highlight: inset 0 1px 0 rgb(210 226 255 / 16%), inset 0 -1px 0 rgb(12 19 31 / 30%);
+  --glass-control-shadow: var(--glass-highlight), 0 2px 7px #0003, 0 0 0 1px var(--glass-edge);
+ }
+ html[data-theme="dark"] #macos-root .mac-window {
+  --paper: #19212e; --paper-deep: #232e3f; --ink: #edf2fa; --ink-2: #c1ccdc; --muted: #a9b6ca;
+  --gold: #e3c184; --teal: #7bd4cf; --indigo: #b4c5f5;
+ }
+ html[data-theme="dark"] #macos-root .mac-menubar { box-shadow: inset 0 -1px var(--glass-edge), 0 1px 8px #0002; }
+ html[data-theme="dark"] #macos-root .mac-menubar button:hover,
+ html[data-theme="dark"] #macos-root .mac-menubar button:focus-visible { background: var(--glass-hover); box-shadow: none; }
+ html[data-theme="dark"] #macos-root .mac-locales { background: #07101d40; }
+ html[data-theme="dark"] #macos-root .mac-locales button[aria-pressed="true"] { background: var(--glass-control); }
+ html[data-theme="dark"] #macos-root .mac-dock { background: rgb(27 37 54 / 65%); box-shadow: var(--glass-highlight), 0 0 0 1px var(--glass-edge), 0 9px 26px #0005; }
+ html[data-theme="dark"] #macos-root .mac-dock .divider { background: var(--glass-line); }
+ html[data-theme="dark"] #macos-root .mac-dock-dot { background: #e5edfa; }
+ html[data-theme="dark"] #macos-root .mac-dock-tooltip { background: var(--glass-reading); }
+ html[data-theme="dark"] #macos-root .mac-window-visual { background: var(--glass-tint); border-color: var(--glass-edge); }
+ html[data-theme="dark"] #macos-root .mac-titlebar { background: rgb(43 56 77 / 55%); border-bottom-color: var(--glass-line); box-shadow: var(--glass-highlight); }
+ html[data-theme="dark"] #macos-root .mac-window-title { color: var(--glass-ink); }
+ html[data-theme="dark"] #macos-root .mac-window-body { scrollbar-color: #66758b transparent; }
+ html[data-theme="dark"] #macos-root .mac-project-launcher { background: rgb(48 61 81 / 55%); border-color: var(--glass-line); box-shadow: var(--glass-highlight); }
+ html[data-theme="dark"] #macos-root .mac-project-launcher:hover { background: var(--glass-hover); }
+ html[data-theme="dark"] #macos-root .mac-window-body .button { color: var(--glass-ink); background: var(--glass-control); border-color: var(--glass-edge); box-shadow: var(--glass-highlight); }
+ html[data-theme="dark"] #macos-root .mac-window-body .button:hover { background: #415776; }
+ html[data-theme="dark"] #macos-root .mac-window-body .button-dark { background: #425e86; color: #fff; }
+ html[data-theme="dark"] #macos-root .mac-window-body .method-tabs button[aria-selected="true"] { color: var(--glass-ink); background: var(--glass-hover); box-shadow: var(--glass-highlight); }
+ html[data-theme="dark"] #macos-root :focus-visible { outline-color: #9cc8ff; }
+ @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-theme="dark"] #macos-root { --glass-tint:#202c3e; --glass-control:#2f3f56; --glass-reading:#19212e; }
+  html[data-theme="dark"] #macos-root .mac-dock, html[data-theme="dark"] #macos-root .mac-titlebar { background: #202c3e; }
+ }
+ @media(prefers-reduced-transparency:reduce), (prefers-contrast:more) {
+  html[data-theme="dark"] #macos-root { --glass-tint:#202c3e; --glass-control:#2f3f56; --glass-reading:#19212e; --glass-edge:#7e91af; }
+  html[data-theme="dark"] #macos-root .mac-dock, html[data-theme="dark"] #macos-root .mac-titlebar { background:#202c3e; }
+ }
+}
+@media(forced-colors:active) {
+ #macos-root .mac-theme-panel { background:Canvas; color:CanvasText; border:1px solid CanvasText; box-shadow:none; }
+ .mac-theme-heading, .mac-theme-hint { color:CanvasText; }
+ #macos-root .mac-theme-panel button[aria-pressed="true"] { outline:1px solid Highlight; }
+}
+
+/* Always reveal the new appearance above a still image of the old one. */
+::view-transition-image-pair(root) { isolation: auto; }
+::view-transition-old(root), ::view-transition-new(root) {
+ display: block;
+ animation: none;
+ mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }

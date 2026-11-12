@@ -1,0 +1,78 @@
+{
+  "verified": "2026-11-10",
+  "preservation": "Original asset bytes; object-fit:contain preserves aspect ratio. Monaco source is JPEG data despite original .png extension, renamed .jpg without conversion.",
+  "icons": [
+    {
+      "app": "mxgraph",
+      "file": "mxgraph.png",
+      "source": "https://raw.githubusercontent.com/Jason-chen-coder/Mxgraph-EasyFlowEditor/V1.0-beat/readme_images/app_icon.png",
+      "role": "original project logo",
+      "sha256": "7dd1e60892aedf2b584b789de5b1b89a54e08d943855a1f44031ef1a535f7946",
+      "bytes": 898658,
+      "source_commit": "197728326927ca704bde1e1f81e38a0868720a69"
+    },
+    {
+      "app": "speech",
+      "file": "speech.jpg",
+      "source": "https://raw.githubusercontent.com/Jason-chen-coder/Flutter-EasySpeechRecognition/main/assets/images/logo.jpg",
+      "role": "original project waveform artwork",
+      "sha256": "58d75ba02b0453c1f21421dafadc2d30f6bc02681ee3db591384bee1cbaca601",
+      "bytes": 36319,
+      "source_commit": "a22fafdde592c08a7b95b0afd85529eae91eb44a"
+    },
+    {
+      "app": "monaco",
+      "file": "monaco.jpg",
+      "source": "https://raw.githubusercontent.com/Jason-chen-coder/Monaco-EasyCodeEditor/main/src/assets/logo.png",
+      "role": "actual app VS Code logo asset",
+      "sha256": "f4f4d560e97a719059bdd7a7248991d3f1e52b2d637006539fad4a2dbae52ba6",
+      "bytes": 12832,
+      "source_commit": "76e4f9a95cfaa3f8a3a659f6eda1cd9e94e367dd"
+    },
+    {
+      "app": "jsplumb",
+      "file": "jsplumb.ico",
+      "source": "https://raw.githubusercontent.com/Jason-chen-coder/JsPlumb-EasyFlowEditor/master/public/favicon.ico",
+      "role": "actual app connected-node favicon",
+      "sha256": "e982fe198a158a78284a99062ccae531f7dc5386849115333f038c28afaaf423",
+      "bytes": 4286,
+      "source_commit": "620a93f0c77cf7eb438f3bb2bfc0f7ea653557cf"
+    },
+    {
+      "app": "microfrontends",
+      "file": "webpack.png",
+      "source": "https://raw.githubusercontent.com/Jason-chen-coder/Webpack5Mfp-Node-Nacos/master/vue-app1/src/assets/images/webpackimage.png",
+      "role": "actual demo webpack logo asset",
+      "sha256": "cae91a6678fe36270ba4427c42d8a541f00cea290ae8a3fe0466584e312f3c17",
+      "bytes": 14170,
+      "source_commit": "4aaa6e34a7267a53e385fe71ba2e0c2977bfbb03"
+    },
+    {
+      "app": "devskills",
+      "file": "devskills.png",
+      "source": "https://raw.githubusercontent.com/Jason-chen-coder/dev-skills/master/images/logo.png",
+      "role": "original project logo",
+      "sha256": "5813570d3875e4186b09a4a64df34838536e77baadd4698321ceefdfe1ddaf84",
+      "bytes": 1420224,
+      "source_commit": "ecec11e08c5b52fcb1cd55b91a98dfef2ae0fa2d"
+    },
+    {
+      "app": "d3",
+      "file": "d3.svg",
+      "source": "https://raw.githubusercontent.com/d3/d3-logo/master/d3.svg",
+      "role": "official D3 framework fallback; project only contains stock Vue logo",
+      "sha256": "e633d3d1aae911c04dd3e52c1e9946a054ac8875c3d3e07ccf85ce5716461935",
+      "bytes": 1370,
+      "source_commit": "7f0ff9603748ae4a6b016c1df33d7906da8e386e"
+    },
+    {
+      "app": "yourdream",
+      "file": "yourdream.png",
+      "source": "YourDream Studio/studio/src/assets/yourdream-icon-dark-v2.png",
+      "evidence": "Studio package.json build icon settings and AppNavigation use this asset",
+      "role": "actual product icon from local Studio source",
+      "sha256": "0349309b61c2ef6ec64f9944f9bf41d43e660323141ee04b2f785e14d9b94638",
+      "bytes": 1295882
+    }
+  ]
+}

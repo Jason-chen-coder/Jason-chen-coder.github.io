@@ -1,6 +1,8 @@
 # Work material stays in version control but is excluded from the public site.
 exclude:
   - NOTES.md
+  - DESKTOP.md
+  - desktop-app
   - TEARDOWN.md
   - RECON
   - resume.pdf

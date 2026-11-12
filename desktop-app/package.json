@@ -1,0 +1,21 @@
+{
+  "name": "jason-macos-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build && node scripts/version-desktop-assets.mjs",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "dependencies": {
+    "@neodrag/svelte": "3.0.0-next.8",
+    "popmotion": "11.0.5",
+    "svelte": "5.56.4"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "7.1.2",
+    "svelte-check": "4.7.1",
+    "typescript": "6.0.3",
+    "vite": "8.1.3"
+  }
+}

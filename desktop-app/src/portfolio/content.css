@@ -1,0 +1,51 @@
+.mac-window-body .section { padding: 32px; background: transparent; }
+.mac-window-body .shell { width: 100%; max-width: none; margin: 0; }
+.mac-window-body .section-heading { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 25px; }
+.mac-window-body .section-heading h2 { font: 600 30px/1.35 var(--sans); letter-spacing: -.04em; }
+.mac-window-body .section-heading h2 br { display: none; }
+.mac-window-body .section-heading h2 em { font-style: normal; }
+.mac-window-body .section-intro { font-size: 12px; max-width: 680px; line-height: 1.9; }
+.mac-window-body .eyebrow { font-family: var(--sans); font-size: 10px; letter-spacing: .1em; }
+.mac-window-body .snapshot { font-size: 10px; margin-top: 9px; }
+.mac-window-body .project-row { grid-template-columns: 26px 1fr; gap: 20px; padding: 28px 0; }
+.mac-window-body .project-index { font-size: 9px; }
+.mac-window-body .project-index i { font-size: 17px; }
+.mac-window-body .project-copy { min-width: 0; }
+.mac-window-body .project-row h3 { font-family: var(--sans); font-size: 23px; }
+.mac-window-body .project-description { font-size: 12px; }
+.mac-window-body .project-film-player { grid-column: 2; width: 100%; max-width: 680px; margin-top: 3px; }
+.mac-window-body .project-repo { font-size: 10px; }
+.mac-window-body .studio-feature { display: flex; flex-direction: column; gap: 20px; padding: 32px; margin: 0; border: none; border-bottom: 1px solid var(--line); }
+.mac-window-body .studio-feature h3 { font: 600 27px/1.2 var(--sans); }
+.mac-window-body .studio-lead { font: 500 19px/1.5 var(--sans); }
+.mac-window-body .studio-description { font-size: 12px; }
+.mac-window-body .studio-feature-film { width: 100%; }
+.mac-window-body .loop-illustration { width: 100%; }
+.mac-window-body .method-layout { display: flex; flex-direction: column; }
+.mac-window-body .about-details { margin-top: 20px; }
+.mac-window-body .capabilities dd { font-size: 13px; }
+.mac-window-body .personal-note { font: 500 24px/1.5 var(--sans); margin-top: 30px; }
+.mac-window-body .contact { min-height: 100%; display: flex; align-items: center; }
+.mac-window-body .contact .shell { display: block; }
+.mac-window-body .contact-content { max-width: 100%; }
+.mac-window-body .contact h2 { font: 600 39px/1.3 var(--sans); }
+.mac-window-body .contact-orbit { display: none; }
+.mac-window-body .contact-description { font-size: 13px; }
+.mac-window-body .email-address { font-size: clamp(13px, 2vw, 22px); overflow-wrap: anywhere; }
+.mac-window-body .button { font-size: 12px; padding: 10px 16px; }
+.mac-window-body .reveal { opacity: 1; transform: none; }
+
+@media(max-width:720px){.mac-window-body .section,.mac-window-body .studio-feature{padding:23px 19px}.mac-window-body .project-row{grid-template-columns:1fr;gap:12px;padding:23px 0}.mac-window-body .project-index{display:none}.mac-window-body .project-copy,.mac-window-body .project-film-player{grid-column:1}.mac-window-body .project-row h3{font-size:20px}.mac-window-body .capabilities dl>div{grid-template-columns:1fr;gap:4px}.mac-window-body .contact-actions{flex-wrap:wrap}}
+
+/* Standalone project articles no longer inherit the collection section's inset. */
+.mac-window-body > .project-row { margin: 0; padding: 28px 32px; }
+@media(max-width:720px) { .mac-window-body > .project-row { padding: 23px 19px; } }
+
+.mac-window-body .mac-detail { max-width: 920px; margin-inline: auto; }
+.mac-detail header > p:last-child, .mac-detail > p, .mac-detail section p { font-size: 14px; line-height: 1.9; color: var(--muted); }
+.mac-detail section h3 { font: 600 16px/1.5 var(--sans); margin: 24px 0 8px; }
+.mac-detail-media { margin: 24px 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #f5f7fa; }
+.mac-detail-media img, .mac-detail-media video { display: block; width: 100%; height: auto; border-radius: 6px; }
+.mac-detail-brand img { width: 128px; height: 128px; object-fit: contain; margin: 30px auto; }
+.mac-detail-media figcaption { color: var(--muted); font-size: 11px; padding: 12px 4px 2px; }
+.mac-detail-links { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 24px; }

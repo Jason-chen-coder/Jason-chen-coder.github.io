@@ -1,0 +1,17 @@
+.mac-window[data-window-motion] {
+  /* The backing focus z-index can keep changing while a surface animates. */
+  z-index: var(--window-motion-z-index) !important;
+}
+/* One scoped rule replaces four inline declarations on every copied node.
+   Rasterize only each small slice, rather than the full cloned window surface. */
+.mac-genie-overlay .mac-window-visual,
+.mac-genie-overlay .mac-window-visual * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+.mac-genie-slice { contain: strict; }
+/* The snapshot is inert and scrollTop is restored programmatically. Avoid an
+   independently composited scrolling surface for every copy of the body. */
+.mac-genie-overlay .mac-window-body { overflow: hidden !important; }
