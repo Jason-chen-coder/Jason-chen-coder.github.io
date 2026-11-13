@@ -32,7 +32,7 @@
 <section class="dock-container mac-dock-region" class:is-scrollable={ui.scrollable} bind:this={region}>
  <div class="mac-dock-viewport" bind:this={viewport} onwheel={wheel}>
  <!-- svelte-ignore a11y_no_static_element_interactions -->
- <nav class="dock-el mac-dock" aria-label={t('navigation')} bind:this={dock} onpointermove={event=>dock_mouse_x=event.pointerType==='touch'?null:event.clientX} onpointerleave={()=>dock_mouse_x=null} onfocusin={event=>{if(ui.scrollable)(event.target as HTMLElement).closest('button')?.scrollIntoView({block:'nearest',inline:'nearest'});}}>
+ <nav class="dock-el mac-dock" aria-label={t('navigation')} style:--dock-rest-size={`${baseWidth}px`} bind:this={dock} onpointermove={event=>dock_mouse_x=event.pointerType==='touch'?null:event.clientX} onpointerleave={()=>dock_mouse_x=null} onfocusin={event=>{if(ui.scrollable)(event.target as HTMLElement).closest('button')?.scrollIntoView({block:'nearest',inline:'nearest'});}}>
   {#each dockApps as config}
    {#if config.id==='github'}<div class="divider" aria-hidden="true"></div>{/if}
    <DockItem mouse_x={dock_mouse_x} app_id={config.id} {magnification}/>
@@ -80,10 +80,12 @@
 
 		border-radius: 1.2rem;
 
-		height: auto;
+		/* The glass stays fixed; enlarged icons grow above its top edge. */
+		height: calc(var(--dock-rest-size) + 20px);
+		box-sizing: border-box;
 
 		display: flex;
-		align-items: center;
+		align-items: flex-end;
 
 		transition: transform 0.3s ease;
 
