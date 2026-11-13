@@ -7,9 +7,9 @@ body.has-desktop { height: 100dvh; overflow: hidden; font-family: var(--sans); b
 .mac-menubar { height: 32px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; position: absolute; inset: 0 0 auto; z-index: 500; color: #fcfcff; background: #15283b3b; backdrop-filter: blur(28px) saturate(1.5); box-shadow: 0 1px #ffffff16; font-size: 12px; line-height: 1; }
 .mac-menu-left, .mac-menu-right { display: flex; align-items: center; height: 100%; gap: 22px; }
 .mac-menu-right { gap: 18px; }
-.mac-menubar button { color: inherit; background: transparent; padding: 6px 2px; border-radius: 4px; font-size: inherit; }
-.mac-menubar button:hover { background: #ffffff21; }
-.mac-home img { width: 21px; height: 21px; }
+.mac-menubar button:where(:not(.control-panel button)) { color: inherit; background: transparent; padding: 6px 2px; border-radius: 4px; font-size: inherit; }
+.mac-menubar button:where(:not(.control-panel button)):hover { background: #ffffff21; }
+.mac-home img { width: 21px; height: 21px; border-radius:50%; object-fit:cover; }
 .mac-menubar .mac-home { padding: 2px 7px; }
 .mac-brand { font-weight: 650; letter-spacing: .015em; }
 .mac-current-app { font-weight: 600; }
@@ -112,13 +112,13 @@ body.has-desktop { height: 100dvh; overflow: hidden; font-family: var(--sans); b
   box-shadow: inset 0 -1px 0 rgb(255 255 255 / 45%), 0 1px 8px rgb(17 30 48 / 5%);
 }
 
-#macos-root .mac-menubar button {
+#macos-root .mac-menubar button:where(:not(.control-panel button)) {
   border-radius: 999px;
   transition: background-color 140ms ease, box-shadow 140ms ease;
 }
 
-#macos-root .mac-menubar button:hover,
-#macos-root .mac-menubar button:focus-visible {
+#macos-root .mac-menubar button:where(:not(.control-panel button)):hover,
+#macos-root .mac-menubar button:where(:not(.control-panel button)):focus-visible {
   background: rgb(255 255 255 / 55%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 65%);
 }

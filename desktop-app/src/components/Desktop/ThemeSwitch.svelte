@@ -1,6 +1,7 @@
 <script lang="ts">
  import {onMount, tick} from 'svelte';
  import {ui} from '../../portfolio/ui.svelte';
+ let {embedded = false} = $props<{embedded?:boolean}>();
  type Theme = 'light' | 'dark' | 'system';
  const controller = (window as typeof window & {PortfolioTheme: {preference: Theme; set: (value: Theme, origin?: {x:number; y:number}) => void}}).PortfolioTheme;
  let preference = $state<Theme>(controller.preference);
@@ -11,8 +12,7 @@
  async function choose(theme: Theme, event: MouseEvent) {
   const box = trigger.getBoundingClientRect();
   const origin = event.detail ? {x:event.clientX, y:event.clientY} : {x:box.x + box.width / 2, y:box.y + box.height / 2};
-  panel.open = false;
-  trigger.focus();
+  if (!embedded) {panel.open = false;trigger.focus();}
   // Settle the closed popover before the browser captures the old appearance.
   await tick();
   controller.set(theme, origin);
@@ -24,12 +24,13 @@
    if (event.key === 'Escape' && panel.open) {event.preventDefault();event.stopImmediatePropagation();panel.open = false;trigger.focus();}
   };
   document.addEventListener('portfolio:themechange', sync);
+  if (embedded) return () => document.removeEventListener('portfolio:themechange', sync);
   document.addEventListener('pointerdown', outside);
   document.addEventListener('keydown', escape, true);
   return () => {document.removeEventListener('portfolio:themechange', sync);document.removeEventListener('pointerdown', outside);document.removeEventListener('keydown', escape, true);};
  });
 </script>
-<details class="mac-theme" bind:this={panel}>
+<details class="mac-theme" bind:this={panel} open={embedded} class:embedded>
  <summary bind:this={trigger} aria-label={`${copy.title}: ${copy[preference]}`} title={copy.title} data-theme-toggle>
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
    {#if preference === 'system'}<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/>

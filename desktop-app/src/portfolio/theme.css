@@ -33,8 +33,8 @@
   --gold: #e3c184; --teal: #7bd4cf; --indigo: #b4c5f5;
  }
  html[data-theme="dark"] #macos-root .mac-menubar { box-shadow: inset 0 -1px var(--glass-edge), 0 1px 8px #0002; }
- html[data-theme="dark"] #macos-root .mac-menubar button:hover,
- html[data-theme="dark"] #macos-root .mac-menubar button:focus-visible { background: var(--glass-hover); box-shadow: none; }
+ html[data-theme="dark"] #macos-root .mac-menubar button:where(:not(.control-panel button)):hover,
+ html[data-theme="dark"] #macos-root .mac-menubar button:where(:not(.control-panel button)):focus-visible { background: var(--glass-hover); box-shadow: none; }
  html[data-theme="dark"] #macos-root .mac-locales { background: #07101d40; }
  html[data-theme="dark"] #macos-root .mac-locales button[aria-pressed="true"] { background: var(--glass-control); }
  html[data-theme="dark"] #macos-root .mac-dock { background: rgb(27 37 54 / 65%); box-shadow: var(--glass-highlight), 0 0 0 1px var(--glass-edge), 0 9px 26px #0005; }
@@ -76,3 +76,6 @@
 }
 ::view-transition-old(root) { z-index: 1; }
 ::view-transition-new(root) { z-index: 2; }
+
+/* Embedded options belong to the settings panel, not the menubar. */
+#macos-root .mac-theme.embedded .mac-theme-panel button { min-height: 48px; border-radius: 16px; line-height: 20px; }

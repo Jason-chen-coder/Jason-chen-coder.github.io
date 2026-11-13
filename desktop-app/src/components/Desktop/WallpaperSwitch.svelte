@@ -2,19 +2,21 @@
  import {onMount} from 'svelte';
  import {ui} from '../../portfolio/ui.svelte';
  import {wallpaper,wallpaperOptions,selectWallpaper,type WallpaperId} from './wallpaper/preferences.svelte';
+ let {embedded = false} = $props<{embedded?:boolean}>();
  let panel:HTMLDetailsElement;
  let trigger:HTMLElement;
  const title=$derived(ui.locale==='en'?'Wallpaper':'壁纸');
  const selected=$derived(wallpaperOptions.find(option=>option.id===wallpaper.current)!);
- function choose(id:WallpaperId){selectWallpaper(id);panel.open=false;trigger.focus();}
+ function choose(id:WallpaperId){selectWallpaper(id);if(!embedded){panel.open=false;trigger.focus();}}
  onMount(()=>{
+  if(embedded)return;
   const outside=(event:PointerEvent)=>{if(!panel.contains(event.target as Node))panel.open=false;};
   const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&panel.open){event.preventDefault();event.stopImmediatePropagation();panel.open=false;trigger.focus();}};
   document.addEventListener('pointerdown',outside);document.addEventListener('keydown',escape,true);
   return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',escape,true);};
  });
 </script>
-<details class="wallpaper-picker" bind:this={panel}>
+<details class="wallpaper-picker" bind:this={panel} open={embedded} class:embedded>
  <summary bind:this={trigger} data-wallpaper-toggle aria-label={`${title}: ${ui.locale==='en'?selected.en:selected.zh}`} title={title}>
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg><span class="picker-label">{title}</span>
  </summary>

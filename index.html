@@ -3,6 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>document.documentElement.classList.add('desktop-loading');</script>
+    <style>
+      /* Keep legacy content available to desktop windows without painting it during startup. */
+      html.desktop-loading:not(.desktop-ready) { background: #000; }
+      html.desktop-loading:not(.desktop-ready) body { background: #000; }
+      html.desktop-loading:not(.desktop-ready) body::before { display: none; }
+      html.desktop-loading:not(.desktop-ready) body > :not(#macos-root):not(#desktop-boot) { display: none !important; }
+      #desktop-boot { display: none; }
+      html.desktop-loading:not(.desktop-ready) #desktop-boot { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: #000; }
+      html.desktop-entering #desktop-boot { position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; background:#000; }
+      #desktop-boot .boot-content { display: flex; flex-direction: column; align-items: center; gap: 40px; transform: translateY(6vh); }
+      #desktop-boot img { display: block; width: 96px; height: 96px; border-radius: 50%; object-fit: cover; }
+      #desktop-boot .boot-track { width: 144px; height: 4px; overflow: hidden; border-radius: 4px; background: #383838; }
+      #desktop-boot .boot-track::after { content: ''; display: block; width: 40%; height: 100%; border-radius: inherit; background: #eee; animation: boot-progress 1.5s ease-in-out infinite; }
+      @keyframes boot-progress { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
+      @media (prefers-reduced-motion: reduce) { #desktop-boot .boot-track::after { animation: none; transform: translateX(75%); } }
+    </style>
     <meta name="theme-color" content="#f6f4ef" />
     <meta
       name="description"
@@ -23,10 +40,16 @@
     <script defer src="./script.js"></script>
     <script defer src="./promo-media.js?v=91ae57c11b09"></script>
     <script defer src="./illustration-motion.js"></script>
-    <link rel="stylesheet" href="./assets/macos/desktop.css?v=d6ebcd41f312" />
-    <script type="module" src="./assets/macos/desktop.js?v=0571722ef919"></script>
+    <link rel="stylesheet" href="./assets/macos/desktop.css?v=025a135b4353" />
+    <script type="module" src="./assets/macos/desktop.js?v=37cf6fae2df2"></script>
   </head>
   <body>
+    <div id="desktop-boot" role="status" aria-label="正在加载桌面" aria-live="polite">
+      <div class="boot-content">
+        <img src="./assets/images/github-avatar.jpg" width="96" height="96" alt="" fetchpriority="high" />
+        <div class="boot-track" aria-hidden="true"></div>
+      </div>
+    </div>
     <a data-i18n="a11y.skip" class="skip-link" href="#main-content"
       >跳到主要内容</a
     >

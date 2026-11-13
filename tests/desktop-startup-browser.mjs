@@ -1,0 +1,60 @@
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const base = process.env.DESKTOP_URL || 'http://127.0.0.1:4177/';
+const browser = await chromium.launch({ headless: true });
+try {
+  const page = await browser.newPage();
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  await page.route('**/assets/macos/desktop.js*', async route => {
+    await gate;
+    await route.continue();
+  });
+  await page.goto(base, { waitUntil: 'commit' });
+  await page.locator('.hero').waitFor({ state: 'attached' });
+  assert.equal(await page.locator('.masthead').isVisible(), false);
+  assert.equal(await page.locator('#main-content').isVisible(), false);
+  const boot = page.locator('#desktop-boot');
+  assert.equal(await boot.isVisible(), true);
+  await page.locator('#desktop-boot img').evaluate(image => image.decode());
+  assert.equal(await boot.evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(0, 0, 0)');
+  await page.screenshot({ path: '/tmp/portfolio-boot-desktop.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  assert.equal(await page.locator('.boot-track').evaluate(el => getComputedStyle(el, '::after').animationName), 'none');
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.screenshot({ path: '/tmp/portfolio-boot-mobile.png' });
+  release();
+  await page.locator('.mac-desktop').waitFor({ state: 'visible' });
+  assert.equal(await boot.isVisible(), false);
+  await page.locator('[data-dock="speech"]').click();
+  await page.locator('#mac-window-speech').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('.masthead').isVisible(), false);
+  const moving = await browser.newPage({reducedMotion:'no-preference'});
+  await moving.goto(base,{waitUntil:'domcontentloaded'});
+  await moving.waitForFunction(()=>document.documentElement.classList.contains('desktop-entering'));
+  assert.equal(await moving.locator('[data-desktop-home] img').evaluate(el=>getComputedStyle(el).visibility),'hidden');
+  assert.equal(await moving.locator('.mac-headline').evaluate(el=>getComputedStyle(el).animationPlayState),'paused');
+  await moving.screenshot({path:'/tmp/portfolio-startup-moving.png'});
+  await moving.waitForFunction(()=>!document.documentElement.classList.contains('desktop-entering'));
+  assert.equal(await moving.locator('#desktop-boot').isVisible(),false);
+  assert.equal(await moving.locator('[data-desktop-home] img').evaluate(el=>getComputedStyle(el).visibility),'visible');
+  assert.equal(await moving.locator('.mac-headline').evaluate(el=>getComputedStyle(el).animationPlayState),'running');
+  assert.equal(await moving.locator('#desktop-boot .boot-content img').count(),1);
+  await moving.reload({waitUntil:'domcontentloaded'});
+  await moving.waitForFunction(()=>document.documentElement.classList.contains('desktop-entering'));
+  await moving.setViewportSize({width:390,height:844});
+  await moving.waitForFunction(()=>!document.documentElement.classList.contains('desktop-entering'));
+  assert.equal(await moving.locator('[data-desktop-home] img').evaluate(el=>getComputedStyle(el).visibility),'visible');
+  console.log('PASS shared boot avatar handoff, text sequencing, resize cancellation');
+  const noScript = await browser.newPage({ javaScriptEnabled: false });
+  await noScript.goto(base);
+  assert.equal(await noScript.locator('#main-content').isVisible(), true);
+  assert.equal(await noScript.locator('#desktop-boot').isVisible(), false);
+  console.log('PASS delayed desktop hides legacy homepage, desktop opens projects, no-JS content remains available');
+} finally {
+  await browser.close();
+}
