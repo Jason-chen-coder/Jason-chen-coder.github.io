@@ -1,24 +1,28 @@
 {
   "verified": "2026-11-10",
-  "preservation": "Original asset bytes; object-fit:contain preserves aspect ratio. Monaco source is JPEG data despite original .png extension, renamed .jpg without conversion.",
+  "preservation": "Local images may be losslessly compressed. Object-fit:contain preserves aspect ratio. Monaco source is JPEG data despite the original .png extension and uses .jpg locally.",
   "icons": [
     {
       "app": "mxgraph",
       "file": "mxgraph.png",
       "source": "https://raw.githubusercontent.com/Jason-chen-coder/Mxgraph-EasyFlowEditor/V1.0-beat/readme_images/app_icon.png",
       "role": "original project logo",
-      "sha256": "7dd1e60892aedf2b584b789de5b1b89a54e08d943855a1f44031ef1a535f7946",
-      "bytes": 898658,
-      "source_commit": "197728326927ca704bde1e1f81e38a0868720a69"
+      "sha256": "a37766542d34a41ac0e72a11902ab5e05c89e0e6ee171ae003da5b64d5d64704",
+      "bytes": 761397,
+      "source_commit": "197728326927ca704bde1e1f81e38a0868720a69",
+      "source_sha256": "7dd1e60892aedf2b584b789de5b1b89a54e08d943855a1f44031ef1a535f7946",
+      "source_bytes": 898658
     },
     {
       "app": "speech",
       "file": "speech.jpg",
       "source": "https://raw.githubusercontent.com/Jason-chen-coder/Flutter-EasySpeechRecognition/main/assets/images/logo.jpg",
       "role": "original project waveform artwork",
-      "sha256": "58d75ba02b0453c1f21421dafadc2d30f6bc02681ee3db591384bee1cbaca601",
-      "bytes": 36319,
-      "source_commit": "a22fafdde592c08a7b95b0afd85529eae91eb44a"
+      "sha256": "b0b6c49bac2b2ba1118073007f6fcdf50a7fa648a99d93a8b627e695349ab938",
+      "bytes": 27839,
+      "source_commit": "a22fafdde592c08a7b95b0afd85529eae91eb44a",
+      "source_sha256": "58d75ba02b0453c1f21421dafadc2d30f6bc02681ee3db591384bee1cbaca601",
+      "source_bytes": 36319
     },
     {
       "app": "monaco",
@@ -43,18 +47,22 @@
       "file": "webpack.png",
       "source": "https://raw.githubusercontent.com/Jason-chen-coder/Webpack5Mfp-Node-Nacos/master/vue-app1/src/assets/images/webpackimage.png",
       "role": "actual demo webpack logo asset",
-      "sha256": "cae91a6678fe36270ba4427c42d8a541f00cea290ae8a3fe0466584e312f3c17",
-      "bytes": 14170,
-      "source_commit": "4aaa6e34a7267a53e385fe71ba2e0c2977bfbb03"
+      "sha256": "1cf278f8f37551e663c9386a0042d17e81bb87c4d07009add26cf1a581f2beaa",
+      "bytes": 13096,
+      "source_commit": "4aaa6e34a7267a53e385fe71ba2e0c2977bfbb03",
+      "source_sha256": "cae91a6678fe36270ba4427c42d8a541f00cea290ae8a3fe0466584e312f3c17",
+      "source_bytes": 14170
     },
     {
       "app": "devskills",
       "file": "devskills.png",
       "source": "https://raw.githubusercontent.com/Jason-chen-coder/dev-skills/master/images/logo.png",
       "role": "original project logo",
-      "sha256": "5813570d3875e4186b09a4a64df34838536e77baadd4698321ceefdfe1ddaf84",
-      "bytes": 1420224,
-      "source_commit": "ecec11e08c5b52fcb1cd55b91a98dfef2ae0fa2d"
+      "sha256": "c9b0bf76f64d0055fa0bab83a83424b132f5633fd99b714235fdb089c3e13945",
+      "bytes": 1169143,
+      "source_commit": "ecec11e08c5b52fcb1cd55b91a98dfef2ae0fa2d",
+      "source_sha256": "5813570d3875e4186b09a4a64df34838536e77baadd4698321ceefdfe1ddaf84",
+      "source_bytes": 1420224
     },
     {
       "app": "d3",
@@ -71,8 +79,10 @@
       "source": "YourDream Studio/studio/src/assets/yourdream-icon-dark-v2.png",
       "evidence": "Studio package.json build icon settings and AppNavigation use this asset",
       "role": "actual product icon from local Studio source",
-      "sha256": "0349309b61c2ef6ec64f9944f9bf41d43e660323141ee04b2f785e14d9b94638",
-      "bytes": 1295882
+      "sha256": "0521107a0ad95703fb93418011d53777ad2f4e650a92a2058728399a2940c100",
+      "bytes": 1101955,
+      "source_sha256": "0349309b61c2ef6ec64f9944f9bf41d43e660323141ee04b2f785e14d9b94638",
+      "source_bytes": 1295882
     }
   ]
 }
